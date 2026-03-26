@@ -41,6 +41,10 @@ Platforma pomaga użytkownikowi:
 └── README.md
 ```
 
+## 🔗 Integracja
+
+- Testowe PR tworzymy z ID taska (np. `ALF-17/...`), aby sprawdzić poprawne linkowanie z Linear.
+
 ## ⚡ Szybki start
 
 ```bash
