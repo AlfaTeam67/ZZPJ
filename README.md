@@ -1,122 +1,147 @@
-# 🚀 Fin-Insight (ZZPJ)
+# Fin-Insight (ZZPJ)
 
-> Inteligentny asystent inwestora: analiza portfela, dane rynkowe i rekomendacje wspierane przez AI.
+Kompletny setup projektu z backendem mikroserwisowym (Java 21 + Spring Boot 3.x) oraz frontendem.
 
-![Status](https://img.shields.io/badge/status-in%20progress-2563eb)
-![Team](https://img.shields.io/badge/team-AlfaTeam-7c3aed)
-![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-0ea5e9)
-![Backend](https://img.shields.io/badge/backend-Spring%20Boot%203.x-10b981)
-![Course](https://img.shields.io/badge/ZZPJ-2025%2F2026-f59e0b)
+## Cel i zgodność z założeniami
 
-## ✨ O projekcie
+Backend jest przygotowany zgodnie z założeniami:
+- Java 21 LTS
+- Spring Boot 3.x
+- Mikroserwisy + database-per-service
+- Eureka (service discovery)
+- Spring Cloud Config Server (centralna konfiguracja)
+- Keycloak (OAuth2/JWT resource server)
+- BigDecimal w polach finansowych
+- Build: Gradle Wrapper (`./gradlew`), bez Mavena
 
-**Fin-Insight** to projekt semestralny zespołu **AlfaTeam** realizowany w ramach ZZPJ.
-
-Platforma pomaga użytkownikowi:
-- śledzić portfel inwestycyjny,
-- agregować dane rynkowe (akcje, krypto, FX),
-- analizować kontekst rynkowy,
-- otrzymywać rekomendacje wspierane przez AI.
-
-## 🧱 Architektura (kierunek)
-
-| Moduł | Odpowiedzialność |
-| --- | --- |
-| `backend/` | API, logika biznesowa, warstwa danych, integracje |
-| `frontend/` | Dashboard, widoki portfela, UX/UI |
-
-## 🛠️ Stack technologiczny
-
-- **Backend:** Java 21 LTS, Spring Boot 3.x, Spring Cloud (Eureka, Config), Keycloak, JPA, Flyway, Gradle Wrapper (`./gradlew`)
-- **Frontend:** Node.js (najnowsza), React + TypeScript, Vite, Tailwind, shadcn/ui
-- **DevOps:** Docker, Docker Compose, CI (testy backendu)
-
-## 📁 Struktura repozytorium
+## Struktura
 
 ```text
-.
+ZZPJ/
 ├── backend/
+│   ├── eureka-server/
+│   ├── config-server/
+│   ├── portfolio-manager/
+│   ├── market-data-service/
+│   └── ai-advisor-service/
 ├── frontend/
-├── LICENSE
 └── README.md
 ```
 
-## 🔗 Integracja
+## Ważne: osobne repo konfiguracji
 
-- Testowe PR tworzymy z ID taska (np. `ALF-17/...`), aby sprawdzić poprawne linkowanie z Linear.
+Konfiguracja serwisów jest w osobnym repo:
+`https://github.com/AlfaTeam67/ZZPJ-config.git`
 
-## ⚡ Szybki start
+Lokalny układ katalogów musi być taki:
+
+```text
+study/
+├── ZZPJ/
+└── ZZPJ-config/
+```
+
+`backend/docker-compose.yml` montuje config z:
+`CONFIG_REPO_HOST_PATH=../../ZZPJ-config`
+
+## Szybki start (Docker, zalecane)
+
+1. Sklonuj repozytoria:
 
 ```bash
+cd <twoj-katalog-roboczy>
 git clone https://github.com/AlfaTeam67/ZZPJ.git
-cd ZZPJ
+git clone git@github.com:AlfaTeam67/ZZPJ-config.git
 ```
 
-## ☕ Backend (Java) – szybki kierunek
+2. Przygotuj env backendu:
 
-- Generowanie modułów przez **Spring Initializr**: https://start.spring.io/
-- Build tool: **Gradle Wrapper** (`./gradlew`)
-- Przykładowe moduły: `eureka-server`, `config-server`, `portfolio-manager`, `market-data-service`, `ai-advisor-service`
-
-## 🌿 Zasady branchowania
-
-Każdy branch tworzymy z prefiksem typu pracy + ID zadania z Linear:
-
-```text
-feature/ALF-17/opis-co-robimy
+```bash
+cd ZZPJ/backend
+cp .env.example .env
 ```
 
-Przykłady:
-- `feature/ALF-18/backend-spring-boot-bootstrap`
-- `feature/ALF-19/frontend-vite-tailwind-setup`
-- `fix/ALF-27/naprawa-integracji-keycloak`
+3. Uruchom backend:
 
-## ✅ Zasady commitów
-
-Rekomendowany format (Conventional Commits):
-
-```text
-typ: krótki opis
+```bash
+docker-compose down -v --remove-orphans
+docker-compose build
+docker-compose up -d
 ```
 
-Dozwolone typy:
-- `feat:` nowa funkcjonalność (zamiast `feature:`)
-- `fix:` poprawka błędu
-- `chore:` porządki / techniczne
-- `docs:` dokumentacja
-- `refactor:` refaktoryzacja bez zmiany działania
-- `test:` testy
-- `ci:` pipeline / workflow
+4. Szybka walidacja:
 
-Przykłady:
-- `feat: dodać endpoint healthcheck`
-- `fix: poprawić walidację symbolu aktywa`
-- `ci: uruchamiać testy backendu na PR`
+```bash
+./scripts/test-services.sh
+curl http://localhost:8888/portfolio-manager/default
+```
 
-## 🔍 Zasady Pull Requestów i review
+## Uruchomienie lokalne (bez Docker dla serwisów Java)
 
-- **Nie pushujemy bezpośrednio na `main`.**
-- Każda zmiana idzie przez **PR**.
-- Do PR automatycznie uruchamiany jest code review przez **Google Gemini**.
-- Do review przypisujemy cały zespół.
-- Co najmniej **jedna osoba z zespołu** musi ręcznie zatwierdzić PR.
-- Merge dopiero po zielonym CI i zatwierdzeniu.
+Infrastruktura:
 
-## 🤖 CI (backend)
+```bash
+cd ZZPJ/backend
+docker-compose up keycloak-db portfolio-db market-data-db keycloak
+```
 
-W PR uruchamiany jest pipeline backendu:
-- testy (`./gradlew test`).
+Serwisy (osobne terminale):
 
-Cel: wychwycić problemy przed mergem i utrzymać stabilny `main`.
+```bash
+# 1) Eureka
+cd eureka-server && ./gradlew bootRun
 
-## 🗺️ Roadmap (high-level)
+# 2) Config Server (wymaga ścieżki do ZZPJ-config)
+cd config-server
+export CONFIG_REPO_PATH=$(pwd)/../../ZZPJ-config
+./gradlew bootRun
 
-1. Standardy repo + workflow zespołu
-2. Konfiguracja środowiska backend
-3. Konfiguracja środowiska frontend
-4. Konteneryzacja lokalna (Docker Compose)
-5. Implementacja MVP + jakość kodu + testy
+# 3) Portfolio
+cd portfolio-manager && ./gradlew bootRun
 
----
+# 4) Market Data
+cd market-data-service && ./gradlew bootRun
 
-Tworzone przez **AlfaTeam** · ZZPJ 2025/2026
+# 5) AI Advisor
+cd ai-advisor-service && ./gradlew bootRun
+```
+
+## Testy
+
+W każdym module backendu:
+
+```bash
+./gradlew test
+```
+
+Weryfikowane moduły:
+- `eureka-server`
+- `config-server`
+- `portfolio-manager`
+- `market-data-service`
+- `ai-advisor-service`
+
+## Potwierdzenie kluczowych założeń technicznych
+
+- Java 21: ustawione w każdym `backend/*/build.gradle` (`JavaLanguageVersion.of(21)`).
+- Spring Boot 3.x: `3.5.3` we wszystkich modułach.
+- Gradle Wrapper: obecny w każdym module, brak `pom.xml`/`mvnw`.
+- Eureka Server: `spring-cloud-starter-netflix-eureka-server`.
+- Config Server: `spring-cloud-config-server`.
+- Config Client + Eureka Client: obecne w 3 serwisach biznesowych + ai-advisor.
+- OAuth2 resource server: obecny w `portfolio-manager`, `market-data-service`, `ai-advisor-service`.
+- BigDecimal: używany w encjach i DTO finansowych (np. `Portfolio.totalValue`, `MarketPrice.price`, `MarketPrice.volume`).
+
+## Definition of Done – status
+
+- Moduły backendu istnieją i uruchamiają się przez `./gradlew bootRun`: **TAK**
+- Testy `./gradlew test` (smoke/context): **TAK**
+- Eureka i Config Server uruchamiają się poprawnie: **TAK**
+- Rejestracja serwisów w Eureka: **TAK**
+- Integracja Keycloak (resource server + JWT) przygotowana: **TAK**
+- BigDecimal w krytycznych polach finansowych: **TAK**
+
+## Uwaga o Cucumber (BDD)
+
+W projekcie są testy JUnit 5 (i wsparcie Mockito przez stack Spring Test), natomiast **Cucumber nie jest obecnie skonfigurowany**.
+Jeśli chcesz, mogę dodać minimalny szkielet Cucumber dla jednego serwisu jako kolejny krok.
