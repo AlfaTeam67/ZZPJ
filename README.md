@@ -1,30 +1,37 @@
-# Fin-Insight (ZZPJ)
+# 🚀 Fin-Insight (ZZPJ)
 
-Inteligentny asystent inwestora: analiza portfela, dane rynkowe i rekomendacje wspierane przez AI.
+> Inteligentny asystent inwestora: analiza portfela, dane rynkowe i rekomendacje wspierane przez AI.
 
-## O projekcie
+![Status](https://img.shields.io/badge/status-in%20progress-2563eb)
+![Team](https://img.shields.io/badge/team-AlfaTeam-7c3aed)
+![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-0ea5e9)
+![Backend](https://img.shields.io/badge/backend-FastAPI-10b981)
+![Course](https://img.shields.io/badge/ZZPJ-2025%2F2026-f59e0b)
 
-**Fin-Insight** to projekt semestralny zespołu **AlfaTeam** realizowany w ramach ZZPJ.  
-Celem jest stworzenie aplikacji, która pomaga użytkownikowi:
+## ✨ O projekcie
 
+**Fin-Insight** to projekt semestralny zespołu **AlfaTeam** realizowany w ramach ZZPJ.
+
+Platforma pomaga użytkownikowi:
 - śledzić portfel inwestycyjny,
 - agregować dane rynkowe (akcje, krypto, FX),
-- otrzymywać kontekstowe rekomendacje oparte o AI.
+- analizować kontekst rynkowy,
+- otrzymywać rekomendacje wspierane przez AI.
 
-## Kierunek architektury
+## 🧱 Architektura (kierunek)
 
-- `backend/` – API, logika biznesowa, warstwa danych, integracje zewnętrzne.
-- `frontend/` – aplikacja webowa (dashboard, widoki portfela, interfejs użytkownika).
+| Moduł | Odpowiedzialność |
+| --- | --- |
+| `backend/` | API, logika biznesowa, warstwa danych, integracje |
+| `frontend/` | Dashboard, widoki portfela, UX/UI |
 
-Repozytorium startuje od czystej struktury i będzie rozwijane iteracyjnie.
+## 🛠️ Stack technologiczny
 
-## Planowany stack
+- **Backend:** Python (najnowsza), FastAPI, SQLAlchemy, Alembic, Poetry, pytest
+- **Frontend:** Node.js (najnowsza), React + TypeScript, Vite, Tailwind, shadcn/ui
+- **DevOps:** Docker, Docker Compose, CI (lint + testy backendu)
 
-- Backend: Python, FastAPI, SQLAlchemy, Alembic, Poetry, pytest
-- Frontend: React + TypeScript, Vite, Tailwind, shadcn/ui
-- DevOps: Docker, Docker Compose, CI/CD-ready setup
-
-## Struktura repozytorium
+## 📁 Struktura repozytorium
 
 ```text
 .
@@ -34,27 +41,71 @@ Repozytorium startuje od czystej struktury i będzie rozwijane iteracyjnie.
 └── README.md
 ```
 
-## Szybki start
+## ⚡ Szybki start
 
 ```bash
 git clone https://github.com/AlfaTeam67/ZZPJ.git
 cd ZZPJ
 ```
 
-## Roadmap (high-level)
+## 🌿 Zasady branchowania
 
-1. Ustalenie standardów repo i workflow
+Każdy branch tworzymy z ID zadania z Linear:
+
+```text
+ALF-17/opis-co-robimy
+```
+
+Przykłady:
+- `ALF-18/backend-fastapi-bootstrap`
+- `ALF-19/frontend-vite-tailwind-setup`
+
+## ✅ Zasady commitów
+
+Rekomendowany format (Conventional Commits):
+
+```text
+typ: krótki opis
+```
+
+Dozwolone typy:
+- `feat:` nowa funkcjonalność (zamiast `feature:`)
+- `fix:` poprawka błędu
+- `chore:` porządki / techniczne
+- `docs:` dokumentacja
+- `refactor:` refaktoryzacja bez zmiany działania
+- `test:` testy
+- `ci:` pipeline / workflow
+
+Przykłady:
+- `feat: dodać endpoint healthcheck`
+- `fix: poprawić walidację symbolu aktywa`
+- `ci: uruchamiać lint i testy backendu na PR`
+
+## 🔍 Zasady Pull Requestów i review
+
+- **Nie pushujemy bezpośrednio na `main`.**
+- Każda zmiana idzie przez **PR**.
+- Do PR automatycznie uruchamiany jest code review przez **Google Gemini**.
+- Do review przypisujemy cały zespół.
+- Co najmniej **jedna osoba z zespołu** musi ręcznie zatwierdzić PR.
+- Merge dopiero po zielonym CI i zatwierdzeniu.
+
+## 🤖 CI (backend)
+
+W PR uruchamiany jest pipeline backendu:
+- lint,
+- testy.
+
+Cel: wychwycić problemy przed mergem i utrzymać stabilny `main`.
+
+## 🗺️ Roadmap (high-level)
+
+1. Standardy repo + workflow zespołu
 2. Konfiguracja środowiska backend
 3. Konfiguracja środowiska frontend
-4. Konteneryzacja i lokalne środowisko DevOps
-5. Implementacja funkcji MVP + testy
-
-## Zasady pracy zespołu
-
-- Krótkie branche per task
-- PR do każdej zmiany
-- Planowanie zadań w Linear
-- Nacisk na jakość kodu, testy i czytelną dokumentację
+4. Konteneryzacja lokalna (Docker Compose)
+5. Implementacja MVP + jakość kodu + testy
 
 ---
 
