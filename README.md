@@ -60,15 +60,16 @@ cd ZZPJ
 
 ## 🌿 Zasady branchowania
 
-Każdy branch tworzymy z ID zadania z Linear:
+Każdy branch tworzymy z prefiksem typu pracy + ID zadania z Linear:
 
 ```text
-ALF-17/opis-co-robimy
+feature/ALF-17/opis-co-robimy
 ```
 
 Przykłady:
-- `ALF-18/backend-spring-boot-bootstrap`
-- `ALF-19/frontend-vite-tailwind-setup`
+- `feature/ALF-18/backend-spring-boot-bootstrap`
+- `feature/ALF-19/frontend-vite-tailwind-setup`
+- `fix/ALF-27/naprawa-integracji-keycloak`
 
 ## ✅ Zasady commitów
 
