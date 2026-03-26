@@ -5,7 +5,7 @@
 ![Status](https://img.shields.io/badge/status-in%20progress-2563eb)
 ![Team](https://img.shields.io/badge/team-AlfaTeam-7c3aed)
 ![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-0ea5e9)
-![Backend](https://img.shields.io/badge/backend-FastAPI-10b981)
+![Backend](https://img.shields.io/badge/backend-Spring%20Boot%203.x-10b981)
 ![Course](https://img.shields.io/badge/ZZPJ-2025%2F2026-f59e0b)
 
 ## ✨ O projekcie
@@ -27,9 +27,9 @@ Platforma pomaga użytkownikowi:
 
 ## 🛠️ Stack technologiczny
 
-- **Backend:** Python (najnowsza), FastAPI, SQLAlchemy, Alembic, Poetry, pytest
+- **Backend:** Java 21 LTS, Spring Boot 3.x, Spring Cloud (Eureka, Config), Keycloak, JPA, Flyway, Gradle Wrapper (`./gradlew`)
 - **Frontend:** Node.js (najnowsza), React + TypeScript, Vite, Tailwind, shadcn/ui
-- **DevOps:** Docker, Docker Compose, CI (lint + testy backendu)
+- **DevOps:** Docker, Docker Compose, CI (testy backendu)
 
 ## 📁 Struktura repozytorium
 
@@ -48,6 +48,12 @@ git clone https://github.com/AlfaTeam67/ZZPJ.git
 cd ZZPJ
 ```
 
+## ☕ Backend (Java) – szybki kierunek
+
+- Generowanie modułów przez **Spring Initializr**: https://start.spring.io/
+- Build tool: **Gradle Wrapper** (`./gradlew`)
+- Przykładowe moduły: `eureka-server`, `config-server`, `portfolio-manager`, `market-data-service`, `ai-advisor-service`
+
 ## 🌿 Zasady branchowania
 
 Każdy branch tworzymy z ID zadania z Linear:
@@ -57,7 +63,7 @@ ALF-17/opis-co-robimy
 ```
 
 Przykłady:
-- `ALF-18/backend-fastapi-bootstrap`
+- `ALF-18/backend-spring-boot-bootstrap`
 - `ALF-19/frontend-vite-tailwind-setup`
 
 ## ✅ Zasady commitów
@@ -80,7 +86,7 @@ Dozwolone typy:
 Przykłady:
 - `feat: dodać endpoint healthcheck`
 - `fix: poprawić walidację symbolu aktywa`
-- `ci: uruchamiać lint i testy backendu na PR`
+- `ci: uruchamiać testy backendu na PR`
 
 ## 🔍 Zasady Pull Requestów i review
 
@@ -94,8 +100,7 @@ Przykłady:
 ## 🤖 CI (backend)
 
 W PR uruchamiany jest pipeline backendu:
-- lint,
-- testy.
+- testy (`./gradlew test`).
 
 Cel: wychwycić problemy przed mergem i utrzymać stabilny `main`.
 
