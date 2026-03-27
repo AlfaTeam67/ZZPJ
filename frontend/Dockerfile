@@ -1,5 +1,5 @@
 # Use latest Node.js as base image
-FROM node:latest
+FROM node:24.14.1
 
 # Working directory in container
 WORKDIR /app

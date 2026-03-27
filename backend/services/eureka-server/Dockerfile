@@ -1,11 +1,11 @@
 # Multi-stage build for Eureka Server
 
-# Stage 1: Build the JAR
+# Stage 1: Build and Test
 FROM gradle:8.7-jdk21-alpine AS builder
 WORKDIR /app
 COPY . .
-# Skip tests to speed up the build for now
-RUN gradle :services:eureka-server:bootJar --no-daemon
+# Run full build including tests
+RUN gradle :services:eureka-server:build --no-daemon
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jdk-alpine

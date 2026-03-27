@@ -1,10 +1,8 @@
-# Multi-stage build for Config Server
-
-# Stage 1: Build the JAR
+# Stage 1: Build and Test
 FROM gradle:8.7-jdk21-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN gradle :services:config-server:bootJar --no-daemon
+RUN gradle :services:config-server:build --no-daemon
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jdk-alpine
