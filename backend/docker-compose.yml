@@ -36,7 +36,7 @@ services:
     networks:
       - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user"]
+      test: ["CMD-SHELL", "pg_isready -U ${PORTFOLIO_DB_USER:-user} -d ${PORTFOLIO_DB_NAME:-portfolio}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,7 +55,7 @@ services:
     networks:
       - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user"]
+      test: ["CMD-SHELL", "pg_isready -U ${MARKET_DATA_DB_USER:-user} -d ${MARKET_DATA_DB_NAME:-marketdata}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -125,10 +125,10 @@ services:
       dockerfile: Dockerfile
     container_name: fin-insight-config
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_PROFILES_ACTIVE: ${CONFIG_SERVER_PROFILES:-docker,native}
       CONFIG_REPO_PATH: /config-repo
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
+      CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
     volumes:
       - ${CONFIG_REPO_HOST_PATH:-../../ZZPJ-config}:/config-repo
     ports:

@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -52,7 +53,7 @@ class AdvisorControllerTest {
 
         RecommendationResponse response = RecommendationResponse.builder()
                 .recommendations(Arrays.asList("Recommendation 1", "Recommendation 2"))
-                .confidence(0.90)
+                .confidence(new BigDecimal("0.90"))
                 .timestamp(LocalDateTime.now())
                 .build();
 

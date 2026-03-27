@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +33,7 @@ class AdvisorServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getRecommendations()).isNotEmpty();
         assertThat(response.getRecommendations()).hasSizeGreaterThan(0);
-        assertThat(response.getConfidence()).isEqualTo(0.95);
+        assertThat(response.getConfidence()).isEqualByComparingTo(new BigDecimal("0.95"));
         assertThat(response.getTimestamp()).isNotNull();
     }
 
@@ -50,7 +52,7 @@ class AdvisorServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getRecommendations()).isNotEmpty();
-        assertThat(response.getConfidence()).isEqualTo(0.90);
+        assertThat(response.getConfidence()).isEqualByComparingTo(new BigDecimal("0.90"));
     }
 
     @Test
@@ -68,7 +70,7 @@ class AdvisorServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getRecommendations()).isNotEmpty();
-        assertThat(response.getConfidence()).isEqualTo(0.85);
+        assertThat(response.getConfidence()).isEqualByComparingTo(new BigDecimal("0.85"));
     }
 
     @Test
@@ -86,6 +88,6 @@ class AdvisorServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getRecommendations()).isNotEmpty();
-        assertThat(response.getConfidence()).isEqualTo(0.75);
+        assertThat(response.getConfidence()).isEqualByComparingTo(new BigDecimal("0.75"));
     }
 }

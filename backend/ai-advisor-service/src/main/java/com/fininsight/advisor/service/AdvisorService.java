@@ -5,6 +5,7 @@ import com.fininsight.advisor.dto.RecommendationResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ public class AdvisorService {
                 request.getUserId(), request.getPortfolioId(), request.getRiskTolerance());
         
         List<String> recommendations = generateMockRecommendations(request.getRiskTolerance());
-        Double confidence = calculateConfidence(request.getRiskTolerance());
+        BigDecimal confidence = calculateConfidence(request.getRiskTolerance());
         
         return RecommendationResponse.builder()
                 .recommendations(recommendations)
@@ -60,13 +61,13 @@ public class AdvisorService {
         return recommendations;
     }
     
-    private Double calculateConfidence(RecommendationRequest.RiskTolerance riskTolerance) {
-        // Mock confidence calculation based on risk tolerance
+    private BigDecimal calculateConfidence(RecommendationRequest.RiskTolerance riskTolerance) {
+        // Keep financial confidence score in BigDecimal to avoid floating point precision loss.
         return switch (riskTolerance) {
-            case LOW -> 0.95;
-            case MODERATE -> 0.90;
-            case HIGH -> 0.85;
-            case AGGRESSIVE -> 0.75;
+            case LOW -> new BigDecimal("0.95");
+            case MODERATE -> new BigDecimal("0.90");
+            case HIGH -> new BigDecimal("0.85");
+            case AGGRESSIVE -> new BigDecimal("0.75");
         };
     }
 }
