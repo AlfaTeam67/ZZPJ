@@ -109,6 +109,42 @@ W PR uruchamiany jest pipeline backendu:
 
 Cel: wychwycić problemy przed mergem i utrzymać stabilny `main`.
 
+## 🛠️ Uruchomienie lokalne
+
+### 📦 Backend (Docker)
+
+Wszystkie serwisy backendowe (Eureka, Config, Portfolio, itd.) oraz bazy danych (Postgres, Redis) i Keycloak:
+
+```bash
+cd backend
+docker-compose up -d
+```
+
+Zatrzymaj wszystko:
+
+```bash
+docker-compose down
+```
+
+### 💻 Frontend (Node.js + Docker)
+
+Zalecane użycie `nvm`:
+
+```bash
+cd frontend
+nvm install node
+nvm use node
+npm install
+npm run dev
+```
+
+Uruchomienie przez Docker Compose:
+
+```bash
+cd frontend
+docker-compose up -d
+```
+
 ## 🗺️ Roadmap (high-level)
 
 1. Standardy repo + workflow zespołu
