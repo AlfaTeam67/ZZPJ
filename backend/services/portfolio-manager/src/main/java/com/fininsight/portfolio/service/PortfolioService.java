@@ -5,8 +5,10 @@ import com.fininsight.portfolio.dto.PortfolioResponse;
 import com.fininsight.portfolio.entity.Portfolio;
 import com.fininsight.portfolio.repository.PortfolioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +30,7 @@ public class PortfolioService {
     @Transactional(readOnly = true)
     public PortfolioResponse getPortfolioById(Long id, String userId) {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
         return mapToResponse(portfolio);
     }
 
@@ -47,7 +49,7 @@ public class PortfolioService {
     @Transactional
     public PortfolioResponse updatePortfolio(Long id, PortfolioRequest request, String userId) {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
         
         portfolio.setName(request.getName());
         portfolio.setTotalValue(request.getTotalValue());
@@ -59,7 +61,7 @@ public class PortfolioService {
     @Transactional
     public void deletePortfolio(Long id, String userId) {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Portfolio not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
         portfolioRepository.delete(portfolio);
     }
 

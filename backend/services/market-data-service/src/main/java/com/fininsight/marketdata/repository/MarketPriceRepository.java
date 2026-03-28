@@ -13,7 +13,7 @@ public interface MarketPriceRepository extends JpaRepository<MarketPrice, Long> 
     
     List<MarketPrice> findBySymbolOrderByTimestampDesc(Symbol symbol);
     
-    @Query("SELECT mp FROM MarketPrice mp WHERE mp.id IN " +
-           "(SELECT MAX(mp2.id) FROM MarketPrice mp2 GROUP BY mp2.symbol)")
+    @Query("SELECT mp FROM MarketPrice mp WHERE mp.timestamp = " +
+           "(SELECT MAX(mp2.timestamp) FROM MarketPrice mp2 WHERE mp2.symbol = mp.symbol)")
     List<MarketPrice> findLatestPrices();
 }
