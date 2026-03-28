@@ -32,8 +32,6 @@ public class PortfolioPosition {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id", nullable = false)
     @NotNull(message = "Portfolio is required")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Portfolio portfolio;
 
     @NotBlank(message = "Symbol is required")

@@ -49,8 +49,6 @@ public class Portfolio {
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private List<PortfolioPosition> positions = new ArrayList<>();
 
     @PrePersist
