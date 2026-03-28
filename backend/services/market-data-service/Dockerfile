@@ -1,8 +1,9 @@
 # Stage 1: Build and Test
-FROM gradle:8.7-jdk21-alpine AS builder
+FROM gradle:8.7-jdk21 AS builder
 WORKDIR /app
+ENV GRADLE_OPTS="-Dorg.gradle.vfs.watch=false -Dorg.gradle.native=false"
 COPY . .
-RUN gradle :services:market-data-service:build --no-daemon
+RUN gradle :services:market-data-service:build --no-daemon --no-watch-fs
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jdk-alpine

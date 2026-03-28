@@ -2,3 +2,12 @@
 .idea/
 .vscode/
 .env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log

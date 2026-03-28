@@ -1,147 +1,275 @@
 services:
+  # ================================
+  # PostgreSQL Databases
+  # ================================
+  
+  keycloak-db:
+    image: postgres:${POSTGRES_VERSION:-16-alpine}
+    container_name: fin-insight-keycloak-db
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak_pass}
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - fin-insight-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  portfolio-db:
+    image: postgres:${POSTGRES_VERSION:-16-alpine}
+    container_name: fin-insight-portfolio-db
+    environment:
+      POSTGRES_DB: ${PORTFOLIO_DB_NAME:-portfolio}
+      POSTGRES_USER: ${PORTFOLIO_DB_USER:-user}
+      POSTGRES_PASSWORD: ${PORTFOLIO_DB_PASSWORD:-password}
+    volumes:
+      - portfolio-db-data:/var/lib/postgresql/data
+    ports:
+      - "${PORTFOLIO_DB_PORT:-5433}:5432"
+    networks:
+      - fin-insight-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PORTFOLIO_DB_USER:-user} -d ${PORTFOLIO_DB_NAME:-portfolio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  market-data-db:
+    image: postgres:${POSTGRES_VERSION:-16-alpine}
+    container_name: fin-insight-market-data-db
+    environment:
+      POSTGRES_DB: ${MARKET_DATA_DB_NAME:-marketdata}
+      POSTGRES_USER: ${MARKET_DATA_DB_USER:-user}
+      POSTGRES_PASSWORD: ${MARKET_DATA_DB_PASSWORD:-password}
+    volumes:
+      - market-data-db-data:/var/lib/postgresql/data
+    ports:
+      - "${MARKET_DATA_DB_PORT:-5434}:5432"
+    networks:
+      - fin-insight-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MARKET_DATA_DB_USER:-user} -d ${MARKET_DATA_DB_NAME:-marketdata}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ================================
+  # Keycloak
+  # ================================
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION:-24.0}
+    container_name: fin-insight-keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak_pass}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HTTP_PORT: ${KEYCLOAK_PORT:-8080}
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HEALTH_ENABLED: true
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    networks:
+      - fin-insight-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: localhost:8080\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ================================
+  # Eureka Server
+  # ================================
+  
   eureka-server:
     build:
       context: .
       dockerfile: services/eureka-server/Dockerfile
-    container_name: eureka-server
-    ports:
-      - "${SERVER_PORT_EUREKA}:8761"
+    container_name: fin-insight-eureka
     environment:
-      - SERVICE_NAME=eureka-server
-      - SERVER_PORT=8761
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+    ports:
+      - "${EUREKA_SERVER_PORT:-8761}:8761"
+    networks:
+      - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health 2>/dev/null | grep -q '\"status\":\"UP\"'"]
-      interval: 10s
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1"]
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 5
       start_period: 40s
 
+  # ================================
+  # Config Server
+  # ================================
+  
   config-server:
     build:
       context: .
       dockerfile: services/config-server/Dockerfile
-    container_name: config-server
-    ports:
-      - "${SERVER_PORT_CONFIG}:8888"
+    container_name: fin-insight-config
     environment:
-      - SERVICE_NAME=config-server
-      - SERVER_PORT=8888
+      SPRING_PROFILES_ACTIVE: ${CONFIG_SERVER_PROFILES:-docker,native}
+      CONFIG_REPO_PATH: /config-repo
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
+    volumes:
+      - ${CONFIG_REPO_HOST_PATH:-../ZZPJ-config}:/config-repo # Override CONFIG_REPO_HOST_PATH with absolute path if needed
+    ports:
+      - "${CONFIG_SERVER_PORT:-8888}:8888"
     depends_on:
       eureka-server:
         condition: service_healthy
+    networks:
+      - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8888/actuator/health 2>/dev/null | grep -q '\"status\":\"UP\"'"]
-      interval: 10s
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8888/actuator/health || exit 1"]
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 5
       start_period: 40s
 
+  # ================================
+  # Portfolio Manager
+  # ================================
+  
   portfolio-manager:
     build:
       context: .
       dockerfile: services/portfolio-manager/Dockerfile
-    container_name: portfolio-manager
-    ports:
-      - "${SERVER_PORT_PORTFOLIO}:8081"
+    container_name: fin-insight-portfolio
     environment:
-      - SERVICE_NAME=portfolio-manager
-      - SERVER_PORT=8081
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      DB_HOST: ${PORTFOLIO_DB_HOST:-portfolio-db}
+      DB_PORT: ${PORTFOLIO_DB_INTERNAL_PORT:-5432}
+      DB_NAME: ${PORTFOLIO_DB_NAME:-portfolio}
+      DB_USER: ${PORTFOLIO_DB_USER:-user}
+      DB_PASSWORD: ${PORTFOLIO_DB_PASSWORD:-password}
+      EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+    ports:
+      - "${PORTFOLIO_MANAGER_PORT:-8081}:8081"
     depends_on:
-      config-server:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
-      postgres:
+      config-server:
         condition: service_healthy
+      portfolio-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health 2>/dev/null | grep -q '\"status\":\"UP\"'"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
       start_period: 60s
 
+  # ================================
+  # Market Data Service
+  # ================================
+  
   market-data-service:
     build:
       context: .
       dockerfile: services/market-data-service/Dockerfile
-    container_name: market-data-service
-    ports:
-      - "${SERVER_PORT_MARKET}:8082"
+    container_name: fin-insight-market-data
     environment:
-      - SERVICE_NAME=market-data-service
-      - SERVER_PORT=8082
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      DB_HOST: ${MARKET_DATA_DB_HOST:-market-data-db}
+      DB_PORT: ${MARKET_DATA_DB_INTERNAL_PORT:-5432}
+      DB_NAME: ${MARKET_DATA_DB_NAME:-marketdata}
+      DB_USER: ${MARKET_DATA_DB_USER:-user}
+      DB_PASSWORD: ${MARKET_DATA_DB_PASSWORD:-password}
+      EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+    ports:
+      - "${MARKET_DATA_PORT:-8082}:8082"
     depends_on:
-      config-server:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
+      market-data-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health 2>/dev/null | grep -q '\"status\":\"UP\"'"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
       start_period: 60s
 
+  # ================================
+  # AI Advisor Service
+  # ================================
+  
   ai-advisor-service:
     build:
       context: .
       dockerfile: services/ai-advisor-service/Dockerfile
-    container_name: ai-advisor-service
-    ports:
-      - "${SERVER_PORT_AI}:8083"
+    container_name: fin-insight-ai-advisor
     environment:
-      - SERVICE_NAME=ai-advisor-service
-      - SERVER_PORT=8083
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+    ports:
+      - "${AI_ADVISOR_PORT:-8083}:8083"
     depends_on:
-      config-server:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - fin-insight-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health 2>/dev/null | grep -q '\"status\":\"UP\"'"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
       start_period: 60s
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# ================================
+# Networks
+# ================================
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    container_name: keycloak
-    command: start-dev --health-enabled=true
-    ports:
-      - "${SERVER_PORT_KEYCLOAK}:8080"
-    environment:
-      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME}
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
+networks:
+  fin-insight-network:
+    name: fin-insight-network
+    driver: bridge
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# ================================
+# Volumes
+# ================================
+
+volumes:
+  keycloak-db-data:
+    name: fin-insight-keycloak-db-data
+  portfolio-db-data:
+    name: fin-insight-portfolio-db-data
+  market-data-db-data:
+    name: fin-insight-market-data-db-data
