@@ -16,7 +16,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/fininsight
+          issuer-uri: http://localhost:8080/realms/fin-insight
   cloud:
     config:
       enabled: false

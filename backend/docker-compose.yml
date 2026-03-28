@@ -128,7 +128,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
     volumes:
-      - ${CONFIG_REPO_HOST_PATH:-../../ZZPJ-config}:/config-repo
+      - ${CONFIG_REPO_HOST_PATH:-../ZZPJ-config}:/config-repo # Override CONFIG_REPO_HOST_PATH with absolute path if needed
     ports:
       - "${CONFIG_SERVER_PORT:-8888}:8888"
     depends_on:

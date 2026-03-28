@@ -18,6 +18,7 @@ public class TestSecurityConfig {
                 .header("alg", "none")
                 .claim("sub", "test-user")
                 .claim("scope", "read write")
+                .claim("realm_access", java.util.Map.of("roles", java.util.List.of("USER")))
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();

@@ -9,5 +9,4 @@ CREATE TABLE portfolio_positions (
     CONSTRAINT idx_portfolio_symbol UNIQUE (portfolio_id, symbol)
 );
 
-CREATE INDEX idx_portfolio_positions_portfolio_id ON portfolio_positions(portfolio_id);
 CREATE INDEX idx_portfolio_positions_symbol ON portfolio_positions(symbol);

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
 class PortfolioManagerApplicationTests {

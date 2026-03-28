@@ -6,5 +6,3 @@ CREATE TABLE symbols (
     created_at TIMESTAMP NOT NULL,
     CONSTRAINT chk_type CHECK (type IN ('STOCK', 'CRYPTO', 'FX'))
 );
-
-CREATE INDEX idx_symbol_ticker ON symbols(ticker);
