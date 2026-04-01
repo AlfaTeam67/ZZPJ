@@ -1,8 +1,6 @@
 package com.fininsight.marketdata.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.fininsight.marketdata.entity.PriceSnapshot;
 import com.fininsight.marketdata.entity.SupportedSymbol;
@@ -18,6 +16,20 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, UU
     
     Optional<PriceSnapshot> findTopBySymbolOrderByFetchedAtDesc(SupportedSymbol symbol);
     
-    @Query("SELECT p FROM PriceSnapshot p WHERE p.symbol.symbol = :symbol ORDER BY p.fetchedAt DESC")
-    Optional<PriceSnapshot> findLatestBySymbolString(@Param("symbol") String symbol);
+    Optional<PriceSnapshot> findTopBySymbolSymbolOrderByFetchedAtDesc(String symbol);
+    
+    @org.springframework.data.jpa.repository.Query("""
+        SELECT p FROM PriceSnapshot p
+        WHERE p.symbol.active = true
+          AND p.fetchedAt = (
+            SELECT MAX(p2.fetchedAt)
+            FROM PriceSnapshot p2
+            WHERE p2.symbol = p.symbol
+          )
+        """)
+    List<PriceSnapshot> findLatestSnapshotsForActiveSymbols();
+    
+    default Optional<PriceSnapshot> findLatestBySymbolString(String symbol) {
+        return findTopBySymbolSymbolOrderByFetchedAtDesc(symbol);
+    }
 }

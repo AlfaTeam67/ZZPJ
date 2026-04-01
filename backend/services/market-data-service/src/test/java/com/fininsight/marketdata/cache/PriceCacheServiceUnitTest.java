@@ -1,6 +1,5 @@
 package com.fininsight.marketdata.cache;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,9 +118,8 @@ class PriceCacheServiceUnitTest {
     }
     
     @Test
-    void shouldDeserializeObjectWhenNotDirectType() throws JsonProcessingException {
+    void shouldDeserializeObjectWhenNotDirectType() {
         Object rawValue = new Object();
-        String json = "{\"symbol\":\"AAPL\",\"price\":150.25,\"currency\":\"USD\",\"changePct24h\":2.5,\"fetchedAt\":\"2026-03-31T10:00:00Z\"}";
         PriceCacheEntry expected = new PriceCacheEntry(
                 "AAPL",
                 new BigDecimal("150.25"),
@@ -131,15 +129,13 @@ class PriceCacheServiceUnitTest {
         );
         
         when(valueOperations.get("price:AAPL")).thenReturn(rawValue);
-        when(objectMapper.writeValueAsString(rawValue)).thenReturn(json);
-        when(objectMapper.readValue(json, PriceCacheEntry.class)).thenReturn(expected);
+        when(objectMapper.convertValue(rawValue, PriceCacheEntry.class)).thenReturn(expected);
         
         Optional<PriceCacheEntry> result = cacheService.getPrice("AAPL");
         
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(expected);
-        verify(objectMapper).writeValueAsString(rawValue);
-        verify(objectMapper).readValue(json, PriceCacheEntry.class);
+        verify(objectMapper).convertValue(rawValue, PriceCacheEntry.class);
     }
     
     @Test

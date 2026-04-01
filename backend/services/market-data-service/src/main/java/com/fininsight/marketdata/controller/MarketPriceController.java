@@ -31,9 +31,7 @@ public class MarketPriceController {
     @GetMapping("/latest")
     @Operation(summary = "Get latest prices for all symbols")
     public ResponseEntity<List<MarketPriceDto>> getLatestPrices() {
-        List<MarketPriceDto> prices = symbolRepository.findByActiveTrue().stream()
-            .map(symbol -> marketPriceRepository.findTopBySymbolOrderByFetchedAtDesc(symbol))
-            .flatMap(java.util.Optional::stream)
+        List<MarketPriceDto> prices = marketPriceRepository.findLatestSnapshotsForActiveSymbols().stream()
             .map(this::toDto)
             .collect(Collectors.toList());
         return ResponseEntity.ok(prices);

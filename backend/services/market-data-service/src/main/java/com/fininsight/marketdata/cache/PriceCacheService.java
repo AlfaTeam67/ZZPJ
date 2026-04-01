@@ -1,6 +1,5 @@
 package com.fininsight.marketdata.cache;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +43,7 @@ public class PriceCacheService {
                 return Optional.of((PriceCacheEntry) value);
             }
             
-            String json = objectMapper.writeValueAsString(value);
-            PriceCacheEntry entry = objectMapper.readValue(json, PriceCacheEntry.class);
+            PriceCacheEntry entry = objectMapper.convertValue(value, PriceCacheEntry.class);
             return Optional.of(entry);
         } catch (Exception e) {
             log.error("Failed to get cached price for symbol: {}", symbol, e);

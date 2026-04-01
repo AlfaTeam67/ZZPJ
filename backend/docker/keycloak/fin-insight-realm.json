@@ -10,10 +10,18 @@
       "standardFlowEnabled": true,
       "protocol": "openid-connect",
       "redirectUris": [
-        "*"
+        "http://localhost:3000/*",
+        "http://localhost:8080/*",
+        "http://localhost:8081/*",
+        "http://localhost:8082/*",
+        "http://localhost:8083/*"
       ],
       "webOrigins": [
-        "*"
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "http://localhost:8081",
+        "http://localhost:8082",
+        "http://localhost:8083"
       ]
     },
     {
