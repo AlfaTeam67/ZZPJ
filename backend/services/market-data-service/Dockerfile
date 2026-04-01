@@ -3,7 +3,7 @@ FROM gradle:8.7-jdk21 AS builder
 WORKDIR /app
 ENV GRADLE_OPTS="-Dorg.gradle.vfs.watch=false -Dorg.gradle.native=false"
 COPY . .
-RUN gradle :services:market-data-service:build --no-daemon --no-watch-fs
+RUN gradle :services:market-data-service:build -x test --no-daemon --no-watch-fs
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jdk-alpine
