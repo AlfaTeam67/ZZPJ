@@ -1,8 +1,8 @@
 package com.fininsight.marketdata.controller;
 
+import com.fininsight.marketdata.entity.SupportedSymbol;
 import com.fininsight.marketdata.dto.SymbolDto;
-import com.fininsight.marketdata.entity.Symbol;
-import com.fininsight.marketdata.repository.SymbolRepository;
+import com.fininsight.marketdata.repository.SupportedSymbolRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 public class SymbolController {
     
-    private final SymbolRepository symbolRepository;
+    private final SupportedSymbolRepository symbolRepository;
     
     @GetMapping
     @Operation(summary = "Get all symbols")
@@ -33,34 +33,37 @@ public class SymbolController {
         return ResponseEntity.ok(symbols);
     }
     
-    @GetMapping("/{id}")
-    @Operation(summary = "Get symbol by ID")
-    public ResponseEntity<SymbolDto> getSymbolById(@PathVariable Long id) {
-        return symbolRepository.findById(id)
-            .map(symbol -> ResponseEntity.ok(toDto(symbol)))
+    @GetMapping("/{symbol}")
+    @Operation(summary = "Get symbol by symbol code")
+    public ResponseEntity<SymbolDto> getSymbolById(@PathVariable String symbol) {
+        return symbolRepository.findById(symbol)
+            .map(foundSymbol -> ResponseEntity.ok(toDto(foundSymbol)))
             .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
     @Operation(summary = "Create new symbol")
     public ResponseEntity<SymbolDto> createSymbol(@Valid @RequestBody SymbolDto symbolDto) {
-        Symbol symbol = Symbol.builder()
-            .ticker(symbolDto.getTicker())
-            .name(symbolDto.getName())
+        SupportedSymbol symbol = SupportedSymbol.builder()
+            .symbol(symbolDto.getSymbol())
             .type(symbolDto.getType())
+            .apiSource(symbolDto.getApiSource())
+            .active(symbolDto.isActive())
+            .baseCurrency(symbolDto.getBaseCurrency())
             .build();
         
-        Symbol saved = symbolRepository.save(symbol);
+        SupportedSymbol saved = symbolRepository.save(symbol);
         return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
     }
     
-    private SymbolDto toDto(Symbol symbol) {
+    private SymbolDto toDto(SupportedSymbol symbol) {
         return SymbolDto.builder()
-            .id(symbol.getId())
-            .ticker(symbol.getTicker())
-            .name(symbol.getName())
+            .symbol(symbol.getSymbol())
             .type(symbol.getType())
-            .createdAt(symbol.getCreatedAt())
+            .apiSource(symbol.getApiSource())
+            .active(symbol.isActive())
+            .baseCurrency(symbol.getBaseCurrency())
+            .addedAt(symbol.getAddedAt())
             .build();
     }
 }

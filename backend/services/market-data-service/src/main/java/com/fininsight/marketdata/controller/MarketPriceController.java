@@ -1,10 +1,10 @@
 package com.fininsight.marketdata.controller;
 
+import com.fininsight.marketdata.entity.PriceSnapshot;
+import com.fininsight.marketdata.entity.SupportedSymbol;
 import com.fininsight.marketdata.dto.MarketPriceDto;
-import com.fininsight.marketdata.entity.MarketPrice;
-import com.fininsight.marketdata.entity.Symbol;
-import com.fininsight.marketdata.repository.MarketPriceRepository;
-import com.fininsight.marketdata.repository.SymbolRepository;
+import com.fininsight.marketdata.repository.PriceSnapshotRepository;
+import com.fininsight.marketdata.repository.SupportedSymbolRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,13 +25,15 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 public class MarketPriceController {
     
-    private final MarketPriceRepository marketPriceRepository;
-    private final SymbolRepository symbolRepository;
+    private final PriceSnapshotRepository marketPriceRepository;
+    private final SupportedSymbolRepository symbolRepository;
     
     @GetMapping("/latest")
     @Operation(summary = "Get latest prices for all symbols")
     public ResponseEntity<List<MarketPriceDto>> getLatestPrices() {
-        List<MarketPriceDto> prices = marketPriceRepository.findLatestPrices().stream()
+        List<MarketPriceDto> prices = symbolRepository.findByActiveTrue().stream()
+            .map(symbol -> marketPriceRepository.findTopBySymbolOrderByFetchedAtDesc(symbol))
+            .flatMap(java.util.Optional::stream)
             .map(this::toDto)
             .collect(Collectors.toList());
         return ResponseEntity.ok(prices);
@@ -39,10 +42,10 @@ public class MarketPriceController {
     @GetMapping("/symbol/{ticker}")
     @Operation(summary = "Get prices for a specific symbol")
     public ResponseEntity<List<MarketPriceDto>> getPricesBySymbol(@PathVariable String ticker) {
-        return symbolRepository.findByTicker(ticker)
+        return symbolRepository.findBySymbolAndActiveTrue(ticker)
             .map(symbol -> {
                 List<MarketPriceDto> prices = marketPriceRepository
-                    .findBySymbolOrderByTimestampDesc(symbol).stream()
+                    .findBySymbolOrderByFetchedAtDesc(symbol).stream()
                     .map(this::toDto)
                     .collect(Collectors.toList());
                 return ResponseEntity.ok(prices);
@@ -53,28 +56,34 @@ public class MarketPriceController {
     @PostMapping
     @Operation(summary = "Add new market price")
     public ResponseEntity<MarketPriceDto> addMarketPrice(@Valid @RequestBody MarketPriceDto priceDto) {
-        return symbolRepository.findByTicker(priceDto.getTicker())
+        return symbolRepository.findBySymbolAndActiveTrue(priceDto.getSymbol())
             .map(symbol -> {
-                MarketPrice marketPrice = MarketPrice.builder()
+                PriceSnapshot marketPrice = PriceSnapshot.builder()
                     .symbol(symbol)
+                    .source(priceDto.getSource())
                     .price(priceDto.getPrice())
-                    .volume(priceDto.getVolume())
-                    .timestamp(priceDto.getTimestamp())
+                    .currency(priceDto.getCurrency())
+                    .changePct24h(priceDto.getChangePct24h())
+                    .volume24h(priceDto.getVolume24h())
+                    .fetchedAt(priceDto.getFetchedAt() != null ? priceDto.getFetchedAt() : Instant.now())
                     .build();
                 
-                MarketPrice saved = marketPriceRepository.save(marketPrice);
+                PriceSnapshot saved = marketPriceRepository.save(marketPrice);
                 return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
             })
             .orElse(ResponseEntity.badRequest().build());
     }
     
-    private MarketPriceDto toDto(MarketPrice marketPrice) {
+    private MarketPriceDto toDto(PriceSnapshot marketPrice) {
         return MarketPriceDto.builder()
             .id(marketPrice.getId())
-            .ticker(marketPrice.getSymbol().getTicker())
+            .symbol(marketPrice.getSymbol().getSymbol())
+            .source(marketPrice.getSource())
             .price(marketPrice.getPrice())
-            .volume(marketPrice.getVolume())
-            .timestamp(marketPrice.getTimestamp())
+            .currency(marketPrice.getCurrency())
+            .changePct24h(marketPrice.getChangePct24h())
+            .volume24h(marketPrice.getVolume24h())
+            .fetchedAt(marketPrice.getFetchedAt())
             .build();
     }
 }

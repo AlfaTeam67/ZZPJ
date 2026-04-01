@@ -6,6 +6,25 @@ spring:
   cloud:
     config:
       fail-fast: false
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/marketdata}
+    username: ${SPRING_DATASOURCE_USERNAME:marketdata}
+    password: ${SPRING_DATASOURCE_PASSWORD:marketdata}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   security:
     oauth2:
       resourceserver:

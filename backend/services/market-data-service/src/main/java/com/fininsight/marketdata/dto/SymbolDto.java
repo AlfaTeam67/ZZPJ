@@ -1,5 +1,6 @@
 package com.fininsight.marketdata.dto;
 
+import com.fininsight.marketdata.entity.enums.SymbolType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -7,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -15,19 +16,20 @@ import java.time.LocalDateTime;
 @Builder
 public class SymbolDto {
     
-    private Long id;
-    
-    @NotBlank(message = "Ticker is required")
+    @NotBlank(message = "Symbol is required")
     @Size(max = 20)
-    private String ticker;
+    private String symbol;
     
-    @NotBlank(message = "Name is required")
-    @Size(max = 255)
-    private String name;
+    private SymbolType type;
     
-    @NotBlank(message = "Type is required")
-    @Size(max = 20)
-    private String type;
+    @NotBlank(message = "API source is required")
+    @Size(max = 50)
+    private String apiSource;
     
-    private LocalDateTime createdAt;
+    private boolean active;
+    
+    @Size(max = 10)
+    private String baseCurrency;
+    
+    private Instant addedAt;
 }
