@@ -34,8 +34,8 @@ class MarketDataServiceApplicationTests {
 
 	@Test
 	void smokeTest() {
-		assertThat(context.getBean("symbolRepository")).isNotNull();
-		assertThat(context.getBean("marketPriceRepository")).isNotNull();
+		assertThat(context.getBean("supportedSymbolRepository")).isNotNull();
+		assertThat(context.getBean("priceSnapshotRepository")).isNotNull();
 		assertThat(context.getBean("symbolController")).isNotNull();
 		assertThat(context.getBean("marketPriceController")).isNotNull();
 	}

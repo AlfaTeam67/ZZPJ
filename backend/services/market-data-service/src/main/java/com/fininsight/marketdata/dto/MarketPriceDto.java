@@ -9,7 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -17,19 +18,27 @@ import java.time.LocalDateTime;
 @Builder
 public class MarketPriceDto {
     
-    private Long id;
+    private UUID id;
     
-    @NotBlank(message = "Ticker is required")
-    private String ticker;
+    @NotBlank(message = "Symbol is required")
+    private String symbol;
+    
+    @NotBlank(message = "Source is required")
+    private String source;
     
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
     private BigDecimal price;
     
+    @NotBlank(message = "Currency is required")
+    private String currency;
+    
+    private BigDecimal changePct24h;
+    
     @NotNull(message = "Volume is required")
     @DecimalMin(value = "0.0", message = "Volume must be non-negative")
-    private BigDecimal volume;
+    private BigDecimal volume24h;
     
     @NotNull(message = "Timestamp is required")
-    private LocalDateTime timestamp;
+    private Instant fetchedAt;
 }

@@ -1,8 +1,0 @@
-CREATE TABLE symbols (
-    id BIGSERIAL PRIMARY KEY,
-    ticker VARCHAR(20) NOT NULL UNIQUE,
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(20) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    CONSTRAINT chk_type CHECK (type IN ('STOCK', 'CRYPTO', 'FX'))
-);
