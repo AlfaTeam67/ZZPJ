@@ -1,10 +1,12 @@
 package com.fininsight.marketdata.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fininsight.marketdata.config.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -26,6 +28,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(TestSecurityConfig.class)
 class PriceCacheServiceTest {
     
     private static final DockerImageName REDIS_IMAGE = DockerImageName.parse("redis:7-alpine");
