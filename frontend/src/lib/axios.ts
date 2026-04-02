@@ -1,17 +1,22 @@
 import axios from 'axios'
 import { env } from '@/lib/env'
-import { store } from '@/store/store'
 
 export const apiClient = axios.create({
   baseURL: env.apiUrl,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
 })
 
-apiClient.interceptors.request.use((config) => {
-  const token = store.getState().auth.token
+export function setupAxiosInterceptors(getToken: () => string | null) {
+  apiClient.interceptors.request.use((config) => {
+    const token = getToken()
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
 
-  return config
-})
+    return config
+  })
+}

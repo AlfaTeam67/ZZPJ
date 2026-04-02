@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import App from './App'
 import './index.css'
+import { setupAxiosInterceptors } from '@/lib/axios'
 import { queryClient } from '@/lib/queryClient'
 import { store } from '@/store/store'
 
@@ -14,6 +15,8 @@ const rootElement = document.getElementById('root')
 if (!rootElement) {
   throw new Error("Root element '#root' was not found.")
 }
+
+setupAxiosInterceptors(() => store.getState().auth.token)
 
 createRoot(rootElement).render(
   <StrictMode>
