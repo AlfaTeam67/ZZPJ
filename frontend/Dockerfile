@@ -1,21 +1,33 @@
-# Use latest Node.js as base image
-FROM node:24.14.1
+FROM node:24-alpine AS builder
 
-# Working directory in container
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if they exist)
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application
 COPY . .
 
-# Expose port 5173 for Vite
-EXPOSE 5173
+ARG VITE_API_URL
+RUN test -n "$VITE_API_URL" || (echo "VITE_API_URL build arg is required" && exit 1)
+ENV VITE_API_URL=$VITE_API_URL
 
-# Start the application in dev mode
-# Vite needs --host to be accessible from outside the container
-CMD ["npm", "run", "dev", "--", "--host"]
+RUN npm run build
+
+FROM node:24-alpine AS runtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN npm install -g serve@14.2.4
+
+COPY --from=builder /app/dist ./dist
+
+USER node
+
+EXPOSE 4173
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:4173 >/dev/null || exit 1
+
+CMD ["serve", "-s", "dist", "-l", "4173"]
