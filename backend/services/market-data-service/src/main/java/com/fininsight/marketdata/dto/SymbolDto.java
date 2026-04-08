@@ -2,6 +2,7 @@ package com.fininsight.marketdata.dto;
 
 import com.fininsight.marketdata.entity.enums.SymbolType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ public class SymbolDto {
     @Size(max = 20)
     private String symbol;
     
+    @NotNull(message = "Type is required")
     private SymbolType type;
     
     @NotBlank(message = "API source is required")

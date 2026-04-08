@@ -1,6 +1,18 @@
 {
   "realm": "fin-insight",
   "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "User role"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      }
+    ]
+  },
   "clients": [
     {
       "clientId": "fin-insight-client",
@@ -40,6 +52,7 @@
       "username": "admin",
       "enabled": true,
       "emailVerified": true,
+      "email": "admin@fininsight.local",
       "firstName": "Fin",
       "lastName": "Admin",
       "credentials": [
@@ -48,7 +61,24 @@
           "value": "admin",
           "temporary": false
         }
-      ]
+      ],
+      "realmRoles": ["user", "admin"]
+    },
+    {
+      "username": "testuser",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user@fininsight.local",
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user"]
     }
   ]
 }

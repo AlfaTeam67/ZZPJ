@@ -3,8 +3,11 @@ package com.fininsight.marketdata.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -15,14 +18,18 @@ import java.util.UUID;
     @Index(name = "idx_snap_symbol_fetched", columnList = "symbol, fetched_at DESC"),
     @Index(name = "idx_snap_fetched", columnList = "fetched_at DESC")
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = "symbol")
 public class PriceSnapshot {
     
     @Id
     @GeneratedValue
+    @EqualsAndHashCode.Include
     private UUID id;
     
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,4 +1,4 @@
--- V1__init_market_data.sql
+-- V1__create_supported_symbols.sql
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE supported_symbols (

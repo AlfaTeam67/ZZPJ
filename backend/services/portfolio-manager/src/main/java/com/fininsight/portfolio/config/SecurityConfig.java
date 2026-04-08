@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 @EnableWebSecurity
@@ -45,9 +46,14 @@ import java.util.stream.Collectors;
         )
 )
 public class SecurityConfig {
-
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String issuerUri;
+    private String primaryIssuer;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.secondary-issuer-uri:}")
+    private String secondaryIssuer;
+
+    @Value("${JWT_ISSUER_URI:${KEYCLOAK_ISSUER_URI:${spring.security.oauth2.resourceserver.jwt.issuer-uri}}}")
+    private String jwkDiscoveryIssuer;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -81,38 +87,35 @@ public class SecurityConfig {
     @Bean
     @ConditionalOnMissingBean(JwtDecoder.class)
     public JwtDecoder jwtDecoder() {
-        NimbusJwtDecoder jwtDecoder = JwtDecoders.fromIssuerLocation(issuerUri);
-        
-        // Create a custom validator that accepts both keycloak:8080 and localhost:8080 issuers
-        OAuth2TokenValidator<Jwt> multiIssuerValidator = new OAuth2TokenValidator<Jwt>() {
-            private final Set<String> allowedIssuers = Set.of(
-                issuerUri,
-                issuerUri.replace("keycloak", "localhost")
-            );
-            
-            @Override
-            public OAuth2TokenValidatorResult validate(Jwt token) {
-                String tokenIssuer = token.getIssuer().toString();
+        Set<String> allowedIssuers = Stream.of(primaryIssuer, secondaryIssuer, jwkDiscoveryIssuer)
+            .filter(s -> s != null && !s.isEmpty())
+            .collect(Collectors.toSet());
+
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(buildJwkSetUri(jwkDiscoveryIssuer)).build();
+
+        OAuth2TokenValidator<Jwt> multiIssuerValidator = new DelegatingOAuth2TokenValidator<>(
+            new JwtTimestampValidator(),
+            jwt -> {
+                String tokenIssuer = jwt.getIssuer().toString();
                 if (allowedIssuers.contains(tokenIssuer)) {
                     return OAuth2TokenValidatorResult.success();
                 }
                 return OAuth2TokenValidatorResult.failure(
-                    new OAuth2Error("invalid_token", 
-                        "The iss claim is not valid. Expected one of: " + allowedIssuers + " but got: " + tokenIssuer, 
+                    new OAuth2Error("invalid_issuer",
+                        "Token issuer: " + tokenIssuer + " not in allowed list: " + allowedIssuers,
                         null)
                 );
             }
-        };
-        
-        OAuth2TokenValidator<Jwt> withTimestamp = new DelegatingOAuth2TokenValidator<>(
-            multiIssuerValidator,
-            new JwtTimestampValidator()
         );
-        
-        jwtDecoder.setJwtValidator(withTimestamp);
+
+        jwtDecoder.setJwtValidator(multiIssuerValidator);
         return jwtDecoder;
     }
 
+    private String buildJwkSetUri(String issuerUri) {
+        String normalized = issuerUri.endsWith("/") ? issuerUri.substring(0, issuerUri.length() - 1) : issuerUri;
+        return normalized + "/protocol/openid-connect/certs";
+    }
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -122,12 +125,14 @@ public class SecurityConfig {
                 return List.of();
             }
             
-            Collection<String> roles = (Collection<String>) realmAccess.get("roles");
-            if (roles == null) {
+            Object rolesObj = realmAccess.get("roles");
+            if (!(rolesObj instanceof Collection<?>)) {
                 return List.of();
             }
             
+            Collection<?> roles = (Collection<?>) rolesObj;
             return roles.stream()
+                    .map(Object::toString)
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                     .collect(Collectors.toList());
         });
