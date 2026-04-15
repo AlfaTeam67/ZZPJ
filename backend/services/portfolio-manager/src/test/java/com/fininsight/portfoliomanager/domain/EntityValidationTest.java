@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
-import com.fininsight.portfoliomanager.domain.enums.UserRole;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -36,11 +35,8 @@ class EntityValidationTest {
     }
 
     @Test
-    void userShouldFailValidationWhenEmailIsBlank() {
+    void userShouldFailValidationWhenIdIsNull() {
         User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setEmail(" ");
-        user.setRole(UserRole.USER);
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
@@ -51,8 +47,6 @@ class EntityValidationTest {
     void portfolioShouldFailValidationWhenNameExceedsLimit() {
         User user = new User();
         user.setId(UUID.randomUUID());
-        user.setEmail("john@example.com");
-        user.setRole(UserRole.USER);
 
         Portfolio portfolio = new Portfolio();
         portfolio.setUser(user);

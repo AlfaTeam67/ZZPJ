@@ -1,6 +1,6 @@
-package com.fininsight.portfolio;
+package com.fininsight.portfoliomanager;
 
-import com.fininsight.portfolio.config.TestSecurityConfig;
+import com.fininsight.portfoliomanager.config.TestSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -11,8 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class PortfolioManagerApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+    }
 }

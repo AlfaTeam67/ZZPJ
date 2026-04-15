@@ -15,14 +15,13 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import com.fininsight.portfolio.config.JpaAuditingConfig;
+import com.fininsight.portfoliomanager.config.JpaAuditingConfig;
 import com.fininsight.portfoliomanager.domain.Asset;
 import com.fininsight.portfoliomanager.domain.Portfolio;
 import com.fininsight.portfoliomanager.domain.Transaction;
 import com.fininsight.portfoliomanager.domain.User;
 import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
-import com.fininsight.portfoliomanager.domain.enums.UserRole;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -60,7 +59,7 @@ class RepositoryIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.datasource.driver-class-name", postgres::getDriverClassName);
         registry.add("spring.flyway.enabled", () -> true);
-        registry.add("spring.flyway.locations", () -> "classpath:db/portfolio-model");
+        registry.add("spring.flyway.locations", () -> "classpath:db/migration");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
 
@@ -68,8 +67,6 @@ class RepositoryIntegrationTest {
     void shouldPersistAndReadEntitiesThroughRepositories() {
         User user = new User();
         user.setId(UUID.randomUUID());
-        user.setEmail("investor@example.com");
-        user.setRole(UserRole.USER);
         user = userRepository.save(user);
 
         Portfolio portfolio = new Portfolio();
@@ -102,7 +99,7 @@ class RepositoryIntegrationTest {
         List<Portfolio> portfolios = portfolioRepository.findByUserId(user.getId());
         List<Asset> assets = assetRepository.findByPortfolioId(portfolio.getId());
         List<Transaction> transactions = transactionRepository.findByPortfolioId(portfolio.getId());
-        Optional<User> foundUser = userRepository.findByEmail("investor@example.com");
+        Optional<User> foundUser = userRepository.findById(user.getId());
 
         assertThat(portfolios).hasSize(1);
         assertThat(assets).hasSize(1);

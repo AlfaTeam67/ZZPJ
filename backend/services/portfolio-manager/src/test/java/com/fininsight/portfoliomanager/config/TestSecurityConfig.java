@@ -1,4 +1,4 @@
-package com.fininsight.portfolio.config;
+package com.fininsight.portfoliomanager.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -15,12 +15,12 @@ public class TestSecurityConfig {
     @Primary
     public JwtDecoder jwtDecoder() {
         return token -> Jwt.withTokenValue(token)
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                .claim("scope", "read write")
-                .claim("realm_access", java.util.Map.of("roles", java.util.List.of("USER")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
+            .header("alg", "none")
+            .claim("sub", "11111111-1111-1111-1111-111111111111")
+            .claim("scope", "read write")
+            .claim("realm_access", java.util.Map.of("roles", java.util.List.of("USER")))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(3600))
+            .build();
     }
 }

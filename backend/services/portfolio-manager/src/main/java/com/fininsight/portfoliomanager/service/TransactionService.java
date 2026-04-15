@@ -1,0 +1,116 @@
+package com.fininsight.portfoliomanager.service;
+
+import com.fininsight.portfoliomanager.domain.Asset;
+import com.fininsight.portfoliomanager.domain.Portfolio;
+import com.fininsight.portfoliomanager.domain.Transaction;
+import com.fininsight.portfoliomanager.domain.enums.TransactionType;
+import com.fininsight.portfoliomanager.dto.TransactionRequest;
+import com.fininsight.portfoliomanager.dto.TransactionResponse;
+import com.fininsight.portfoliomanager.repository.AssetRepository;
+import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
+import com.fininsight.portfoliomanager.repository.TransactionRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class TransactionService {
+
+    private static final int PRICE_SCALE = 4;
+
+    private final PortfolioDataRepository portfolioRepository;
+    private final AssetRepository assetRepository;
+    private final TransactionRepository transactionRepository;
+
+    @Transactional
+    public TransactionResponse createTransaction(UUID portfolioId, String userId, TransactionRequest request) {
+        UUID userUuid = parseUuid(userId, "Invalid user ID");
+        Portfolio portfolio = portfolioRepository.findByIdAndUserId(portfolioId, userUuid)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
+
+        Asset asset = assetRepository.findByPortfolioIdAndId(portfolioId, request.getAssetId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
+
+        updateAssetPosition(asset, request);
+        assetRepository.save(asset);
+
+        Transaction transaction = new Transaction();
+        transaction.setAsset(asset);
+        transaction.setPortfolio(portfolio);
+        transaction.setType(request.getType());
+        transaction.setQuantity(request.getQuantity());
+        transaction.setPrice(request.getPrice());
+        transaction.setCurrency(request.getCurrency());
+        transaction.setFee(request.getFee());
+        transaction.setExecutedAt(request.getExecutedAt() != null ? request.getExecutedAt() : Instant.now());
+        transaction.setNotes(request.getNotes());
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        return mapToResponse(savedTransaction);
+    }
+
+    private void updateAssetPosition(Asset asset, TransactionRequest request) {
+        BigDecimal currentQuantity = asset.getQuantity();
+        BigDecimal requestQuantity = request.getQuantity();
+        BigDecimal requestPrice = request.getPrice();
+
+        if (requestQuantity.signum() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction quantity must be positive");
+        }
+        if (requestPrice.signum() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction price cannot be negative");
+        }
+
+        if (request.getType() == TransactionType.BUY) {
+            BigDecimal existingCost = currentQuantity.multiply(asset.getAvgBuyPrice());
+            BigDecimal newCost = requestQuantity.multiply(requestPrice);
+            BigDecimal updatedQuantity = currentQuantity.add(requestQuantity);
+            BigDecimal updatedAvg = existingCost.add(newCost)
+                .divide(updatedQuantity, PRICE_SCALE, RoundingMode.HALF_UP);
+            asset.setQuantity(updatedQuantity);
+            asset.setAvgBuyPrice(updatedAvg);
+            return;
+        }
+
+        if (currentQuantity.compareTo(requestQuantity) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell more than owned quantity");
+        }
+
+        BigDecimal updatedQuantity = currentQuantity.subtract(requestQuantity);
+        asset.setQuantity(updatedQuantity);
+        if (updatedQuantity.signum() == 0) {
+            asset.setAvgBuyPrice(BigDecimal.ZERO.setScale(PRICE_SCALE, RoundingMode.HALF_UP));
+        }
+    }
+
+    private TransactionResponse mapToResponse(Transaction transaction) {
+        return TransactionResponse.builder()
+            .id(transaction.getId())
+            .assetId(transaction.getAsset().getId())
+            .portfolioId(transaction.getPortfolio().getId())
+            .type(transaction.getType())
+            .quantity(transaction.getQuantity())
+            .price(transaction.getPrice())
+            .currency(transaction.getCurrency())
+            .fee(transaction.getFee())
+            .executedAt(transaction.getExecutedAt())
+            .notes(transaction.getNotes())
+            .build();
+    }
+
+    private UUID parseUuid(String value, String message) {
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+        }
+    }
+}
