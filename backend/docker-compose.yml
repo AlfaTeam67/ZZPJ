@@ -1,3 +1,5 @@
+name: fin-insight-backend
+
 services:
   # ================================
   # PostgreSQL Databases
