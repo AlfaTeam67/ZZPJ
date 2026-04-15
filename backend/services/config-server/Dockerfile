@@ -1,9 +1,19 @@
 # Stage 1: Build and Test
-FROM gradle:8.7-jdk21 AS builder
+FROM gradle:8.10-jdk21-alpine AS builder
 WORKDIR /app
-ENV GRADLE_OPTS="-Dorg.gradle.vfs.watch=false -Dorg.gradle.native=false"
+
+# Install ca-certificates for secure HTTPS connections
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
+ENV GRADLE_OPTS="-Dorg.gradle.vfs.watch=false -Dorg.gradle.native=false -Dhttps.protocols=TLSv1.2,TLSv1.3 -Djdk.tls.client.protocols=TLSv1.2,TLSv1.3"
 COPY . .
-RUN gradle :services:config-server:build --no-daemon --no-watch-fs
+RUN set -eux; \
+    for attempt in 1 2 3; do \
+      gradle :services:config-server:build --no-daemon --no-watch-fs && break; \
+      if [ "$attempt" -eq 3 ]; then exit 1; fi; \
+      echo "Gradle build failed (attempt $attempt), retrying in 10s..."; \
+      sleep 10; \
+    done
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jdk-alpine

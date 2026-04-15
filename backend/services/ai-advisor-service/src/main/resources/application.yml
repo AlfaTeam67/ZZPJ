@@ -10,7 +10,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:${JWT_ISSUER_URI:http://localhost:8080/realms/fin-insight}}
+          issuer-uri: ${JWT_ISSUER_URI:${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/fin-insight}}
+          secondary-issuer-uri: ${JWT_SECONDARY_ISSUER_URI:${KEYCLOAK_SECONDARY_ISSUER_URI:http://localhost:8080/realms/fin-insight}}
 
 eureka:
   client:

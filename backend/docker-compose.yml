@@ -65,7 +65,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION:-24.0}
     container_name: fin-insight-keycloak
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME:-keycloak}
@@ -77,8 +77,13 @@ services:
       KC_HOSTNAME_STRICT: false
       KC_HOSTNAME_STRICT_HTTPS: false
       KC_HEALTH_ENABLED: true
+      # Pozwól na tokeny z localhost i keycloak hostname
+      KC_HOSTNAME_URL: http://localhost:8080
+      KC_HOSTNAME_ADMIN_URL: http://localhost:8080
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
+    volumes:
+      - ./docker/keycloak:/opt/keycloak/data/import:ro
     depends_on:
       keycloak-db:
         condition: service_healthy
@@ -101,6 +106,7 @@ services:
       dockerfile: services/eureka-server/Dockerfile
     container_name: fin-insight-eureka
     environment:
+      SERVICE_NAME: eureka-server
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
     ports:
       - "${EUREKA_SERVER_PORT:-8761}:8761"
@@ -123,6 +129,7 @@ services:
       dockerfile: services/config-server/Dockerfile
     container_name: fin-insight-config
     environment:
+      SERVICE_NAME: config-server
       SPRING_PROFILES_ACTIVE: ${CONFIG_SERVER_PROFILES:-docker,native}
       CONFIG_REPO_PATH: /config-repo
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
@@ -153,6 +160,7 @@ services:
       dockerfile: services/portfolio-manager/Dockerfile
     container_name: fin-insight-portfolio
     environment:
+      SERVICE_NAME: portfolio-manager
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       DB_HOST: ${PORTFOLIO_DB_HOST:-portfolio-db}
       DB_PORT: ${PORTFOLIO_DB_INTERNAL_PORT:-5432}
@@ -161,6 +169,8 @@ services:
       DB_PASSWORD: ${PORTFOLIO_DB_PASSWORD:-password}
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      KEYCLOAK_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      KEYCLOAK_SECONDARY_ISSUER_URI: http://localhost:8080/realms/fin-insight
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
     ports:
       - "${PORTFOLIO_MANAGER_PORT:-8081}:8081"
@@ -192,6 +202,7 @@ services:
       dockerfile: services/market-data-service/Dockerfile
     container_name: fin-insight-market-data
     environment:
+      SERVICE_NAME: market-data-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       DB_HOST: ${MARKET_DATA_DB_HOST:-market-data-db}
       DB_PORT: ${MARKET_DATA_DB_INTERNAL_PORT:-5432}
@@ -231,6 +242,7 @@ services:
       dockerfile: services/ai-advisor-service/Dockerfile
     container_name: fin-insight-ai-advisor
     environment:
+      SERVICE_NAME: ai-advisor-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}

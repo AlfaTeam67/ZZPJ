@@ -1,0 +1,325 @@
+{
+  "info": {
+    "_postman_id": "c8f7e3f0-2e21-4be4-b9f4-9f7c30b1c6f1",
+    "name": "Fin-Insight - Market Data Service",
+    "description": "Collection for testing Market Data Service API with Keycloak JWT authentication.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Access Token (client credentials)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{client_secret}}",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_base_url}}"
+              ],
+              "path": [
+                "realms",
+                "{{realm}}",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "description": "Fetches JWT access token from Keycloak using client credentials grant. On success, token is saved to collection variable `access_token`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Token response status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('access_token');",
+                  "pm.collectionVariables.set('access_token', json.access_token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /actuator/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{market_data_base_url}}/actuator/health",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /actuator/info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{market_data_base_url}}/actuator/info",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Symbols",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "GET /api/symbols",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{market_data_base_url}}/api/symbols",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "api",
+                "symbols"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/symbols",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"AAPL\",\n  \"type\": \"STOCK\",\n  \"apiSource\": \"alphavantage\",\n  \"active\": true,\n  \"baseCurrency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{market_data_base_url}}/api/symbols",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "api",
+                "symbols"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/symbols/{symbol}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{market_data_base_url}}/api/symbols/{{symbol}}",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "api",
+                "symbols",
+                "{{symbol}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Market Prices",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "GET /api/market-prices/latest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{market_data_base_url}}/api/market-prices/latest",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "api",
+                "market-prices",
+                "latest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/market-prices/symbol/{ticker}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{market_data_base_url}}/api/market-prices/symbol/{{ticker}}",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "api",
+                "market-prices",
+                "symbol",
+                "{{ticker}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/market-prices",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"AAPL\",\n  \"source\": \"alphavantage\",\n  \"price\": 199.45,\n  \"currency\": \"USD\",\n  \"changePct24h\": 1.25,\n  \"volume24h\": 123456.78,\n  \"fetchedAt\": \"2026-03-31T12:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{market_data_base_url}}/api/market-prices",
+              "host": [
+                "{{market_data_base_url}}"
+              ],
+              "path": [
+                "api",
+                "market-prices"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "market_data_base_url",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "keycloak_base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "realm",
+      "value": "fin-insight"
+    },
+    {
+      "key": "client_id",
+      "value": "market-data-postman"
+    },
+    {
+      "key": "username",
+      "value": "admin"
+    },
+    {
+      "key": "password",
+      "value": "admin"
+    },
+    {
+      "key": "client_secret",
+      "value": "postman-secret"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "symbol",
+      "value": "AAPL"
+    },
+    {
+      "key": "ticker",
+      "value": "AAPL"
+    }
+  ]
+}
