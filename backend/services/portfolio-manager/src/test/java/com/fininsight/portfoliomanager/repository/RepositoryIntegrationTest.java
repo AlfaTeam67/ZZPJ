@@ -1,4 +1,4 @@
-package pl.alfateam.portfoliomanager.repository;
+package com.fininsight.portfoliomanager.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +16,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import com.fininsight.portfolio.config.JpaAuditingConfig;
-import pl.alfateam.portfoliomanager.domain.Asset;
-import pl.alfateam.portfoliomanager.domain.Portfolio;
-import pl.alfateam.portfoliomanager.domain.Transaction;
-import pl.alfateam.portfoliomanager.domain.User;
-import pl.alfateam.portfoliomanager.domain.enums.AssetType;
-import pl.alfateam.portfoliomanager.domain.enums.TransactionType;
-import pl.alfateam.portfoliomanager.domain.enums.UserRole;
+import com.fininsight.portfoliomanager.domain.Asset;
+import com.fininsight.portfoliomanager.domain.Portfolio;
+import com.fininsight.portfoliomanager.domain.Transaction;
+import com.fininsight.portfoliomanager.domain.User;
+import com.fininsight.portfoliomanager.domain.enums.AssetType;
+import com.fininsight.portfoliomanager.domain.enums.TransactionType;
+import com.fininsight.portfoliomanager.domain.enums.UserRole;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -45,7 +45,7 @@ class RepositoryIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private PortfolioRepository portfolioRepository;
+    private PortfolioDataRepository portfolioRepository;
 
     @Autowired
     private AssetRepository assetRepository;

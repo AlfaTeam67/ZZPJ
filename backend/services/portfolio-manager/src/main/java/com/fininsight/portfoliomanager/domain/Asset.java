@@ -1,7 +1,8 @@
-package pl.alfateam.portfoliomanager.domain;
+package com.fininsight.portfoliomanager.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -17,29 +18,28 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.alfateam.portfoliomanager.domain.enums.TransactionType;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import com.fininsight.portfoliomanager.domain.enums.AssetType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "transactions")
+@Entity(name = "DataAsset")
+@Table(name = "assets")
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Transaction {
+@EntityListeners(AuditingEntityListener.class)
+public class Asset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
     private UUID id;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "asset_id", nullable = false)
-    private Asset asset;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,27 +49,29 @@ public class Transaction {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionType type;
+    private AssetType type;
+
+    @NotBlank
+    @Column(nullable = false, length = 20)
+    private String symbol;
 
     @NotNull
     @Column(nullable = false, precision = 18, scale = 8)
     private BigDecimal quantity;
 
     @NotNull
-    @Column(nullable = false, precision = 18, scale = 4)
-    private BigDecimal price;
+    @Column(name = "avg_buy_price", nullable = false, precision = 18, scale = 4)
+    private BigDecimal avgBuyPrice;
 
     @NotBlank
     @Column(nullable = false, length = 10)
     private String currency;
 
-    @Column(precision = 18, scale = 4)
-    private BigDecimal fee;
+    @CreatedDate
+    @Column(name = "added_at", nullable = false, updatable = false)
+    private Instant addedAt;
 
-    @NotNull
-    @Column(name = "executed_at", nullable = false)
-    private Instant executedAt;
-
-    @Column
-    private String notes;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }

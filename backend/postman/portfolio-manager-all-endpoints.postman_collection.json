@@ -1,0 +1,303 @@
+{
+  "info": {
+    "_postman_id": "6ee4db9b-6f38-44df-9af4-09ff0b178568",
+    "name": "Fin-Insight - Portfolio Manager - All Endpoints",
+    "description": "Komplet endpointow modulu portfolio-manager (CRUD portfolios + health/info).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Access Token (password grant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+            "urlencoded": [
+              {
+                "key": "client_id",
+                "value": "{{client_id}}",
+                "type": "text"
+              },
+              {
+                "key": "username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_base_url}}"
+              ],
+              "path": [
+                "realms",
+                "{{realm}}",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Auth status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('access_token');",
+                  "pm.collectionVariables.set('access_token', json.access_token);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /actuator/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{portfolio_base_url}}/actuator/health",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /actuator/info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{portfolio_base_url}}/actuator/info",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Portfolios",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "GET /api/portfolios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{portfolio_base_url}}/api/portfolios",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "api",
+                "portfolios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/portfolios/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{portfolio_base_url}}/api/portfolios/{{portfolio_id}}",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "api",
+                "portfolios",
+                "{{portfolio_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/portfolios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Portfolio {{$timestamp}}\",\n  \"totalValue\": 12000.5000\n}"
+            },
+            "url": {
+              "raw": "{{portfolio_base_url}}/api/portfolios",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "api",
+                "portfolios"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.id !== undefined && json.id !== null) {",
+                  "    pm.collectionVariables.set('portfolio_id', String(json.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "PUT /api/portfolios/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Portfolio\",\n  \"totalValue\": 15000.7500\n}"
+            },
+            "url": {
+              "raw": "{{portfolio_base_url}}/api/portfolios/{{portfolio_id}}",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "api",
+                "portfolios",
+                "{{portfolio_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/portfolios/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{portfolio_base_url}}/api/portfolios/{{portfolio_id}}",
+              "host": [
+                "{{portfolio_base_url}}"
+              ],
+              "path": [
+                "api",
+                "portfolios",
+                "{{portfolio_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "portfolio_base_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "keycloak_base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "realm",
+      "value": "fin-insight"
+    },
+    {
+      "key": "client_id",
+      "value": "fin-insight-client"
+    },
+    {
+      "key": "client_secret",
+      "value": "postman-secret"
+    },
+    {
+      "key": "username",
+      "value": "testuser"
+    },
+    {
+      "key": "password",
+      "value": "test123"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "portfolio_id",
+      "value": "1"
+    }
+  ]
+}

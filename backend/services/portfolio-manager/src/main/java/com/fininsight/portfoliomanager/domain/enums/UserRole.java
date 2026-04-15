@@ -1,4 +1,4 @@
-package pl.alfateam.portfoliomanager.domain.enums;
+package com.fininsight.portfoliomanager.domain.enums;
 
 public enum UserRole {
     USER,

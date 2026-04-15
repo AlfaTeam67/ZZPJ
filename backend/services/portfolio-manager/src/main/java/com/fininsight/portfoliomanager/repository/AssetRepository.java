@@ -1,7 +1,7 @@
-package pl.alfateam.portfoliomanager.repository;
+package com.fininsight.portfoliomanager.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.alfateam.portfoliomanager.domain.Asset;
+import com.fininsight.portfoliomanager.domain.Asset;
 
 import java.util.List;
 import java.util.Optional;

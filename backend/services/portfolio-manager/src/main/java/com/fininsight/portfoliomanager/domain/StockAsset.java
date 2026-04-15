@@ -1,4 +1,4 @@
-package pl.alfateam.portfoliomanager.domain;
+package com.fininsight.portfoliomanager.domain;
 
 import java.math.BigDecimal;
 

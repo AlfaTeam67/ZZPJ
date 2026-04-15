@@ -1,4 +1,4 @@
-package pl.alfateam.portfoliomanager.domain;
+package com.fininsight.portfoliomanager.domain;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -7,9 +7,9 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import pl.alfateam.portfoliomanager.domain.enums.AssetType;
-import pl.alfateam.portfoliomanager.domain.enums.TransactionType;
-import pl.alfateam.portfoliomanager.domain.enums.UserRole;
+import com.fininsight.portfoliomanager.domain.enums.AssetType;
+import com.fininsight.portfoliomanager.domain.enums.TransactionType;
+import com.fininsight.portfoliomanager.domain.enums.UserRole;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;

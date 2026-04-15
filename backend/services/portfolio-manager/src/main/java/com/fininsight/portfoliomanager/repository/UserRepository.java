@@ -1,7 +1,7 @@
-package pl.alfateam.portfoliomanager.repository;
+package com.fininsight.portfoliomanager.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.alfateam.portfoliomanager.domain.User;
+import com.fininsight.portfoliomanager.domain.User;
 
 import java.util.Optional;
 import java.util.UUID;
