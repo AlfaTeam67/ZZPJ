@@ -5,6 +5,32 @@
     "description": "Komplet endpointow modulu portfolio-manager (CRUD portfolios + health/info).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "function normalizeUrl(value, fallback) {",
+          "  const raw = (value || '').trim();",
+          "  const withDefault = raw || fallback;",
+          "  return /^https?:\\/\\//.test(withDefault)",
+          "    ? withDefault.replace(/\\/+$/, '')",
+          "    : fallback;",
+          "}",
+          "",
+          "const portfolioBaseRaw = pm.variables.get('portfolio_base_url');",
+          "const portfolioBase = normalizeUrl(portfolioBaseRaw, 'http://localhost:8081').replace(/\\/api$/, '');",
+          "pm.collectionVariables.set('portfolio_base_url', portfolioBase);",
+          "pm.collectionVariables.set('portfolio_api_base_url', `${portfolioBase}/api`);",
+          "",
+          "const keycloakBaseRaw = pm.variables.get('keycloak_base_url');",
+          "const keycloakBase = normalizeUrl(keycloakBaseRaw, 'http://localhost:8080');",
+          "pm.collectionVariables.set('keycloak_base_url', keycloakBase);"
+        ]
+      }
+    }
+  ],
   "item": [
     {
       "name": "Auth",
@@ -138,12 +164,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{portfolio_base_url}}/api/portfolios",
+              "raw": "{{portfolio_api_base_url}}/portfolios",
               "host": [
-                "{{portfolio_base_url}}"
+                "{{portfolio_api_base_url}}"
               ],
               "path": [
-                "api",
                 "portfolios"
               ]
             }
@@ -156,12 +181,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{portfolio_base_url}}/api/portfolios/{{portfolio_id}}",
+              "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
               "host": [
-                "{{portfolio_base_url}}"
+                "{{portfolio_api_base_url}}"
               ],
               "path": [
-                "api",
                 "portfolios",
                 "{{portfolio_id}}"
               ]
@@ -181,15 +205,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"My Portfolio {{$timestamp}}\",\n  \"totalValue\": 12000.5000\n}"
+              "raw": "{\n  \"name\": \"My Portfolio {{$timestamp}}\",\n  \"description\": \"Created from Postman all-endpoints collection\"\n}"
             },
             "url": {
-              "raw": "{{portfolio_base_url}}/api/portfolios",
+              "raw": "{{portfolio_api_base_url}}/portfolios",
               "host": [
-                "{{portfolio_base_url}}"
+                "{{portfolio_api_base_url}}"
               ],
               "path": [
-                "api",
                 "portfolios"
               ]
             }
@@ -224,15 +247,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Portfolio\",\n  \"totalValue\": 15000.7500\n}"
+              "raw": "{\n  \"name\": \"Updated Portfolio\",\n  \"description\": \"Updated from Postman all-endpoints collection\"\n}"
             },
             "url": {
-              "raw": "{{portfolio_base_url}}/api/portfolios/{{portfolio_id}}",
+              "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
               "host": [
-                "{{portfolio_base_url}}"
+                "{{portfolio_api_base_url}}"
               ],
               "path": [
-                "api",
                 "portfolios",
                 "{{portfolio_id}}"
               ]
@@ -246,14 +268,41 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{portfolio_base_url}}/api/portfolios/{{portfolio_id}}",
+              "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
               "host": [
-                "{{portfolio_base_url}}"
+                "{{portfolio_api_base_url}}"
               ],
               "path": [
-                "api",
                 "portfolios",
                 "{{portfolio_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/portfolios/{id}/transactions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetType\": \"STOCK\",\n  \"symbol\": \"AAPL\",\n  \"type\": \"BUY\",\n  \"quantity\": 1,\n  \"price\": 100.00,\n  \"currency\": \"USD\",\n  \"executedAt\": \"2026-04-16T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}/transactions",
+              "host": [
+                "{{portfolio_api_base_url}}"
+              ],
+              "path": [
+                "portfolios",
+                "{{portfolio_id}}",
+                "transactions"
               ]
             }
           },
@@ -266,6 +315,10 @@
     {
       "key": "portfolio_base_url",
       "value": "http://localhost:8081"
+    },
+    {
+      "key": "portfolio_api_base_url",
+      "value": "http://localhost:8081/api"
     },
     {
       "key": "keycloak_base_url",
@@ -297,7 +350,7 @@
     },
     {
       "key": "portfolio_id",
-      "value": "1"
+      "value": ""
     }
   ]
 }

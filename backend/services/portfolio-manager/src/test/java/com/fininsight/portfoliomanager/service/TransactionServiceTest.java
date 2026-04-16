@@ -70,6 +70,33 @@ class TransactionServiceTest {
     }
 
     @Test
+    void shouldIncludeFeeInAverageBuyPriceCalculation() {
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        UUID assetId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+
+        Portfolio portfolio = portfolio(portfolioId, userId);
+        Asset asset = asset(assetId, portfolio, "10.00000000", "100.0000");
+        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        TransactionRequest request = TransactionRequest.builder()
+            .assetId(assetId)
+            .type(TransactionType.BUY)
+            .quantity(new BigDecimal("5.00000000"))
+            .price(new BigDecimal("200.0000"))
+            .fee(new BigDecimal("15.0000"))
+            .currency("USD")
+            .build();
+
+        transactionService.createTransaction(portfolioId, userId.toString(), request);
+
+        assertThat(asset.getQuantity()).isEqualByComparingTo("15.00000000");
+        assertThat(asset.getAvgBuyPrice()).isEqualByComparingTo("134.3333");
+    }
+
+    @Test
     void shouldRejectSellWhenQuantityIsTooHigh() {
         UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");

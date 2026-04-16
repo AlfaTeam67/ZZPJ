@@ -99,13 +99,37 @@ class PortfolioServiceTest {
         saved.setDescription("Long-term");
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(portfolioRepository.save(any(Portfolio.class))).thenReturn(saved);
-        when(assetRepository.calculateTotalValueByPortfolioId(saved.getId())).thenReturn(BigDecimal.ZERO);
 
         PortfolioResponse result = portfolioService.createPortfolio(request, userId.toString());
 
         assertThat(result.getId()).isEqualTo(saved.getId());
         assertThat(result.getName()).isEqualTo("Tech");
         assertThat(result.getDescription()).isEqualTo("Long-term");
+        assertThat(result.getTotalValue()).isEqualByComparingTo(BigDecimal.ZERO);
+        verify(assetRepository, never()).calculateTotalValueByPortfolioId(saved.getId());
+    }
+
+    @Test
+    void shouldCreatePortfolioAndProvisionMissingUser() {
+        UUID userId = UUID.fromString("48484848-4848-4848-4848-484848484848");
+        PortfolioRequest request = PortfolioRequest.builder()
+            .name("Autoprovisioned User Portfolio")
+            .description("Created without pre-existing user row")
+            .build();
+        Portfolio saved = portfolio(UUID.fromString("99999999-9999-9999-9999-999999999999"), request.getName(), userId);
+        saved.setDescription(request.getDescription());
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(portfolioRepository.save(any(Portfolio.class))).thenReturn(saved);
+
+        PortfolioResponse result = portfolioService.createPortfolio(request, userId.toString());
+
+        assertThat(result.getId()).isEqualTo(saved.getId());
+        assertThat(result.getUserId()).isEqualTo(userId);
+        verify(userRepository).save(any(User.class));
+        assertThat(result.getTotalValue()).isEqualByComparingTo(BigDecimal.ZERO);
+        verify(assetRepository, never()).calculateTotalValueByPortfolioId(saved.getId());
     }
 
     @Test

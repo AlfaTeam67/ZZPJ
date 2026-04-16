@@ -3,6 +3,7 @@ package com.fininsight.portfoliomanager.service;
 import com.fininsight.portfoliomanager.domain.Asset;
 import com.fininsight.portfoliomanager.domain.Portfolio;
 import com.fininsight.portfoliomanager.domain.Transaction;
+import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
 import com.fininsight.portfoliomanager.dto.TransactionRequest;
 import com.fininsight.portfoliomanager.dto.TransactionResponse;
@@ -36,8 +37,7 @@ public class TransactionService {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(portfolioId, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
-        Asset asset = assetRepository.findByPortfolioIdAndId(portfolioId, request.getAssetId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
+        Asset asset = getOrCreateAsset(portfolio, request);
 
         updateAssetPosition(asset, request);
         assetRepository.save(asset);
@@ -57,21 +57,46 @@ public class TransactionService {
         return mapToResponse(savedTransaction);
     }
 
+    private Asset getOrCreateAsset(Portfolio portfolio, TransactionRequest request) {
+        if (request.getAssetId() != null) {
+            return assetRepository.findByPortfolioIdAndId(portfolio.getId(), request.getAssetId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
+        }
+
+        if (request.getType() != TransactionType.BUY) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Asset ID is required for SELL transactions");
+        }
+
+        if (request.getSymbol() == null || request.getAssetType() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Symbol and Asset Type are required when Asset ID is not provided");
+        }
+
+        return assetRepository.findByPortfolioIdAndSymbol(portfolio.getId(), request.getSymbol())
+            .orElseGet(() -> {
+                Asset newAsset = new Asset();
+                newAsset.setPortfolio(portfolio);
+                newAsset.setSymbol(request.getSymbol());
+                newAsset.setType(request.getAssetType());
+                newAsset.setQuantity(BigDecimal.ZERO);
+                newAsset.setAvgBuyPrice(BigDecimal.ZERO);
+                newAsset.setCurrency(request.getCurrency());
+                return newAsset;
+            });
+    }
+
     private void updateAssetPosition(Asset asset, TransactionRequest request) {
         BigDecimal currentQuantity = asset.getQuantity();
         BigDecimal requestQuantity = request.getQuantity();
         BigDecimal requestPrice = request.getPrice();
+        BigDecimal requestFee = request.getFee() != null ? request.getFee() : BigDecimal.ZERO;
 
-        if (requestQuantity.signum() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction quantity must be positive");
-        }
-        if (requestPrice.signum() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction price cannot be negative");
+        if (requestFee.signum() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction fee cannot be negative");
         }
 
         if (request.getType() == TransactionType.BUY) {
             BigDecimal existingCost = currentQuantity.multiply(asset.getAvgBuyPrice());
-            BigDecimal newCost = requestQuantity.multiply(requestPrice);
+            BigDecimal newCost = requestQuantity.multiply(requestPrice).add(requestFee);
             BigDecimal updatedQuantity = currentQuantity.add(requestQuantity);
             BigDecimal updatedAvg = existingCost.add(newCost)
                 .divide(updatedQuantity, PRICE_SCALE, RoundingMode.HALF_UP);

@@ -1,10 +1,11 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-DROP TABLE IF EXISTS transactions;
-DROP TABLE IF EXISTS assets;
-DROP TABLE IF EXISTS portfolio_positions;
-DROP TABLE IF EXISTS portfolios;
-DROP TABLE IF EXISTS users;
+-- Usuwamy stare tabele, aby uniknąć konfliktów typów (bigint vs uuid)
+-- CASCADE usunie również powiązane klucze obce
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS assets CASCADE;
+DROP TABLE IF EXISTS portfolios CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
     id UUID PRIMARY KEY,
@@ -30,7 +31,7 @@ CREATE TABLE assets (
     portfolio_id UUID NOT NULL,
     type VARCHAR(30) NOT NULL CHECK (type IN ('STOCK', 'CRYPTO', 'BOND')),
     symbol VARCHAR(20) NOT NULL,
-    quantity NUMERIC(18, 8) NOT NULL CHECK (quantity > 0),
+    quantity NUMERIC(18, 8) NOT NULL CHECK (quantity >= 0),
     avg_buy_price NUMERIC(18, 4) NOT NULL CHECK (avg_buy_price >= 0),
     currency VARCHAR(10) NOT NULL,
     added_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

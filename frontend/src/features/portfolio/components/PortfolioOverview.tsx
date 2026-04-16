@@ -1,9 +1,6 @@
-import Decimal from 'decimal.js'
-
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePortfolio } from '@/features/portfolio/hooks/usePortfolio'
-import { formatMoney } from '@/utils/formatMoney'
 
 export function PortfolioOverview() {
   const { data, isLoading } = usePortfolio()
@@ -24,37 +21,24 @@ export function PortfolioOverview() {
     )
   }
 
-  const computedTotal = data.assets
-    .reduce(
-      (sum, asset) => sum.plus(new Decimal(asset.quantity).mul(asset.currentPrice)),
-      new Decimal(0)
-    )
-    .toString()
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Portfolio overview</CardTitle>
-        <CardDescription>Snapshot based on current mock market values.</CardDescription>
+        <CardDescription>Backend-aligned portfolio snapshot.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge>Assets: {data.assets.length}</Badge>
-          <Badge variant="secondary">Total: {formatMoney(computedTotal, data.currency)}</Badge>
+          <Badge>Portfolio ID: {data.id}</Badge>
+          <Badge variant="secondary">User ID: {data.userId}</Badge>
         </div>
-        <ul className="space-y-2">
-          {data.assets.map((asset) => (
-            <li
-              key={asset.id}
-              className="flex items-center justify-between rounded-lg border px-3 py-2"
-            >
-              <span className="font-medium">{asset.symbol}</span>
-              <span className="text-sm text-muted-foreground">
-                {asset.quantity} @ {formatMoney(asset.currentPrice, data.currency)}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-2 rounded-lg border px-3 py-2">
+          <p className="font-medium">{data.name}</p>
+          <p className="text-sm text-muted-foreground">Total value: {data.totalValue}</p>
+          {data.description ? (
+            <p className="text-sm text-muted-foreground">{data.description}</p>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   )

@@ -31,6 +31,9 @@ public class PortfolioService {
     public List<PortfolioResponse> getAllPortfoliosForUser(String userId) {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
         List<Portfolio> portfolios = portfolioRepository.findByUserId(userUuid);
+        if (portfolios.isEmpty()) {
+            return List.of();
+        }
         Map<UUID, BigDecimal> totalsByPortfolioId = assetRepository.findTotalValuesByPortfolioIds(
             portfolios.stream().map(Portfolio::getId).toList()
         ).stream().collect(Collectors.toMap(
@@ -54,11 +57,12 @@ public class PortfolioService {
     @Transactional
     public PortfolioResponse createPortfolio(PortfolioRequest request, String userId) {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
-        User user = userRepository.findById(userUuid).orElseGet(() -> {
-            User newUser = new User();
-            newUser.setId(userUuid);
-            return userRepository.save(newUser);
-        });
+        User user = userRepository.findById(userUuid)
+            .orElseGet(() -> {
+                User newUser = new User();
+                newUser.setId(userUuid);
+                return userRepository.save(newUser);
+            });
 
         Portfolio portfolio = new Portfolio();
         portfolio.setName(request.getName());
@@ -66,7 +70,7 @@ public class PortfolioService {
         portfolio.setUser(user);
 
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
-        return mapToResponse(savedPortfolio, assetRepository.calculateTotalValueByPortfolioId(savedPortfolio.getId()));
+        return mapToResponse(savedPortfolio, BigDecimal.ZERO);
     }
 
     @Transactional
