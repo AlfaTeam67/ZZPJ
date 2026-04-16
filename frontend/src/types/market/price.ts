@@ -26,7 +26,7 @@ export function toPriceTicker(snapshot: PriceSnapshot): PriceTicker {
     symbol: snapshot.symbol,
     price: snapshot.price,
     currency: snapshot.currency,
-    changePct24h: Number.isFinite(parsedChange) && rawChange !== undefined ? rawChange : undefined,
+    changePct24h: Number.isFinite(parsedChange) && rawChange ? rawChange : undefined,
     trend: change > 0 ? 'UP' : change < 0 ? 'DOWN' : 'NEUTRAL',
   }
 }
