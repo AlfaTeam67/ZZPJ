@@ -5,7 +5,9 @@ const portfolioMock: Portfolio = {
   userId: '11111111-1111-1111-1111-111111111111',
   name: 'Growth Portfolio',
   description: 'Long-term diversified holdings',
-  totalValue: '19630.58',
+  totals: {
+    USD: '19630.58',
+  },
   createdAt: '2026-04-01T10:00:00.000Z',
 }
 

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -18,6 +19,6 @@ public class PortfolioResponse {
     private String name;
     private UUID userId;
     private String description;
-    private BigDecimal totalValue;
+    private Map<String, BigDecimal> totals;
     private Instant createdAt;
 }

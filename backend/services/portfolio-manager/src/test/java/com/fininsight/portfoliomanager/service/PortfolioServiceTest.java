@@ -58,7 +58,7 @@ class PortfolioServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).isEqualTo("Growth");
         assertThat(result.getFirst().getUserId()).isEqualTo(userId);
-        assertThat(result.getFirst().getTotalValue()).isEqualByComparingTo("1000.000000000000");
+        assertThat(result.getFirst().getTotals()).containsEntry("USD", new BigDecimal("1000.0000"));
     }
 
     @Test
@@ -73,6 +73,7 @@ class PortfolioServiceTest {
 
         assertThat(result.getId()).isEqualTo(portfolioId);
         assertThat(result.getName()).isEqualTo("Retirement");
+        assertThat(result.getTotals()).isEmpty();
     }
 
     @Test
@@ -106,7 +107,7 @@ class PortfolioServiceTest {
         assertThat(result.getId()).isEqualTo(saved.getId());
         assertThat(result.getName()).isEqualTo("Tech");
         assertThat(result.getDescription()).isEqualTo("Long-term");
-        assertThat(result.getTotalValue()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.getTotals()).isEmpty();
         verify(assetRepository, never()).findTotalValuesByPortfolioId(saved.getId());
     }
 
@@ -129,7 +130,7 @@ class PortfolioServiceTest {
         assertThat(result.getId()).isEqualTo(saved.getId());
         assertThat(result.getUserId()).isEqualTo(userId);
         verify(userRepository).saveAndFlush(any(User.class));
-        assertThat(result.getTotalValue()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.getTotals()).isEmpty();
         verify(assetRepository, never()).findTotalValuesByPortfolioId(saved.getId());
     }
 
@@ -177,10 +178,11 @@ class PortfolioServiceTest {
 
         assertThat(result.getName()).isEqualTo("New");
         assertThat(result.getDescription()).isEqualTo("Updated");
+        assertThat(result.getTotals()).isEmpty();
     }
 
     @Test
-    void shouldReturnNullTotalValueForMultiCurrencyPortfolioList() {
+    void shouldReturnFullBreakdownForMultiCurrencyPortfolioList() {
         UUID userId = UUID.fromString("98989898-9898-9898-9898-989898989898");
         UUID portfolioId = UUID.fromString("10101010-1010-1010-1010-101010101010");
         Portfolio portfolio = portfolio(portfolioId, "Mixed", userId);
@@ -193,11 +195,13 @@ class PortfolioServiceTest {
         List<PortfolioResponse> result = portfolioService.getAllPortfoliosForUser(userId.toString());
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getTotalValue()).isNull();
+        assertThat(result.getFirst().getTotals()).hasSize(2);
+        assertThat(result.getFirst().getTotals()).containsEntry("USD", new BigDecimal("100.0000"));
+        assertThat(result.getFirst().getTotals()).containsEntry("EUR", new BigDecimal("200.0000"));
     }
 
     @Test
-    void shouldReturnNullTotalValueForMultiCurrencyPortfolioById() {
+    void shouldReturnFullBreakdownForMultiCurrencyPortfolioById() {
         UUID userId = UUID.fromString("20202020-2020-2020-2020-202020202020");
         UUID portfolioId = UUID.fromString("30303030-3030-3030-3030-303030303030");
         Portfolio portfolio = portfolio(portfolioId, "Mixed", userId);
@@ -209,7 +213,9 @@ class PortfolioServiceTest {
 
         PortfolioResponse result = portfolioService.getPortfolioById(portfolioId, userId.toString());
 
-        assertThat(result.getTotalValue()).isNull();
+        assertThat(result.getTotals()).hasSize(2);
+        assertThat(result.getTotals()).containsEntry("USD", new BigDecimal("100.0000"));
+        assertThat(result.getTotals()).containsEntry("EUR", new BigDecimal("200.0000"));
     }
 
     @Test

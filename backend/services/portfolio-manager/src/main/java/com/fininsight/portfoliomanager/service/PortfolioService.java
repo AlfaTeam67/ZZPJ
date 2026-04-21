@@ -43,7 +43,7 @@ public class PortfolioService {
         ));
 
         return portfolios.stream()
-            .map(portfolio -> mapToResponse(portfolio, resolveTotalValue(totalsByPortfolioId.get(portfolio.getId()))))
+            .map(portfolio -> mapToResponse(portfolio, resolveTotals(totalsByPortfolioId.get(portfolio.getId()))))
             .toList();
     }
 
@@ -52,7 +52,7 @@ public class PortfolioService {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
-        return mapToResponse(portfolio, resolveTotalValue(assetRepository.findTotalValuesByPortfolioId(portfolio.getId())));
+        return mapToResponse(portfolio, resolveTotals(assetRepository.findTotalValuesByPortfolioId(portfolio.getId())));
     }
 
     @Transactional
@@ -66,7 +66,7 @@ public class PortfolioService {
         portfolio.setUser(user);
 
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
-        return mapToResponse(savedPortfolio, BigDecimal.ZERO);
+        return mapToResponse(savedPortfolio, Map.of());
     }
 
     @Transactional
@@ -79,7 +79,7 @@ public class PortfolioService {
         portfolio.setDescription(request.getDescription());
 
         Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
-        return mapToResponse(updatedPortfolio, resolveTotalValue(assetRepository.findTotalValuesByPortfolioId(updatedPortfolio.getId())));
+        return mapToResponse(updatedPortfolio, resolveTotals(assetRepository.findTotalValuesByPortfolioId(updatedPortfolio.getId())));
     }
 
     @Transactional
@@ -90,25 +90,26 @@ public class PortfolioService {
         portfolioRepository.delete(portfolio);
     }
 
-    private PortfolioResponse mapToResponse(Portfolio portfolio, BigDecimal totalValue) {
+    private PortfolioResponse mapToResponse(Portfolio portfolio, Map<String, BigDecimal> totals) {
         return PortfolioResponse.builder()
             .id(portfolio.getId())
             .name(portfolio.getName())
             .description(portfolio.getDescription())
             .userId(portfolio.getUser().getId())
-            .totalValue(totalValue)
+            .totals(totals)
             .createdAt(portfolio.getCreatedAt())
             .build();
     }
 
-    private BigDecimal resolveTotalValue(List<AssetRepository.PortfolioCurrencyTotalValueProjection> totalsByCurrency) {
+    private Map<String, BigDecimal> resolveTotals(List<AssetRepository.PortfolioCurrencyTotalValueProjection> totalsByCurrency) {
         if (totalsByCurrency == null || totalsByCurrency.isEmpty()) {
-            return BigDecimal.ZERO;
+            return Map.of();
         }
-        if (totalsByCurrency.size() == 1) {
-            return totalsByCurrency.getFirst().getTotalValue();
-        }
-        return null;
+        return totalsByCurrency.stream()
+            .collect(Collectors.toMap(
+                AssetRepository.PortfolioCurrencyTotalValueProjection::getCurrency,
+                AssetRepository.PortfolioCurrencyTotalValueProjection::getTotalValue
+            ));
     }
 
     private User findOrCreateUser(UUID userUuid) {

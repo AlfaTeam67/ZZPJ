@@ -5,7 +5,7 @@ export interface Portfolio {
   userId: string
   name: string
   description?: string | null
-  totalValue: MoneyValue
+  totals: Record<string, MoneyValue>
   createdAt: string
 }
 
