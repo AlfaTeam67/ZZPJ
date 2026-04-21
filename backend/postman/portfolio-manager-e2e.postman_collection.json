@@ -1,0 +1,420 @@
+{
+  "info": {
+    "_postman_id": "aef4f82f-7f9d-493b-83f7-48689a9ed16b",
+    "name": "Fin-Insight - Portfolio Manager - E2E",
+    "description": "E2E workflow modulu portfolio: create -> list -> get -> update -> delete -> verify not found.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "function normalizeUrl(value, fallback) {",
+          "  const raw = (value || '').trim();",
+          "  const withDefault = raw || fallback;",
+          "  return /^https?:\\/\\//.test(withDefault)",
+          "    ? withDefault.replace(/\\/+$/, '')",
+          "    : fallback;",
+          "}",
+          "",
+          "const portfolioBaseRaw = pm.variables.get('portfolio_base_url');",
+          "const portfolioBase = normalizeUrl(portfolioBaseRaw, 'http://localhost:8081').replace(/\\/api$/, '');",
+          "pm.collectionVariables.set('portfolio_base_url', portfolioBase);",
+          "pm.collectionVariables.set('portfolio_api_base_url', `${portfolioBase}/api`);",
+          "",
+          "const keycloakBaseRaw = pm.variables.get('keycloak_base_url');",
+          "const keycloakBase = normalizeUrl(keycloakBaseRaw, 'http://localhost:8080');",
+          "pm.collectionVariables.set('keycloak_base_url', keycloakBase);"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth - Get Access Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+            "urlencoded": [
+              {
+                "key": "client_id",
+                "value": "{{client_id}}",
+                "type": "text"
+              },
+              {
+                "key": "username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+            {
+              "key": "password",
+              "value": "{{password}}",
+              "type": "text"
+            },
+            {
+              "key": "grant_type",
+              "value": "password",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token",
+          "host": [
+            "{{keycloak_base_url}}"
+          ],
+          "path": [
+            "realms",
+            "{{realm}}",
+            "protocol",
+            "openid-connect",
+            "token"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Auth status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.expect(json.access_token).to.be.a('string').and.to.have.length.greaterThan(20);",
+              "pm.collectionVariables.set('access_token', json.access_token);"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "2. Create Portfolio",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"E2E Portfolio\",\n  \"description\": \"Created in E2E flow\"\n}"
+        },
+        "url": {
+          "raw": "{{portfolio_api_base_url}}/portfolios",
+          "host": [
+            "{{portfolio_api_base_url}}"
+          ],
+          "path": [
+            "portfolios"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.expect(json).to.have.property('id');",
+              "pm.expect(json.name).to.eql('E2E Portfolio');",
+              "pm.collectionVariables.set('portfolio_id', String(json.id));"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "3. Get All Portfolios",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{portfolio_api_base_url}}/portfolios",
+          "host": [
+            "{{portfolio_api_base_url}}"
+          ],
+          "path": [
+            "portfolios"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('List status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.expect(json).to.be.an('array');",
+              "const id = pm.collectionVariables.get('portfolio_id');",
+              "pm.expect(json.some(p => String(p.id) === id)).to.eql(true);"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "4. Get Portfolio By Id",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
+          "host": [
+            "{{portfolio_api_base_url}}"
+          ],
+          "path": [
+            "portfolios",
+            "{{portfolio_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Get by id status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.expect(String(json.id)).to.eql(pm.collectionVariables.get('portfolio_id'));",
+              "pm.expect(json.name).to.eql('E2E Portfolio');"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "5. Update Portfolio",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"E2E Portfolio Updated\",\n  \"description\": \"Updated in E2E flow\"\n}"
+        },
+        "url": {
+          "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
+          "host": [
+            "{{portfolio_api_base_url}}"
+          ],
+          "path": [
+            "portfolios",
+            "{{portfolio_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Update status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.expect(json.name).to.eql('E2E Portfolio Updated');"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "6. Delete Portfolio",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
+          "host": [
+            "{{portfolio_api_base_url}}"
+          ],
+          "path": [
+            "portfolios",
+            "{{portfolio_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Delete status 204', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "7. Verify Deleted (404)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
+          "host": [
+            "{{portfolio_api_base_url}}"
+          ],
+          "path": [
+            "portfolios",
+            "{{portfolio_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Deleted portfolio returns 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "portfolio_base_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "portfolio_api_base_url",
+      "value": "http://localhost:8081/api"
+    },
+    {
+      "key": "keycloak_base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "realm",
+      "value": "fin-insight"
+    },
+    {
+      "key": "client_id",
+      "value": "fin-insight-client"
+    },
+    {
+      "key": "client_secret",
+      "value": "postman-secret"
+    },
+    {
+      "key": "username",
+      "value": "testuser"
+    },
+    {
+      "key": "password",
+      "value": "test123"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "portfolio_id",
+      "value": ""
+    }
+  ]
+}

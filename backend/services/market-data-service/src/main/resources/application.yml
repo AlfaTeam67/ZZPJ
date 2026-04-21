@@ -1,3 +1,6 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: market-data-service
@@ -42,6 +45,9 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    redis:
+      enabled: false
 
 logging:
   level:

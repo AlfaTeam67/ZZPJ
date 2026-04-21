@@ -1,28 +1,28 @@
 export type MoneyValue = string
 
-export interface Asset {
-  id: string
-  symbol: string
-  quantity: string
-  averagePrice: MoneyValue
-  currentPrice: MoneyValue
-}
-
 export interface Portfolio {
   id: string
-  ownerId: string
-  currency: string
-  totalValue: MoneyValue
-  assets: Asset[]
+  userId: string
+  name: string
+  description?: string | null
+  totals: Record<string, MoneyValue>
+  createdAt: string
 }
 
+export type AssetType = 'STOCK' | 'CRYPTO' | 'BOND'
 export type TransactionType = 'BUY' | 'SELL'
 
 export interface Transaction {
   id: string
   assetId: string
+  portfolioId: string
   type: TransactionType
   quantity: string
   price: MoneyValue
+  currency: string
+  fee?: MoneyValue | null
+  notes?: string | null
+  assetType?: AssetType
+  symbol?: string
   executedAt: string
 }

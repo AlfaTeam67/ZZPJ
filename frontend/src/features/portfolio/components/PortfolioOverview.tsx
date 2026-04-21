@@ -1,5 +1,3 @@
-import Decimal from 'decimal.js'
-
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePortfolio } from '@/features/portfolio/hooks/usePortfolio'
@@ -24,37 +22,43 @@ export function PortfolioOverview() {
     )
   }
 
-  const computedTotal = data.assets
-    .reduce(
-      (sum, asset) => sum.plus(new Decimal(asset.quantity).mul(asset.currentPrice)),
-      new Decimal(0)
-    )
-    .toString()
+  const hasTotals = Object.keys(data.totals).length > 0
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Portfolio overview</CardTitle>
-        <CardDescription>Snapshot based on current mock market values.</CardDescription>
+        <CardDescription>Multi-currency portfolio breakdown.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge>Assets: {data.assets.length}</Badge>
-          <Badge variant="secondary">Total: {formatMoney(computedTotal, data.currency)}</Badge>
+          <Badge variant="outline">Portfolio ID: {data.id}</Badge>
+          <Badge variant="outline">User ID: {data.userId}</Badge>
         </div>
-        <ul className="space-y-2">
-          {data.assets.map((asset) => (
-            <li
-              key={asset.id}
-              className="flex items-center justify-between rounded-lg border px-3 py-2"
-            >
-              <span className="font-medium">{asset.symbol}</span>
-              <span className="text-sm text-muted-foreground">
-                {asset.quantity} @ {formatMoney(asset.currentPrice, data.currency)}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-3 rounded-lg border p-4 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-lg font-semibold">{data.name}</p>
+              {data.description && (
+                <p className="text-sm text-muted-foreground">{data.description}</p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-medium text-muted-foreground">Balances</p>
+              <div className="space-y-1">
+                {hasTotals ? (
+                  Object.entries(data.totals).map(([currency, value]) => (
+                    <p key={currency} className="text-xl font-bold">
+                      {formatMoney(value, currency)}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-xl font-bold">0.00</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

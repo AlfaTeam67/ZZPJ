@@ -8,7 +8,7 @@ export function useAssets() {
   return useMemo(
     () => ({
       ...portfolioQuery,
-      data: portfolioQuery.data?.assets ?? [],
+      data: [],
     }),
     [portfolioQuery]
   )
