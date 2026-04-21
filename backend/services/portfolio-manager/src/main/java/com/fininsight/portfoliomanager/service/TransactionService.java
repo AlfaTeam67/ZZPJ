@@ -37,6 +37,11 @@ public class TransactionService {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(portfolioId, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
+        Instant executedAt = request.getExecutedAt() != null ? request.getExecutedAt() : Instant.now();
+        if (executedAt.isAfter(Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction execution time cannot be in the future");
+        }
+
         Asset asset = getOrCreateAsset(portfolio, request);
 
         updateAssetPosition(asset, request);
@@ -50,7 +55,7 @@ public class TransactionService {
         transaction.setPrice(request.getPrice());
         transaction.setCurrency(request.getCurrency());
         transaction.setFee(request.getFee());
-        transaction.setExecutedAt(request.getExecutedAt() != null ? request.getExecutedAt() : Instant.now());
+        transaction.setExecutedAt(executedAt);
         transaction.setNotes(request.getNotes());
 
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -59,8 +64,10 @@ public class TransactionService {
 
     private Asset getOrCreateAsset(Portfolio portfolio, TransactionRequest request) {
         if (request.getAssetId() != null) {
-            return assetRepository.findByPortfolioIdAndId(portfolio.getId(), request.getAssetId())
+            Asset asset = assetRepository.findByPortfolioIdAndId(portfolio.getId(), request.getAssetId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
+            validateAssetCurrency(asset, request.getCurrency());
+            return asset;
         }
 
         if (request.getType() != TransactionType.BUY) {
@@ -71,7 +78,7 @@ public class TransactionService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Symbol and Asset Type are required when Asset ID is not provided");
         }
 
-        return assetRepository.findByPortfolioIdAndSymbol(portfolio.getId(), request.getSymbol())
+        Asset asset = assetRepository.findByPortfolioIdAndSymbol(portfolio.getId(), request.getSymbol())
             .orElseGet(() -> {
                 Asset newAsset = new Asset();
                 newAsset.setPortfolio(portfolio);
@@ -82,6 +89,8 @@ public class TransactionService {
                 newAsset.setCurrency(request.getCurrency());
                 return newAsset;
             });
+        validateAssetCurrency(asset, request.getCurrency());
+        return asset;
     }
 
     private void updateAssetPosition(Asset asset, TransactionRequest request) {
@@ -129,6 +138,15 @@ public class TransactionService {
             .executedAt(transaction.getExecutedAt())
             .notes(transaction.getNotes())
             .build();
+    }
+
+    private void validateAssetCurrency(Asset asset, String transactionCurrency) {
+        if (!asset.getCurrency().equals(transactionCurrency)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Transaction currency must match asset currency"
+            );
+        }
     }
 
     private UUID parseUuid(String value, String message) {

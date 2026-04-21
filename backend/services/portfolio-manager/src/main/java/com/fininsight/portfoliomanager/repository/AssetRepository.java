@@ -22,19 +22,22 @@ public interface AssetRepository extends JpaRepository<Asset, UUID> {
         SELECT a.portfolio.id AS portfolioId, COALESCE(SUM(a.quantity * a.avgBuyPrice), 0) AS totalValue
         FROM DataAsset a
         WHERE a.portfolio.id IN :portfolioIds
-        GROUP BY a.portfolio.id
+        GROUP BY a.portfolio.id, a.currency
         """)
-    List<PortfolioTotalValueProjection> findTotalValuesByPortfolioIds(@Param("portfolioIds") Collection<UUID> portfolioIds);
+    List<PortfolioCurrencyTotalValueProjection> findTotalValuesByPortfolioIds(@Param("portfolioIds") Collection<UUID> portfolioIds);
 
     @Query("""
-        SELECT COALESCE(SUM(a.quantity * a.avgBuyPrice), 0)
+        SELECT a.portfolio.id AS portfolioId, COALESCE(SUM(a.quantity * a.avgBuyPrice), 0) AS totalValue
         FROM DataAsset a
         WHERE a.portfolio.id = :portfolioId
+        GROUP BY a.portfolio.id, a.currency
         """)
-    BigDecimal calculateTotalValueByPortfolioId(@Param("portfolioId") UUID portfolioId);
+    List<PortfolioCurrencyTotalValueProjection> findTotalValuesByPortfolioId(@Param("portfolioId") UUID portfolioId);
 
-    interface PortfolioTotalValueProjection {
+    interface PortfolioCurrencyTotalValueProjection {
         UUID getPortfolioId();
+
+        String getCurrency();
 
         BigDecimal getTotalValue();
     }

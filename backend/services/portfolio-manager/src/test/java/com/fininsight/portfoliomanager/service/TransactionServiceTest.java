@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,6 +119,79 @@ class TransactionServiceTest {
         assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Cannot sell more than owned quantity");
+    }
+
+    @Test
+    void shouldRejectTransactionWhenAssetCurrencyDoesNotMatchByAssetId() {
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        UUID assetId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+
+        Portfolio portfolio = portfolio(portfolioId, userId);
+        Asset asset = asset(assetId, portfolio, "2.00000000", "100.0000");
+        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
+
+        TransactionRequest request = TransactionRequest.builder()
+            .assetId(assetId)
+            .type(TransactionType.BUY)
+            .quantity(new BigDecimal("1.00000000"))
+            .price(new BigDecimal("120.0000"))
+            .currency("EUR")
+            .build();
+
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Transaction currency must match asset currency");
+    }
+
+    @Test
+    void shouldRejectTransactionWhenAssetCurrencyDoesNotMatchBySymbol() {
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        UUID assetId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+
+        Portfolio portfolio = portfolio(portfolioId, userId);
+        Asset asset = asset(assetId, portfolio, "2.00000000", "100.0000");
+        asset.setSymbol("AAPL");
+        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(assetRepository.findByPortfolioIdAndSymbol(portfolioId, "AAPL")).thenReturn(Optional.of(asset));
+
+        TransactionRequest request = TransactionRequest.builder()
+            .symbol("AAPL")
+            .assetType(com.fininsight.portfoliomanager.domain.enums.AssetType.STOCK)
+            .type(TransactionType.BUY)
+            .quantity(new BigDecimal("1.00000000"))
+            .price(new BigDecimal("120.0000"))
+            .currency("EUR")
+            .build();
+
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Transaction currency must match asset currency");
+    }
+
+    @Test
+    void shouldRejectFutureDatedTransaction() {
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        UUID assetId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+
+        Portfolio portfolio = portfolio(portfolioId, userId);
+        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+
+        TransactionRequest request = TransactionRequest.builder()
+            .assetId(assetId)
+            .type(TransactionType.BUY)
+            .quantity(new BigDecimal("1.00000000"))
+            .price(new BigDecimal("120.0000"))
+            .currency("USD")
+            .executedAt(Instant.now().plusSeconds(600))
+            .build();
+
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Transaction execution time cannot be in the future");
     }
 
     private static Portfolio portfolio(UUID portfolioId, UUID userId) {

@@ -8,6 +8,7 @@ import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,15 +35,15 @@ public class PortfolioService {
         if (portfolios.isEmpty()) {
             return List.of();
         }
-        Map<UUID, BigDecimal> totalsByPortfolioId = assetRepository.findTotalValuesByPortfolioIds(
+        Map<UUID, List<AssetRepository.PortfolioCurrencyTotalValueProjection>> totalsByPortfolioId = assetRepository.findTotalValuesByPortfolioIds(
             portfolios.stream().map(Portfolio::getId).toList()
-        ).stream().collect(Collectors.toMap(
-            AssetRepository.PortfolioTotalValueProjection::getPortfolioId,
-            AssetRepository.PortfolioTotalValueProjection::getTotalValue
+        ).stream().collect(Collectors.groupingBy(
+            AssetRepository.PortfolioCurrencyTotalValueProjection::getPortfolioId,
+            Collectors.toList()
         ));
 
         return portfolios.stream()
-            .map(portfolio -> mapToResponse(portfolio, totalsByPortfolioId.getOrDefault(portfolio.getId(), BigDecimal.ZERO)))
+            .map(portfolio -> mapToResponse(portfolio, resolveTotalValue(totalsByPortfolioId.get(portfolio.getId()))))
             .toList();
     }
 
@@ -51,18 +52,13 @@ public class PortfolioService {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
-        return mapToResponse(portfolio, assetRepository.calculateTotalValueByPortfolioId(portfolio.getId()));
+        return mapToResponse(portfolio, resolveTotalValue(assetRepository.findTotalValuesByPortfolioId(portfolio.getId())));
     }
 
     @Transactional
     public PortfolioResponse createPortfolio(PortfolioRequest request, String userId) {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
-        User user = userRepository.findById(userUuid)
-            .orElseGet(() -> {
-                User newUser = new User();
-                newUser.setId(userUuid);
-                return userRepository.save(newUser);
-            });
+        User user = findOrCreateUser(userUuid);
 
         Portfolio portfolio = new Portfolio();
         portfolio.setName(request.getName());
@@ -83,7 +79,7 @@ public class PortfolioService {
         portfolio.setDescription(request.getDescription());
 
         Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
-        return mapToResponse(updatedPortfolio, assetRepository.calculateTotalValueByPortfolioId(updatedPortfolio.getId()));
+        return mapToResponse(updatedPortfolio, resolveTotalValue(assetRepository.findTotalValuesByPortfolioId(updatedPortfolio.getId())));
     }
 
     @Transactional
@@ -103,6 +99,33 @@ public class PortfolioService {
             .totalValue(totalValue)
             .createdAt(portfolio.getCreatedAt())
             .build();
+    }
+
+    private BigDecimal resolveTotalValue(List<AssetRepository.PortfolioCurrencyTotalValueProjection> totalsByCurrency) {
+        if (totalsByCurrency == null || totalsByCurrency.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        if (totalsByCurrency.size() == 1) {
+            return totalsByCurrency.getFirst().getTotalValue();
+        }
+        return null;
+    }
+
+    private User findOrCreateUser(UUID userUuid) {
+        return userRepository.findById(userUuid)
+            .orElseGet(() -> {
+                User newUser = new User();
+                newUser.setId(userUuid);
+                try {
+                    return userRepository.saveAndFlush(newUser);
+                } catch (DataIntegrityViolationException exception) {
+                    return userRepository.findById(userUuid)
+                        .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "User provisioning conflict"
+                        ));
+                }
+            });
     }
 
     private UUID parseUuid(String value, String message) {

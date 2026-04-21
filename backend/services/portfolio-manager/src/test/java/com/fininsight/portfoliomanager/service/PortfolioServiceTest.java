@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -50,7 +51,7 @@ class PortfolioServiceTest {
         Portfolio portfolio = portfolio(portfolioId, "Growth", userId);
         when(portfolioRepository.findByUserId(userId)).thenReturn(List.of(portfolio));
         when(assetRepository.findTotalValuesByPortfolioIds(List.of(portfolioId)))
-            .thenReturn(List.of(projection(portfolioId, "1000.0000")));
+            .thenReturn(List.of(projection(portfolioId, "USD", "1000.0000")));
 
         List<PortfolioResponse> result = portfolioService.getAllPortfoliosForUser(userId.toString());
 
@@ -66,7 +67,7 @@ class PortfolioServiceTest {
         UUID portfolioId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
         Portfolio portfolio = portfolio(portfolioId, "Retirement", userId);
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
-        when(assetRepository.calculateTotalValueByPortfolioId(portfolioId)).thenReturn(BigDecimal.ZERO);
+        when(assetRepository.findTotalValuesByPortfolioId(portfolioId)).thenReturn(List.of());
 
         PortfolioResponse result = portfolioService.getPortfolioById(portfolioId, userId.toString());
 
@@ -106,7 +107,7 @@ class PortfolioServiceTest {
         assertThat(result.getName()).isEqualTo("Tech");
         assertThat(result.getDescription()).isEqualTo("Long-term");
         assertThat(result.getTotalValue()).isEqualByComparingTo(BigDecimal.ZERO);
-        verify(assetRepository, never()).calculateTotalValueByPortfolioId(saved.getId());
+        verify(assetRepository, never()).findTotalValuesByPortfolioId(saved.getId());
     }
 
     @Test
@@ -120,16 +121,41 @@ class PortfolioServiceTest {
         saved.setDescription(request.getDescription());
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(portfolioRepository.save(any(Portfolio.class))).thenReturn(saved);
 
         PortfolioResponse result = portfolioService.createPortfolio(request, userId.toString());
 
         assertThat(result.getId()).isEqualTo(saved.getId());
         assertThat(result.getUserId()).isEqualTo(userId);
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).saveAndFlush(any(User.class));
         assertThat(result.getTotalValue()).isEqualByComparingTo(BigDecimal.ZERO);
-        verify(assetRepository, never()).calculateTotalValueByPortfolioId(saved.getId());
+        verify(assetRepository, never()).findTotalValuesByPortfolioId(saved.getId());
+    }
+
+    @Test
+    void shouldRecoverFromUserProvisioningRaceCondition() {
+        UUID userId = UUID.fromString("58585858-5858-5858-5858-585858585858");
+        User persistedUser = new User();
+        persistedUser.setId(userId);
+        PortfolioRequest request = PortfolioRequest.builder()
+            .name("Race-safe Portfolio")
+            .description("Created after concurrent user insert")
+            .build();
+        Portfolio saved = portfolio(UUID.fromString("68686868-6868-6868-6868-686868686868"), request.getName(), userId);
+        saved.setDescription(request.getDescription());
+
+        when(userRepository.findById(userId))
+            .thenReturn(Optional.empty())
+            .thenReturn(Optional.of(persistedUser));
+        when(userRepository.saveAndFlush(any(User.class))).thenThrow(new DataIntegrityViolationException("duplicate key"));
+        when(portfolioRepository.save(any(Portfolio.class))).thenReturn(saved);
+
+        PortfolioResponse result = portfolioService.createPortfolio(request, userId.toString());
+
+        assertThat(result.getId()).isEqualTo(saved.getId());
+        assertThat(result.getUserId()).isEqualTo(userId);
+        verify(userRepository).saveAndFlush(any(User.class));
     }
 
     @Test
@@ -141,7 +167,7 @@ class PortfolioServiceTest {
         updated.setDescription("Updated");
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(existing));
         when(portfolioRepository.save(existing)).thenReturn(updated);
-        when(assetRepository.calculateTotalValueByPortfolioId(portfolioId)).thenReturn(BigDecimal.ZERO);
+        when(assetRepository.findTotalValuesByPortfolioId(portfolioId)).thenReturn(List.of());
 
         PortfolioRequest request = PortfolioRequest.builder()
             .name("New")
@@ -151,6 +177,39 @@ class PortfolioServiceTest {
 
         assertThat(result.getName()).isEqualTo("New");
         assertThat(result.getDescription()).isEqualTo("Updated");
+    }
+
+    @Test
+    void shouldReturnNullTotalValueForMultiCurrencyPortfolioList() {
+        UUID userId = UUID.fromString("98989898-9898-9898-9898-989898989898");
+        UUID portfolioId = UUID.fromString("10101010-1010-1010-1010-101010101010");
+        Portfolio portfolio = portfolio(portfolioId, "Mixed", userId);
+        when(portfolioRepository.findByUserId(userId)).thenReturn(List.of(portfolio));
+        when(assetRepository.findTotalValuesByPortfolioIds(List.of(portfolioId))).thenReturn(List.of(
+            projection(portfolioId, "USD", "100.0000"),
+            projection(portfolioId, "EUR", "200.0000")
+        ));
+
+        List<PortfolioResponse> result = portfolioService.getAllPortfoliosForUser(userId.toString());
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getTotalValue()).isNull();
+    }
+
+    @Test
+    void shouldReturnNullTotalValueForMultiCurrencyPortfolioById() {
+        UUID userId = UUID.fromString("20202020-2020-2020-2020-202020202020");
+        UUID portfolioId = UUID.fromString("30303030-3030-3030-3030-303030303030");
+        Portfolio portfolio = portfolio(portfolioId, "Mixed", userId);
+        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(assetRepository.findTotalValuesByPortfolioId(portfolioId)).thenReturn(List.of(
+            projection(portfolioId, "USD", "100.0000"),
+            projection(portfolioId, "EUR", "200.0000")
+        ));
+
+        PortfolioResponse result = portfolioService.getPortfolioById(portfolioId, userId.toString());
+
+        assertThat(result.getTotalValue()).isNull();
     }
 
     @Test
@@ -191,11 +250,16 @@ class PortfolioServiceTest {
         return portfolio;
     }
 
-    private static AssetRepository.PortfolioTotalValueProjection projection(UUID portfolioId, String totalValue) {
-        return new AssetRepository.PortfolioTotalValueProjection() {
+    private static AssetRepository.PortfolioCurrencyTotalValueProjection projection(UUID portfolioId, String currency, String totalValue) {
+        return new AssetRepository.PortfolioCurrencyTotalValueProjection() {
             @Override
             public UUID getPortfolioId() {
                 return portfolioId;
+            }
+
+            @Override
+            public String getCurrency() {
+                return currency;
             }
 
             @Override
