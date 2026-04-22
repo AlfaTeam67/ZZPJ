@@ -39,8 +39,9 @@ public class TransactionService {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(portfolioId, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
-        Instant executedAt = request.executedAt() != null ? request.executedAt() : Instant.now();
-        if (executedAt.isAfter(Instant.now())) {
+        Instant now = Instant.now();
+        Instant executedAt = request.executedAt() != null ? request.executedAt() : now;
+        if (executedAt.isAfter(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction execution time cannot be in the future");
         }
 

@@ -60,7 +60,8 @@ class PortfolioServiceTest {
         when(portfolioRepository.findByUserId(userId)).thenReturn(List.of(portfolio));
         when(assetRepository.findTotalValuesByPortfolioIds(List.of(portfolioId)))
             .thenReturn(List.of(projection(portfolioId, "USD", "1000.0000")));
-        when(portfolioMapper.toResponse(portfolio)).thenReturn(response);
+        Map<String, BigDecimal> expectedTotals = Map.of("USD", new BigDecimal("1000.0000"));
+        when(portfolioMapper.toResponse(portfolio, expectedTotals)).thenReturn(new PortfolioResponse(portfolioId, userId, "Growth", null, List.of(), expectedTotals, Instant.now()));
 
         List<PortfolioResponse> result = portfolioService.getAllPortfoliosForUser(userId.toString());
 
@@ -79,7 +80,7 @@ class PortfolioServiceTest {
 
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findTotalValuesByPortfolioId(portfolioId)).thenReturn(List.of());
-        when(portfolioMapper.toResponse(portfolio)).thenReturn(response);
+        when(portfolioMapper.toResponse(portfolio, Map.of())).thenReturn(response);
 
         PortfolioResponse result = portfolioService.getPortfolioById(portfolioId, userId.toString());
 
@@ -181,7 +182,7 @@ class PortfolioServiceTest {
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(existing));
         when(portfolioRepository.save(existing)).thenReturn(updated);
         when(assetRepository.findTotalValuesByPortfolioId(portfolioId)).thenReturn(List.of());
-        when(portfolioMapper.toResponse(updated)).thenReturn(response);
+        when(portfolioMapper.toResponse(updated, Map.of())).thenReturn(response);
 
         UpdatePortfolioRequest request = new UpdatePortfolioRequest("New", "Updated");
         PortfolioResponse result = portfolioService.updatePortfolio(portfolioId, request, userId.toString());
@@ -196,14 +197,18 @@ class PortfolioServiceTest {
         UUID userId = UUID.fromString("98989898-9898-9898-9898-989898989898");
         UUID portfolioId = UUID.fromString("10101010-1010-1010-1010-101010101010");
         Portfolio portfolio = portfolio(portfolioId, "Mixed", userId);
-        PortfolioResponse response = new PortfolioResponse(portfolioId, userId, "Mixed", null, List.of(), Map.of(), Instant.now());
+        Map<String, BigDecimal> expectedTotals = Map.of(
+            "USD", new BigDecimal("100.0000"),
+            "EUR", new BigDecimal("200.0000")
+        );
+        PortfolioResponse response = new PortfolioResponse(portfolioId, userId, "Mixed", null, List.of(), expectedTotals, Instant.now());
 
         when(portfolioRepository.findByUserId(userId)).thenReturn(List.of(portfolio));
         when(assetRepository.findTotalValuesByPortfolioIds(List.of(portfolioId))).thenReturn(List.of(
             projection(portfolioId, "USD", "100.0000"),
             projection(portfolioId, "EUR", "200.0000")
         ));
-        when(portfolioMapper.toResponse(portfolio)).thenReturn(response);
+        when(portfolioMapper.toResponse(portfolio, expectedTotals)).thenReturn(response);
 
         List<PortfolioResponse> result = portfolioService.getAllPortfoliosForUser(userId.toString());
 
@@ -218,14 +223,18 @@ class PortfolioServiceTest {
         UUID userId = UUID.fromString("20202020-2020-2020-2020-202020202020");
         UUID portfolioId = UUID.fromString("30303030-3030-3030-3030-303030303030");
         Portfolio portfolio = portfolio(portfolioId, "Mixed", userId);
-        PortfolioResponse response = new PortfolioResponse(portfolioId, userId, "Mixed", null, List.of(), Map.of(), Instant.now());
+        Map<String, BigDecimal> expectedTotals = Map.of(
+            "USD", new BigDecimal("100.0000"),
+            "EUR", new BigDecimal("200.0000")
+        );
+        PortfolioResponse response = new PortfolioResponse(portfolioId, userId, "Mixed", null, List.of(), expectedTotals, Instant.now());
 
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findTotalValuesByPortfolioId(portfolioId)).thenReturn(List.of(
             projection(portfolioId, "USD", "100.0000"),
             projection(portfolioId, "EUR", "200.0000")
         ));
-        when(portfolioMapper.toResponse(portfolio)).thenReturn(response);
+        when(portfolioMapper.toResponse(portfolio, expectedTotals)).thenReturn(response);
 
         PortfolioResponse result = portfolioService.getPortfolioById(portfolioId, userId.toString());
 

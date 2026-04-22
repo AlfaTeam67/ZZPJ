@@ -47,17 +47,8 @@ public class PortfolioService {
 
         return portfolios.stream()
             .map(portfolio -> {
-                PortfolioResponse response = portfolioMapper.toResponse(portfolio);
                 Map<String, BigDecimal> totals = resolveTotals(totalsByPortfolioId.get(portfolio.getId()));
-                return new PortfolioResponse(
-                    response.id(),
-                    response.userId(),
-                    response.name(),
-                    response.description(),
-                    response.assets(),
-                    totals,
-                    response.createdAt()
-                );
+                return portfolioMapper.toResponse(portfolio, totals);
             })
             .toList();
     }
@@ -68,17 +59,8 @@ public class PortfolioService {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
         
-        PortfolioResponse response = portfolioMapper.toResponse(portfolio);
         Map<String, BigDecimal> totals = resolveTotals(assetRepository.findTotalValuesByPortfolioId(portfolio.getId()));
-        return new PortfolioResponse(
-            response.id(),
-            response.userId(),
-            response.name(),
-            response.description(),
-            response.assets(),
-            totals,
-            response.createdAt()
-        );
+        return portfolioMapper.toResponse(portfolio, totals);
     }
 
     @Transactional
@@ -105,17 +87,8 @@ public class PortfolioService {
         portfolio.setDescription(request.description());
 
         Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
-        PortfolioResponse response = portfolioMapper.toResponse(updatedPortfolio);
         Map<String, BigDecimal> totals = resolveTotals(assetRepository.findTotalValuesByPortfolioId(updatedPortfolio.getId()));
-        return new PortfolioResponse(
-            response.id(),
-            response.userId(),
-            response.name(),
-            response.description(),
-            response.assets(),
-            totals,
-            response.createdAt()
-        );
+        return portfolioMapper.toResponse(updatedPortfolio, totals);
     }
 
     @Transactional
