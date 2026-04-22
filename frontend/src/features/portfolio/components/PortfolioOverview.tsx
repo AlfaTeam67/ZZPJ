@@ -47,7 +47,7 @@ export function PortfolioOverview() {
                 {data.totalValue ? (
                   <p className="text-xl font-bold">{formatMoney(data.totalValue, data.currency)}</p>
                 ) : (
-                  <p className="text-xl font-bold">0.00</p>
+                  <p className="text-xl font-bold">{formatMoney('0', data.currency)}</p>
                 )}
               </div>
             </div>
