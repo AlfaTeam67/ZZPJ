@@ -2,8 +2,10 @@ package com.fininsight.portfoliomanager.service;
 
 import com.fininsight.portfoliomanager.domain.Portfolio;
 import com.fininsight.portfoliomanager.domain.User;
-import com.fininsight.portfoliomanager.dto.PortfolioRequest;
-import com.fininsight.portfoliomanager.dto.PortfolioResponse;
+import com.fininsight.portfoliomanager.dto.portfolio.CreatePortfolioRequest;
+import com.fininsight.portfoliomanager.dto.portfolio.PortfolioResponse;
+import com.fininsight.portfoliomanager.dto.portfolio.UpdatePortfolioRequest;
+import com.fininsight.portfoliomanager.mapper.PortfolioMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.UserRepository;
@@ -27,6 +29,7 @@ public class PortfolioService {
     private final PortfolioDataRepository portfolioRepository;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
+    private final PortfolioMapper portfolioMapper;
 
     @Transactional(readOnly = true)
     public List<PortfolioResponse> getAllPortfoliosForUser(String userId) {
@@ -43,7 +46,19 @@ public class PortfolioService {
         ));
 
         return portfolios.stream()
-            .map(portfolio -> mapToResponse(portfolio, resolveTotals(totalsByPortfolioId.get(portfolio.getId()))))
+            .map(portfolio -> {
+                PortfolioResponse response = portfolioMapper.toResponse(portfolio);
+                Map<String, BigDecimal> totals = resolveTotals(totalsByPortfolioId.get(portfolio.getId()));
+                return new PortfolioResponse(
+                    response.id(),
+                    response.userId(),
+                    response.name(),
+                    response.description(),
+                    response.assets(),
+                    totals,
+                    response.createdAt()
+                );
+            })
             .toList();
     }
 
@@ -52,34 +67,55 @@ public class PortfolioService {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
-        return mapToResponse(portfolio, resolveTotals(assetRepository.findTotalValuesByPortfolioId(portfolio.getId())));
+        
+        PortfolioResponse response = portfolioMapper.toResponse(portfolio);
+        Map<String, BigDecimal> totals = resolveTotals(assetRepository.findTotalValuesByPortfolioId(portfolio.getId()));
+        return new PortfolioResponse(
+            response.id(),
+            response.userId(),
+            response.name(),
+            response.description(),
+            response.assets(),
+            totals,
+            response.createdAt()
+        );
     }
 
     @Transactional
-    public PortfolioResponse createPortfolio(PortfolioRequest request, String userId) {
+    public PortfolioResponse createPortfolio(CreatePortfolioRequest request, String userId) {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
         User user = findOrCreateUser(userUuid);
 
         Portfolio portfolio = new Portfolio();
-        portfolio.setName(request.getName());
-        portfolio.setDescription(request.getDescription());
+        portfolio.setName(request.name());
+        portfolio.setDescription(request.description());
         portfolio.setUser(user);
 
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
-        return mapToResponse(savedPortfolio, Map.of());
+        return portfolioMapper.toResponse(savedPortfolio);
     }
 
     @Transactional
-    public PortfolioResponse updatePortfolio(UUID id, PortfolioRequest request, String userId) {
+    public PortfolioResponse updatePortfolio(UUID id, UpdatePortfolioRequest request, String userId) {
         UUID userUuid = parseUuid(userId, "Invalid user ID");
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
-        portfolio.setName(request.getName());
-        portfolio.setDescription(request.getDescription());
+        portfolio.setName(request.name());
+        portfolio.setDescription(request.description());
 
         Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
-        return mapToResponse(updatedPortfolio, resolveTotals(assetRepository.findTotalValuesByPortfolioId(updatedPortfolio.getId())));
+        PortfolioResponse response = portfolioMapper.toResponse(updatedPortfolio);
+        Map<String, BigDecimal> totals = resolveTotals(assetRepository.findTotalValuesByPortfolioId(updatedPortfolio.getId()));
+        return new PortfolioResponse(
+            response.id(),
+            response.userId(),
+            response.name(),
+            response.description(),
+            response.assets(),
+            totals,
+            response.createdAt()
+        );
     }
 
     @Transactional
@@ -88,17 +124,6 @@ public class PortfolioService {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
         portfolioRepository.delete(portfolio);
-    }
-
-    private PortfolioResponse mapToResponse(Portfolio portfolio, Map<String, BigDecimal> totals) {
-        return PortfolioResponse.builder()
-            .id(portfolio.getId())
-            .name(portfolio.getName())
-            .description(portfolio.getDescription())
-            .userId(portfolio.getUser().getId())
-            .totals(totals)
-            .createdAt(portfolio.getCreatedAt())
-            .build();
     }
 
     private Map<String, BigDecimal> resolveTotals(List<AssetRepository.PortfolioCurrencyTotalValueProjection> totalsByCurrency) {

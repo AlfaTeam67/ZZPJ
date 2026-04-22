@@ -1,7 +1,8 @@
 package com.fininsight.portfoliomanager.controller;
 
-import com.fininsight.portfoliomanager.dto.PortfolioRequest;
-import com.fininsight.portfoliomanager.dto.PortfolioResponse;
+import com.fininsight.portfoliomanager.dto.portfolio.CreatePortfolioRequest;
+import com.fininsight.portfoliomanager.dto.portfolio.PortfolioResponse;
+import com.fininsight.portfoliomanager.dto.portfolio.UpdatePortfolioRequest;
 import com.fininsight.portfoliomanager.service.PortfolioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -57,7 +58,7 @@ public class PortfolioController {
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Create a new portfolio")
     public ResponseEntity<PortfolioResponse> createPortfolio(
-        @Valid @RequestBody PortfolioRequest request,
+        @Valid @RequestBody CreatePortfolioRequest request,
         @AuthenticationPrincipal Jwt jwt
     ) {
         String userId = jwt.getSubject();
@@ -69,7 +70,7 @@ public class PortfolioController {
     @Operation(summary = "Update an existing portfolio")
     public ResponseEntity<PortfolioResponse> updatePortfolio(
         @PathVariable UUID id,
-        @Valid @RequestBody PortfolioRequest request,
+        @Valid @RequestBody UpdatePortfolioRequest request,
         @AuthenticationPrincipal Jwt jwt
     ) {
         String userId = jwt.getSubject();

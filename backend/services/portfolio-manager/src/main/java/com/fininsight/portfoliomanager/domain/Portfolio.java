@@ -58,4 +58,7 @@ public class Portfolio {
     @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @jakarta.persistence.OneToMany(mappedBy = "portfolio", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Asset> assets = new java.util.ArrayList<>();
 }
