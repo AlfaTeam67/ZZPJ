@@ -45,9 +45,7 @@ export function PortfolioOverview() {
               <p className="text-sm font-medium text-muted-foreground">Balances</p>
               <div className="space-y-1">
                 {data.totalValue ? (
-                  <p className="text-xl font-bold">
-                    {formatMoney(data.totalValue, 'USD')}
-                  </p>
+                  <p className="text-xl font-bold">{formatMoney(data.totalValue, data.currency)}</p>
                 ) : (
                   <p className="text-xl font-bold">0.00</p>
                 )}
