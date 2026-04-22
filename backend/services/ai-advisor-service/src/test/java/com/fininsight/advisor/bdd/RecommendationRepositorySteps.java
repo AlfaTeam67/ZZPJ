@@ -70,7 +70,7 @@ public class RecommendationRepositorySteps {
 
     @Then("I should be able to find it by user ID")
     public void iShouldBeAbleToFindItByUserID() {
-        Page<Recommendation> results = recommendationRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 10));
+        Page<Recommendation> results = recommendationRepository.findByUserId(userId, PageRequest.of(0, 10, org.springframework.data.domain.Sort.by("createdAt").descending()));
         assertThat(results.getContent()).isNotEmpty();
         assertThat(results.getContent().get(0).getId()).isEqualTo(savedRecommendation.getId());
     }

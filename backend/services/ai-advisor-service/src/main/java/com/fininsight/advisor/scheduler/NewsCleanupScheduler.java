@@ -16,7 +16,7 @@ public class NewsCleanupScheduler {
 
     private final NewsCacheRepository newsCacheRepository;
 
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "${app.scheduler.news-cleanup.cron:0 0 3 * * *}")
     @Transactional
     public void deleteExpiredNews() {
         int deleted = newsCacheRepository.deleteExpired(Instant.now());

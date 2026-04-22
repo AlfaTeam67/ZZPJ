@@ -18,7 +18,6 @@ public interface NewsCacheRepository extends JpaRepository<NewsCache, UUID> {
     List<NewsCache> findByExpiresAtAfterOrderByFetchedAtDesc(Instant now);
 
     @Modifying
-    @Transactional
     @Query("DELETE FROM NewsCache n WHERE n.expiresAt < :now")
     int deleteExpired(@Param("now") Instant now);
 }

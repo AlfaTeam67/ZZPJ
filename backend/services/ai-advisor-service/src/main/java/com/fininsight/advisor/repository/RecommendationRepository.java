@@ -11,7 +11,7 @@ import java.util.UUID;
 @Repository
 public interface RecommendationRepository extends JpaRepository<Recommendation, UUID> {
 
-    Page<Recommendation> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
+    Page<Recommendation> findByUserId(UUID userId, Pageable pageable);
 
-    Page<Recommendation> findByPortfolioIdOrderByCreatedAtDesc(UUID portfolioId, Pageable pageable);
+    Page<Recommendation> findByPortfolioId(UUID portfolioId, Pageable pageable);
 }
