@@ -10,8 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {AssetMapper.class})
 public interface PortfolioMapper {
     @Mapping(target = "userId", source = "user.id")
-    @Mapping(target = "totals", ignore = true) // Set manually in service if needed
-    PortfolioResponse toResponse(Portfolio portfolio);
+    PortfolioResponse toResponse(Portfolio portfolio, java.util.Map<String, java.math.BigDecimal> totals);
 
     List<PortfolioSummaryResponse> toSummaryList(List<Portfolio> portfolios);
 }
