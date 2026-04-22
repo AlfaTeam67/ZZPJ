@@ -1,18 +1,17 @@
 export type AssetType = 'STOCK' | 'CRYPTO' | 'BOND'
 
 export interface Asset {
-  id: string;
-  portfolioId: string;
-  type: AssetType;
-  symbol: string;
-  quantity: string;      // string — BigDecimal from backend, NEVER a number
-  avgBuyPrice: string;   // string — BigDecimal
-  currency: string;
-  addedAt: string;
-  updatedAt?: string;
-  currentValue?: string; // optional, calculated by the backend
+  id: string
+  portfolioId: string
+  type: AssetType
+  symbol: string
+  quantity: string // string — BigDecimal from backend, NEVER a number
+  avgBuyPrice: string // string — BigDecimal
+  currency: string
+  addedAt: string
+  updatedAt?: string
+  currentValue?: string // optional, calculated by the backend
 }
-
 
 export function isAsset(obj: unknown): obj is Asset {
   if (obj === null || typeof obj !== 'object') return false
