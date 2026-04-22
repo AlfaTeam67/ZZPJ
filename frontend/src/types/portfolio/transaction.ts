@@ -8,9 +8,9 @@ export interface Transaction {
   quantity: string // string — BigDecimal
   price: string // string — BigDecimal
   currency: string
-  fee?: string
+  fee?: string | null
   executedAt: string
-  notes?: string
+  notes?: string | null
 }
 
 export function isTransaction(obj: unknown): obj is Transaction {

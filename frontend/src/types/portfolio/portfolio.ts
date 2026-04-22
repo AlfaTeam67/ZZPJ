@@ -4,7 +4,7 @@ export interface Portfolio {
   id: string
   userId: string
   name: string
-  description?: string
+  description?: string | null
   currency: string
   createdAt: string
   updatedAt?: string
