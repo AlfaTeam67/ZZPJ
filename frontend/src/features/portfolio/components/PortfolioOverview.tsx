@@ -22,8 +22,6 @@ export function PortfolioOverview() {
     )
   }
 
-  const hasTotals = Object.keys(data.totals).length > 0
-
   return (
     <Card>
       <CardHeader>
@@ -46,14 +44,13 @@ export function PortfolioOverview() {
             <div className="text-right">
               <p className="text-sm font-medium text-muted-foreground">Balances</p>
               <div className="space-y-1">
-                {hasTotals ? (
-                  Object.entries(data.totals).map(([currency, value]) => (
-                    <p key={currency} className="text-xl font-bold">
-                      {formatMoney(value, currency)}
-                    </p>
-                  ))
-                ) : (
-                  <p className="text-xl font-bold">0.00</p>
+                {Object.entries(data.totals).map(([currency, value]) => (
+                  <p key={currency} className="text-xl font-bold">
+                    {formatMoney(value, currency)}
+                  </p>
+                ))}
+                {Object.keys(data.totals).length === 0 && (
+                  <p className="text-xl font-bold">{formatMoney('0', 'USD')}</p>
                 )}
               </div>
             </div>
