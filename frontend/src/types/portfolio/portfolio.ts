@@ -5,10 +5,10 @@ export interface Portfolio {
   userId: string
   name: string
   description?: string | null
-  totals: Record<string, string>
   createdAt: string
   updatedAt?: string
   assets?: Asset[]
+  totals?: Record<string, string> // Map of currency to total value
 }
 
 export function isPortfolio(obj: unknown): obj is Portfolio {
@@ -19,8 +19,6 @@ export function isPortfolio(obj: unknown): obj is Portfolio {
     typeof candidate.id === 'string' &&
     typeof candidate.userId === 'string' &&
     typeof candidate.name === 'string' &&
-    candidate.totals !== null &&
-    typeof candidate.totals === 'object' &&
     typeof candidate.createdAt === 'string'
   )
 }

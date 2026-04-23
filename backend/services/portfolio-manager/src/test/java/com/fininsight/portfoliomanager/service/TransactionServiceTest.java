@@ -5,7 +5,9 @@ import com.fininsight.portfoliomanager.domain.Portfolio;
 import com.fininsight.portfoliomanager.domain.Transaction;
 import com.fininsight.portfoliomanager.domain.User;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
-import com.fininsight.portfoliomanager.dto.TransactionRequest;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
+import com.fininsight.portfoliomanager.mapper.TransactionMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.TransactionRepository;
@@ -36,6 +38,8 @@ class TransactionServiceTest {
     private AssetRepository assetRepository;
     @Mock
     private TransactionRepository transactionRepository;
+    @Mock
+    private TransactionMapper transactionMapper;
     @InjectMocks
     private TransactionService transactionService;
 
@@ -55,13 +59,7 @@ class TransactionServiceTest {
             return tx;
         });
 
-        TransactionRequest request = TransactionRequest.builder()
-            .assetId(assetId)
-            .type(TransactionType.BUY)
-            .quantity(new BigDecimal("5.00000000"))
-            .price(new BigDecimal("200.0000"))
-            .currency("USD")
-            .build();
+        TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("5.00000000"), new BigDecimal("200.0000"), "USD", null, null, null, null, null);
 
         transactionService.createTransaction(portfolioId, userId.toString(), request);
 
@@ -82,14 +80,7 @@ class TransactionServiceTest {
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        TransactionRequest request = TransactionRequest.builder()
-            .assetId(assetId)
-            .type(TransactionType.BUY)
-            .quantity(new BigDecimal("5.00000000"))
-            .price(new BigDecimal("200.0000"))
-            .fee(new BigDecimal("15.0000"))
-            .currency("USD")
-            .build();
+        TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("5.00000000"), new BigDecimal("200.0000"), "USD", new BigDecimal("15.0000"), null, null, null, null);
 
         transactionService.createTransaction(portfolioId, userId.toString(), request);
 
@@ -108,13 +99,7 @@ class TransactionServiceTest {
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
 
-        TransactionRequest request = TransactionRequest.builder()
-            .assetId(assetId)
-            .type(TransactionType.SELL)
-            .quantity(new BigDecimal("3.00000000"))
-            .price(new BigDecimal("120.0000"))
-            .currency("USD")
-            .build();
+        TransactionRequest request = new TransactionRequest(assetId, TransactionType.SELL, new BigDecimal("3.00000000"), new BigDecimal("120.0000"), "USD", null, null, null, null, null);
 
         assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
             .isInstanceOf(ResponseStatusException.class)
@@ -132,13 +117,7 @@ class TransactionServiceTest {
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
 
-        TransactionRequest request = TransactionRequest.builder()
-            .assetId(assetId)
-            .type(TransactionType.BUY)
-            .quantity(new BigDecimal("1.00000000"))
-            .price(new BigDecimal("120.0000"))
-            .currency("EUR")
-            .build();
+        TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("1.00000000"), new BigDecimal("120.0000"), "EUR", null, null, null, null, null);
 
         assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
             .isInstanceOf(ResponseStatusException.class)
@@ -157,14 +136,7 @@ class TransactionServiceTest {
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndSymbol(portfolioId, "AAPL")).thenReturn(Optional.of(asset));
 
-        TransactionRequest request = TransactionRequest.builder()
-            .symbol("AAPL")
-            .assetType(com.fininsight.portfoliomanager.domain.enums.AssetType.STOCK)
-            .type(TransactionType.BUY)
-            .quantity(new BigDecimal("1.00000000"))
-            .price(new BigDecimal("120.0000"))
-            .currency("EUR")
-            .build();
+        TransactionRequest request = new TransactionRequest(null, TransactionType.BUY, new BigDecimal("1.00000000"), new BigDecimal("120.0000"), "EUR", null, null, null, "AAPL", com.fininsight.portfoliomanager.domain.enums.AssetType.STOCK);
 
         assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
             .isInstanceOf(ResponseStatusException.class)
@@ -180,14 +152,7 @@ class TransactionServiceTest {
         Portfolio portfolio = portfolio(portfolioId, userId);
         when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
 
-        TransactionRequest request = TransactionRequest.builder()
-            .assetId(assetId)
-            .type(TransactionType.BUY)
-            .quantity(new BigDecimal("1.00000000"))
-            .price(new BigDecimal("120.0000"))
-            .currency("USD")
-            .executedAt(Instant.now().plusSeconds(600))
-            .build();
+        TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("1.00000000"), new BigDecimal("120.0000"), "USD", null, Instant.now().plusSeconds(600), null, null, null);
 
         assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
             .isInstanceOf(ResponseStatusException.class)

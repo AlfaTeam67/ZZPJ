@@ -1,7 +1,7 @@
 package com.fininsight.portfoliomanager.controller;
 
-import com.fininsight.portfoliomanager.dto.TransactionRequest;
-import com.fininsight.portfoliomanager.dto.TransactionResponse;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
 import com.fininsight.portfoliomanager.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

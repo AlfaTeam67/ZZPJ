@@ -5,8 +5,9 @@ import com.fininsight.portfoliomanager.domain.Portfolio;
 import com.fininsight.portfoliomanager.domain.Transaction;
 import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
-import com.fininsight.portfoliomanager.dto.TransactionRequest;
-import com.fininsight.portfoliomanager.dto.TransactionResponse;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
+import com.fininsight.portfoliomanager.mapper.TransactionMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.TransactionRepository;
@@ -30,6 +31,7 @@ public class TransactionService {
     private final PortfolioDataRepository portfolioRepository;
     private final AssetRepository assetRepository;
     private final TransactionRepository transactionRepository;
+    private final TransactionMapper transactionMapper;
 
     @Transactional
     public TransactionResponse createTransaction(UUID portfolioId, String userId, TransactionRequest request) {
@@ -37,8 +39,9 @@ public class TransactionService {
         Portfolio portfolio = portfolioRepository.findByIdAndUserId(portfolioId, userUuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
-        Instant executedAt = request.getExecutedAt() != null ? request.getExecutedAt() : Instant.now();
-        if (executedAt.isAfter(Instant.now())) {
+        Instant now = Instant.now();
+        Instant executedAt = request.executedAt() != null ? request.executedAt() : now;
+        if (executedAt.isAfter(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction execution time cannot be in the future");
         }
 
@@ -50,60 +53,60 @@ public class TransactionService {
         Transaction transaction = new Transaction();
         transaction.setAsset(asset);
         transaction.setPortfolio(portfolio);
-        transaction.setType(request.getType());
-        transaction.setQuantity(request.getQuantity());
-        transaction.setPrice(request.getPrice());
-        transaction.setCurrency(request.getCurrency());
-        transaction.setFee(request.getFee());
+        transaction.setType(request.type());
+        transaction.setQuantity(request.quantity());
+        transaction.setPrice(request.price());
+        transaction.setCurrency(request.currency());
+        transaction.setFee(request.fee());
         transaction.setExecutedAt(executedAt);
-        transaction.setNotes(request.getNotes());
+        transaction.setNotes(request.notes());
 
         Transaction savedTransaction = transactionRepository.save(transaction);
-        return mapToResponse(savedTransaction);
+        return transactionMapper.toResponse(savedTransaction);
     }
 
     private Asset getOrCreateAsset(Portfolio portfolio, TransactionRequest request) {
-        if (request.getAssetId() != null) {
-            Asset asset = assetRepository.findByPortfolioIdAndId(portfolio.getId(), request.getAssetId())
+        if (request.assetId() != null) {
+            Asset asset = assetRepository.findByPortfolioIdAndId(portfolio.getId(), request.assetId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
-            validateAssetCurrency(asset, request.getCurrency());
+            validateAssetCurrency(asset, request.currency());
             return asset;
         }
 
-        if (request.getType() != TransactionType.BUY) {
+        if (request.type() != TransactionType.BUY) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Asset ID is required for SELL transactions");
         }
 
-        if (request.getSymbol() == null || request.getAssetType() == null) {
+        if (request.symbol() == null || request.assetType() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Symbol and Asset Type are required when Asset ID is not provided");
         }
 
-        Asset asset = assetRepository.findByPortfolioIdAndSymbol(portfolio.getId(), request.getSymbol())
+        Asset asset = assetRepository.findByPortfolioIdAndSymbol(portfolio.getId(), request.symbol())
             .orElseGet(() -> {
                 Asset newAsset = new Asset();
                 newAsset.setPortfolio(portfolio);
-                newAsset.setSymbol(request.getSymbol());
-                newAsset.setType(request.getAssetType());
+                newAsset.setSymbol(request.symbol());
+                newAsset.setType(request.assetType());
                 newAsset.setQuantity(BigDecimal.ZERO);
                 newAsset.setAvgBuyPrice(BigDecimal.ZERO);
-                newAsset.setCurrency(request.getCurrency());
+                newAsset.setCurrency(request.currency());
                 return newAsset;
             });
-        validateAssetCurrency(asset, request.getCurrency());
+        validateAssetCurrency(asset, request.currency());
         return asset;
     }
 
     private void updateAssetPosition(Asset asset, TransactionRequest request) {
         BigDecimal currentQuantity = asset.getQuantity();
-        BigDecimal requestQuantity = request.getQuantity();
-        BigDecimal requestPrice = request.getPrice();
-        BigDecimal requestFee = request.getFee() != null ? request.getFee() : BigDecimal.ZERO;
+        BigDecimal requestQuantity = request.quantity();
+        BigDecimal requestPrice = request.price();
+        BigDecimal requestFee = request.fee() != null ? request.fee() : BigDecimal.ZERO;
 
         if (requestFee.signum() < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction fee cannot be negative");
         }
 
-        if (request.getType() == TransactionType.BUY) {
+        if (request.type() == TransactionType.BUY) {
             BigDecimal existingCost = currentQuantity.multiply(asset.getAvgBuyPrice());
             BigDecimal newCost = requestQuantity.multiply(requestPrice).add(requestFee);
             BigDecimal updatedQuantity = currentQuantity.add(requestQuantity);
@@ -123,21 +126,6 @@ public class TransactionService {
         if (updatedQuantity.signum() == 0) {
             asset.setAvgBuyPrice(BigDecimal.ZERO.setScale(PRICE_SCALE, RoundingMode.HALF_UP));
         }
-    }
-
-    private TransactionResponse mapToResponse(Transaction transaction) {
-        return TransactionResponse.builder()
-            .id(transaction.getId())
-            .assetId(transaction.getAsset().getId())
-            .portfolioId(transaction.getPortfolio().getId())
-            .type(transaction.getType())
-            .quantity(transaction.getQuantity())
-            .price(transaction.getPrice())
-            .currency(transaction.getCurrency())
-            .fee(transaction.getFee())
-            .executedAt(transaction.getExecutedAt())
-            .notes(transaction.getNotes())
-            .build();
     }
 
     private void validateAssetCurrency(Asset asset, String transactionCurrency) {
