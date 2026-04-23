@@ -44,10 +44,14 @@ export function PortfolioOverview() {
             <div className="text-right">
               <p className="text-sm font-medium text-muted-foreground">Balances</p>
               <div className="space-y-1">
-                {data.totalValue ? (
-                  <p className="text-xl font-bold">{formatMoney(data.totalValue, data.currency)}</p>
+                {data.totals && Object.entries(data.totals).length > 0 ? (
+                  Object.entries(data.totals).map(([currency, total]) => (
+                    <p key={currency} className="text-xl font-bold">
+                      {formatMoney(total, currency)}
+                    </p>
+                  ))
                 ) : (
-                  <p className="text-xl font-bold">{formatMoney('0', data.currency)}</p>
+                  <p className="text-xl font-bold">{formatMoney('0', 'USD')}</p>
                 )}
               </div>
             </div>

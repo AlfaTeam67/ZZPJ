@@ -9,5 +9,7 @@ import org.mapstruct.Mapping;
 public interface TransactionMapper {
     @Mapping(target = "portfolioId", source = "portfolio.id")
     @Mapping(target = "assetId", source = "asset.id")
+    @Mapping(target = "symbol", source = "asset.symbol")
+    @Mapping(target = "assetType", source = "asset.type")
     TransactionResponse toResponse(Transaction transaction);
 }
