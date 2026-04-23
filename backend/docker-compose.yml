@@ -60,6 +60,25 @@ services:
       timeout: 5s
       retries: 5
 
+  advisor-db:
+    image: postgres:${POSTGRES_VERSION:-16-alpine}
+    container_name: fin-insight-advisor-db
+    environment:
+      POSTGRES_DB: ${ADVISOR_DB_NAME:-advisor}
+      POSTGRES_USER: ${ADVISOR_DB_USER:-user}
+      POSTGRES_PASSWORD: ${ADVISOR_DB_PASSWORD:-password}
+    volumes:
+      - advisor-db-data:/var/lib/postgresql/data
+    ports:
+      - "${ADVISOR_DB_PORT:-5435}:5432"
+    networks:
+      - fin-insight-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ADVISOR_DB_USER:-user} -d ${ADVISOR_DB_NAME:-advisor}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:${REDIS_VERSION:-7-alpine}
     container_name: fin-insight-redis
@@ -264,6 +283,11 @@ services:
     environment:
       SERVICE_NAME: ai-advisor-service
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      DB_HOST: ${ADVISOR_DB_HOST:-advisor-db}
+      DB_PORT: ${ADVISOR_DB_INTERNAL_PORT:-5432}
+      DB_NAME: ${ADVISOR_DB_NAME:-advisor}
+      DB_USER: ${ADVISOR_DB_USER:-user}
+      DB_PASSWORD: ${ADVISOR_DB_PASSWORD:-password}
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
@@ -273,6 +297,8 @@ services:
       eureka-server:
         condition: service_healthy
       config-server:
+        condition: service_healthy
+      advisor-db:
         condition: service_healthy
       keycloak:
         condition: service_healthy
@@ -305,3 +331,5 @@ volumes:
     name: fin-insight-portfolio-db-data
   market-data-db-data:
     name: fin-insight-market-data-db-data
+  advisor-db-data:
+    name: fin-insight-advisor-db-data
