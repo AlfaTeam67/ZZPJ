@@ -38,7 +38,7 @@ public class TransactionController {
         @Valid @RequestBody TransactionRequest request,
         @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getSubject();
+        UUID userId = UUID.fromString(jwt.getSubject());
         TransactionResponse response = transactionService.createTransaction(portfolioId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

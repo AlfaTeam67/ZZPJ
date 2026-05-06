@@ -3,7 +3,6 @@ package com.fininsight.portfoliomanager.service;
 import com.fininsight.portfoliomanager.domain.Asset;
 import com.fininsight.portfoliomanager.domain.Portfolio;
 import com.fininsight.portfoliomanager.domain.Transaction;
-import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
 import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
 import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
@@ -12,10 +11,11 @@ import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
+import com.fininsight.portfoliomanager.exception.PortfolioAccessDeniedException;
+import com.fininsight.portfoliomanager.exception.AssetNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,15 +34,18 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
 
     @Transactional
-    public TransactionResponse createTransaction(UUID portfolioId, String userId, TransactionRequest request) {
-        UUID userUuid = parseUuid(userId, "Invalid user ID");
-        Portfolio portfolio = portfolioRepository.findByIdAndUserId(portfolioId, userUuid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
+    public TransactionResponse createTransaction(UUID portfolioId, UUID userId, TransactionRequest request) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
 
         Instant now = Instant.now();
         Instant executedAt = request.executedAt() != null ? request.executedAt() : now;
         if (executedAt.isAfter(now)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction execution time cannot be in the future");
+            throw new IllegalArgumentException("Transaction execution time cannot be in the future");
         }
 
         Asset asset = getOrCreateAsset(portfolio, request);
@@ -68,17 +71,17 @@ public class TransactionService {
     private Asset getOrCreateAsset(Portfolio portfolio, TransactionRequest request) {
         if (request.assetId() != null) {
             Asset asset = assetRepository.findByPortfolioIdAndId(portfolio.getId(), request.assetId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found"));
+                .orElseThrow(() -> new AssetNotFoundException("Asset not found"));
             validateAssetCurrency(asset, request.currency());
             return asset;
         }
 
         if (request.type() != TransactionType.BUY) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Asset ID is required for SELL transactions");
+            throw new IllegalArgumentException("Asset ID is required for SELL transactions");
         }
 
         if (request.symbol() == null || request.assetType() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Symbol and Asset Type are required when Asset ID is not provided");
+            throw new IllegalArgumentException("Symbol and Asset Type are required when Asset ID is not provided");
         }
 
         Asset asset = assetRepository.findByPortfolioIdAndSymbol(portfolio.getId(), request.symbol())
@@ -103,7 +106,7 @@ public class TransactionService {
         BigDecimal requestFee = request.fee() != null ? request.fee() : BigDecimal.ZERO;
 
         if (requestFee.signum() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction fee cannot be negative");
+            throw new IllegalArgumentException("Transaction fee cannot be negative");
         }
 
         if (request.type() == TransactionType.BUY) {
@@ -118,7 +121,7 @@ public class TransactionService {
         }
 
         if (currentQuantity.compareTo(requestQuantity) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell more than owned quantity");
+            throw new IllegalArgumentException("Cannot sell more than owned quantity");
         }
 
         BigDecimal updatedQuantity = currentQuantity.subtract(requestQuantity);
@@ -130,18 +133,8 @@ public class TransactionService {
 
     private void validateAssetCurrency(Asset asset, String transactionCurrency) {
         if (!asset.getCurrency().equals(transactionCurrency)) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Transaction currency must match asset currency"
-            );
+            throw new IllegalArgumentException("Transaction currency must match asset currency");
         }
     }
 
-    private UUID parseUuid(String value, String message) {
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-        }
-    }
 }

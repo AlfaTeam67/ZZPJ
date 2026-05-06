@@ -9,6 +9,10 @@ spring:
   cloud:
     config:
       fail-fast: false # Better for docker-compose startup
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:portfolio}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:user}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:password}}
   security:
     oauth2:
       resourceserver:
