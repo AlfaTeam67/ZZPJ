@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,6 +33,21 @@ public class TransactionService {
     private final AssetRepository assetRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> getTransactionsByPortfolio(UUID portfolioId, UUID userId) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
+
+        return transactionRepository.findByPortfolioId(portfolioId)
+            .stream()
+            .map(transactionMapper::toResponse)
+            .toList();
+    }
 
     @Transactional
     public TransactionResponse createTransaction(UUID portfolioId, UUID userId, TransactionRequest request) {

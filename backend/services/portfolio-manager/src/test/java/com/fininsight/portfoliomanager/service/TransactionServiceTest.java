@@ -6,6 +6,7 @@ import com.fininsight.portfoliomanager.domain.Transaction;
 import com.fininsight.portfoliomanager.domain.User;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
 import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
+import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
 import com.fininsight.portfoliomanager.mapper.TransactionMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
@@ -18,12 +19,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +43,48 @@ class TransactionServiceTest {
     private TransactionMapper transactionMapper;
     @InjectMocks
     private TransactionService transactionService;
+
+    @Test
+    void shouldReturnTransactionsForPortfolioOwner() {
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        UUID txId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+
+        Portfolio portfolio = portfolio(portfolioId, userId);
+        Transaction tx = new Transaction();
+        tx.setId(txId);
+        TransactionResponse expectedResponse = new TransactionResponse(
+            txId, portfolioId, null, null, null,
+            TransactionType.BUY, new BigDecimal("5.00000000"), new BigDecimal("100.0000"),
+            "USD", null, java.time.Instant.now(), null
+        );
+
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        when(transactionRepository.findByPortfolioId(portfolioId)).thenReturn(List.of(tx));
+        when(transactionMapper.toResponse(tx)).thenReturn(expectedResponse);
+
+        List<TransactionResponse> result = transactionService.getTransactionsByPortfolio(portfolioId, userId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(expectedResponse);
+        verify(transactionRepository).findByPortfolioId(portfolioId);
+    }
+
+    @Test
+    void shouldThrowWhenGettingTransactionsForForeignPortfolio() {
+        UUID ownerId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID foreignUserId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+
+        Portfolio portfolio = portfolio(portfolioId, ownerId);
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+
+        assertThatThrownBy(() -> transactionService.getTransactionsByPortfolio(portfolioId, foreignUserId))
+            .isInstanceOf(com.fininsight.portfoliomanager.exception.PortfolioAccessDeniedException.class)
+            .hasMessageContaining("Access denied");
+
+        verify(transactionRepository, never()).findByPortfolioId(any());
+    }
 
     @Test
     void shouldUpdateAssetOnBuyTransaction() {
