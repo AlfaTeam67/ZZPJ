@@ -1,0 +1,213 @@
+STANDARD INSTRUCTIONS FOR AI AGENTS WORKING ON FIN-INSIGHT PROJECT
+
+=== PROJECT OVERVIEW ===
+Project: Fin-Insight (ZZPJ 2025/2026)
+Team: AlfaTeam
+Description: Intelligent investment assistant with portfolio tracking, market data aggregation, and AI-powered recommendations
+
+=== REPOSITORY STRUCTURE ===
+- backend/ → Java Spring Boot microservices
+- frontend/ → React + TypeScript + Vite
+- docs/ → Project documentation
+  - architecture.md → System design
+  - conventions.md → Code standards, branching, commits
+  - api/ → API endpoints documentation
+  - llms.txt → This file
+
+=== KEY SERVICES ===
+1. Portfolio Manager (8081) → Portfolio, assets, transactions
+2. Market Data Service (8082) → Prices, symbols, market data
+3. AI Advisor Service (8083) → AI recommendations
+4. Keycloak (8080) → Authentication/Authorization
+5. Eureka Server (8761) → Service discovery
+6. Config Server (8888) → Centralized configuration
+
+=== TECHNOLOGY STACK ===
+Backend:
+  - Java 21 LTS
+  - Spring Boot 3.x
+  - Spring Cloud (Eureka, Config)
+  - Spring Security (OAuth2/JWT)
+  - JPA/Hibernate
+  - PostgreSQL
+  - Redis
+  - Gradle
+
+Frontend:
+  - React 18+
+  - TypeScript
+  - Vite
+  - Tailwind CSS
+  - shadcn/ui
+
+DevOps:
+  - Docker & Docker Compose
+  - PostgreSQL 16
+  - Redis 7
+  - Keycloak 24
+
+=== BRANCHING CONVENTION ===
+Format: <type>/<ID-linear>/<description>
+
+Types:
+  - feature/ → New functionality
+  - fix/ → Bug fix
+  - refactor/ → Code refactoring
+  - docs/ → Documentation
+  - chore/ → Technical tasks
+
+Examples:
+  - feature/ALF-17/add-portfolio-api
+  - fix/ALF-23/fix-transaction-validation
+  - docs/ALF-42/api-documentation
+
+Rules:
+  - Always branch from main
+  - Never push directly to main
+  - Use lowercase with hyphens
+  - Linear ID is mandatory
+
+=== COMMIT CONVENTION ===
+Format: <type>(<scope>): <description>
+
+Types:
+  - feat → New feature
+  - fix → Bug fix
+  - docs → Documentation
+  - style → Code formatting
+  - refactor → Code refactoring
+  - perf → Performance optimization
+  - test → Tests
+  - chore → Technical tasks
+  - ci → CI/CD changes
+
+Examples:
+  - feat(portfolio-manager): add endpoint to delete assets
+  - fix(market-data): fix price caching issue
+  - docs(api): update endpoint documentation
+  - test(auth): add JWT validation tests
+
+Rules:
+  - Use imperative mood (add, fix, change - not added, fixed)
+  - Lowercase first letter
+  - No period at the end
+  - Max 50 characters for first line
+  - Link to Linear issue: "Fixes ALF-17"
+
+=== LINEAR INTEGRATION ===
+- Every branch must have Linear ID (ALF-XX)
+- Commit messages should reference issue: "Fixes ALF-17"
+- PR title should include ID: "[ALF-17] Add portfolio API"
+- Use keywords: Fixes, Closes, Resolves
+
+=== PULL REQUEST PROCESS ===
+1. Create branch from main
+2. Make commits with convention
+3. Push branch
+4. Open PR with description
+5. Link to Linear issue
+6. Wait for code review (Gemini + team)
+7. Merge after approval and green CI
+
+Requirements:
+  - Minimum 1 approval from team
+  - All tests must pass
+  - No breaking changes
+  - Documentation updated
+
+=== DOCKER COMMANDS ===
+Start all services:
+  cd backend && docker-compose up -d
+
+Stop all services:
+  docker-compose down
+
+View logs:
+  docker-compose logs -f <service-name>
+
+Rebuild service:
+  docker-compose up -d --build <service-name>
+
+=== API DOCUMENTATION ===
+See docs/api/ folder for detailed endpoint documentation:
+  - portfolios.md → Portfolio, assets, transactions
+  - market-data.md → Symbols, prices
+  - recommendations.md → AI recommendations
+
+All endpoints require JWT Bearer token in Authorization header.
+
+=== AUTHENTICATION ===
+Keycloak handles authentication:
+  - URL: http://localhost:8080
+  - Realm: fin-insight
+  - Default admin: admin/admin
+
+Get JWT token:
+  curl -X POST http://localhost:8080/realms/fin-insight/protocol/openid-connect/token \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "grant_type=password&client_id=fin-insight&username=user&password=password"
+
+=== TESTING ===
+Backend:
+  ./gradlew test
+  ./gradlew jacocoTestReport (coverage)
+
+Frontend:
+  npm test
+  npm run test:coverage
+
+Minimum coverage: 80%
+
+=== CODE QUALITY ===
+Backend:
+  ./gradlew checkstyleMain
+  ./gradlew spotbugsMain
+
+Frontend:
+  npm run lint
+  npm run format
+
+=== USEFUL ENDPOINTS ===
+Swagger UI (API docs): http://localhost:8081/swagger-ui.html
+Keycloak Admin: http://localhost:8080/admin
+Eureka Dashboard: http://localhost:8761
+Config Server: http://localhost:8888
+
+=== ENVIRONMENT VARIABLES ===
+Backend (.env):
+  - POSTGRES_VERSION=16-alpine
+  - REDIS_VERSION=7-alpine
+  - KEYCLOAK_VERSION=24.0
+  - KEYCLOAK_ADMIN=admin
+  - KEYCLOAK_ADMIN_PASSWORD=admin
+
+Frontend (.env):
+  - VITE_API_URL=http://localhost:8081
+
+=== COMMON ISSUES ===
+Service won't start:
+  - Check logs: docker-compose logs <service>
+  - Verify .env file
+  - Check port availability: lsof -i :<port>
+
+Database connection error:
+  - Ensure PostgreSQL is running
+  - Verify credentials in .env
+  - Check network connectivity
+
+JWT token expired:
+  - Re-login in Keycloak
+  - Get new token
+
+=== RESOURCES ===
+- Architecture: docs/architecture.md
+- Conventions: docs/conventions.md
+- API Docs: docs/api/*.md
+- GitHub: https://github.com/AlfaTeam67/ZZPJ
+- Linear: https://linear.app (project: Fin-Insight)
+
+=== TEAM CONTACTS ===
+See Linear for team members and responsibilities.
+
+=== LAST UPDATED ===
+2025-01-20
