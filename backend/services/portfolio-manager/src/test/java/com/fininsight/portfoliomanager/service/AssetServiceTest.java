@@ -106,6 +106,27 @@ class AssetServiceTest {
     }
 
     @Test
+    void shouldRejectAddAssetWithDifferentCurrency() {
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID portfolioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+
+        Portfolio portfolio = portfolio(portfolioId, userId);
+        Asset existingAsset = asset(portfolio, "AAPL", "2.00000000", "100.0000", "USD");
+        AddAssetRequest request = new AddAssetRequest(AssetType.STOCK, "AAPL", new BigDecimal("1.00000000"), new BigDecimal("130.0000"), "EUR");
+
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        when(assetRepository.findByPortfolioIdAndSymbol(portfolioId, "AAPL")).thenReturn(Optional.of(existingAsset));
+
+        assertThatThrownBy(() -> assetService.addAsset(portfolioId, request, userId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("USD")
+            .hasMessageContaining("EUR");
+
+        verify(assetRepository, never()).save(any());
+        verify(transactionRepository, never()).save(any());
+    }
+
+    @Test
     void shouldRejectAddAssetForDifferentOwner() {
         UUID ownerId = UUID.fromString("33333333-3333-3333-3333-333333333333");
         UUID requesterId = UUID.fromString("44444444-4444-4444-4444-444444444444");

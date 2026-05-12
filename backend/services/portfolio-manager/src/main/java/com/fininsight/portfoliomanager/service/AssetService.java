@@ -47,6 +47,12 @@ public class AssetService {
 
         Asset asset;
         if (existingAsset != null) {
+            if (!existingAsset.getCurrency().equals(request.currency())) {
+                throw new IllegalArgumentException(
+                    "Cannot add to asset with a different currency. Existing: "
+                    + existingAsset.getCurrency() + ", New: " + request.currency()
+                );
+            }
             asset = existingAsset;
             updateAverageBuyPrice(asset, request.quantity(), request.avgBuyPrice());
         } else {
