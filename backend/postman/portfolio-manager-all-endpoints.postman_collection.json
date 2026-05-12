@@ -47,17 +47,17 @@
             ],
             "body": {
               "mode": "urlencoded",
-            "urlencoded": [
-              {
-                "key": "client_id",
-                "value": "{{client_id}}",
-                "type": "text"
-              },
-              {
-                "key": "username",
-                "value": "{{username}}",
-                "type": "text"
-              },
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{username}}",
+                  "type": "text"
+                },
                 {
                   "key": "password",
                   "value": "{{password}}",
@@ -72,9 +72,7 @@
             },
             "url": {
               "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token",
-              "host": [
-                "{{keycloak_base_url}}"
-              ],
+              "host": ["{{keycloak_base_url}}"],
               "path": [
                 "realms",
                 "{{realm}}",
@@ -114,13 +112,8 @@
             "header": [],
             "url": {
               "raw": "{{portfolio_base_url}}/actuator/health",
-              "host": [
-                "{{portfolio_base_url}}"
-              ],
-              "path": [
-                "actuator",
-                "health"
-              ]
+              "host": ["{{portfolio_base_url}}"],
+              "path": ["actuator", "health"]
             }
           },
           "response": []
@@ -132,13 +125,8 @@
             "header": [],
             "url": {
               "raw": "{{portfolio_base_url}}/actuator/info",
-              "host": [
-                "{{portfolio_base_url}}"
-              ],
-              "path": [
-                "actuator",
-                "info"
-              ]
+              "host": ["{{portfolio_base_url}}"],
+              "path": ["actuator", "info"]
             }
           },
           "response": []
@@ -165,12 +153,8 @@
             "header": [],
             "url": {
               "raw": "{{portfolio_api_base_url}}/portfolios",
-              "host": [
-                "{{portfolio_api_base_url}}"
-              ],
-              "path": [
-                "portfolios"
-              ]
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios"]
             }
           },
           "response": []
@@ -182,13 +166,8 @@
             "header": [],
             "url": {
               "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
-              "host": [
-                "{{portfolio_api_base_url}}"
-              ],
-              "path": [
-                "portfolios",
-                "{{portfolio_id}}"
-              ]
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios", "{{portfolio_id}}"]
             }
           },
           "response": []
@@ -209,12 +188,8 @@
             },
             "url": {
               "raw": "{{portfolio_api_base_url}}/portfolios",
-              "host": [
-                "{{portfolio_api_base_url}}"
-              ],
-              "path": [
-                "portfolios"
-              ]
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios"]
             }
           },
           "event": [
@@ -251,13 +226,8 @@
             },
             "url": {
               "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
-              "host": [
-                "{{portfolio_api_base_url}}"
-              ],
-              "path": [
-                "portfolios",
-                "{{portfolio_id}}"
-              ]
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios", "{{portfolio_id}}"]
             }
           },
           "response": []
@@ -269,13 +239,8 @@
             "header": [],
             "url": {
               "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}",
-              "host": [
-                "{{portfolio_api_base_url}}"
-              ],
-              "path": [
-                "portfolios",
-                "{{portfolio_id}}"
-              ]
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios", "{{portfolio_id}}"]
             }
           },
           "response": []
@@ -296,13 +261,78 @@
             },
             "url": {
               "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}/transactions",
-              "host": [
-                "{{portfolio_api_base_url}}"
-              ],
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios", "{{portfolio_id}}", "transactions"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "POST /api/portfolios/{portfolioId}/assets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"STOCK\",\n  \"symbol\": \"AAPL\",\n  \"quantity\": 10,\n  \"avgBuyPrice\": 150.00,\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}/assets",
+              "host": ["{{portfolio_api_base_url}}"],
+              "path": ["portfolios", "{{portfolio_id}}", "assets"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.id !== undefined && json.id !== null) {",
+                  "    pm.collectionVariables.set('asset_id', String(json.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "DELETE /api/portfolios/{portfolioId}/assets/{assetId}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{portfolio_api_base_url}}/portfolios/{{portfolio_id}}/assets/{{asset_id}}",
+              "host": ["{{portfolio_api_base_url}}"],
               "path": [
                 "portfolios",
                 "{{portfolio_id}}",
-                "transactions"
+                "assets",
+                "{{asset_id}}"
               ]
             }
           },
@@ -350,6 +380,10 @@
     },
     {
       "key": "portfolio_id",
+      "value": ""
+    },
+    {
+      "key": "asset_id",
       "value": ""
     }
   ]

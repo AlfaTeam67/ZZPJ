@@ -5,6 +5,8 @@ import com.fininsight.portfoliomanager.domain.User;
 import com.fininsight.portfoliomanager.dto.portfolio.CreatePortfolioRequest;
 import com.fininsight.portfoliomanager.dto.portfolio.PortfolioResponse;
 import com.fininsight.portfoliomanager.dto.portfolio.UpdatePortfolioRequest;
+import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
+import com.fininsight.portfoliomanager.exception.PortfolioAccessDeniedException;
 import com.fininsight.portfoliomanager.mapper.PortfolioMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
@@ -32,12 +34,8 @@ public class PortfolioService {
     private final PortfolioMapper portfolioMapper;
 
     @Transactional(readOnly = true)
-    public List<PortfolioResponse> getAllPortfoliosForUser(String userId) {
-        UUID userUuid = parseUuid(userId, "Invalid user ID");
-        List<Portfolio> portfolios = portfolioRepository.findByUserId(userUuid);
-        if (portfolios.isEmpty()) {
-            return List.of();
-        }
+    public List<PortfolioResponse> getPortfoliosForUser(UUID userId) {
+        List<Portfolio> portfolios = portfolioRepository.findByUserId(userId);
         Map<UUID, List<AssetRepository.PortfolioCurrencyTotalValueProjection>> totalsByPortfolioId = assetRepository.findTotalValuesByPortfolioIds(
             portfolios.stream().map(Portfolio::getId).toList()
         ).stream().collect(Collectors.groupingBy(
@@ -54,19 +52,21 @@ public class PortfolioService {
     }
 
     @Transactional(readOnly = true)
-    public PortfolioResponse getPortfolioById(UUID id, String userId) {
-        UUID userUuid = parseUuid(userId, "Invalid user ID");
-        Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
+    public PortfolioResponse getPortfolio(UUID portfolioId, UUID userId) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
         
         Map<String, BigDecimal> totals = resolveTotals(assetRepository.findTotalValuesByPortfolioId(portfolio.getId()));
         return portfolioMapper.toResponse(portfolio, totals);
     }
 
     @Transactional
-    public PortfolioResponse createPortfolio(CreatePortfolioRequest request, String userId) {
-        UUID userUuid = parseUuid(userId, "Invalid user ID");
-        User user = findOrCreateUser(userUuid);
+    public PortfolioResponse createPortfolio(CreatePortfolioRequest request, UUID userId) {
+        User user = findOrCreateUser(userId);
 
         Portfolio portfolio = new Portfolio();
         portfolio.setName(request.name());
@@ -78,10 +78,13 @@ public class PortfolioService {
     }
 
     @Transactional
-    public PortfolioResponse updatePortfolio(UUID id, UpdatePortfolioRequest request, String userId) {
-        UUID userUuid = parseUuid(userId, "Invalid user ID");
-        Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
+    public PortfolioResponse updatePortfolio(UUID portfolioId, UpdatePortfolioRequest request, UUID userId) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
 
         portfolio.setName(request.name());
         portfolio.setDescription(request.description());
@@ -92,10 +95,14 @@ public class PortfolioService {
     }
 
     @Transactional
-    public void deletePortfolio(UUID id, String userId) {
-        UUID userUuid = parseUuid(userId, "Invalid user ID");
-        Portfolio portfolio = portfolioRepository.findByIdAndUserId(id, userUuid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
+    public void deletePortfolio(UUID portfolioId, UUID userId) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
+        
         portfolioRepository.delete(portfolio);
     }
 
@@ -127,11 +134,4 @@ public class PortfolioService {
             });
     }
 
-    private UUID parseUuid(String value, String message) {
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-        }
-    }
 }

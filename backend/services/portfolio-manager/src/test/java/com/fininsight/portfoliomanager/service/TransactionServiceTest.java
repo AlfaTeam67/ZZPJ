@@ -6,7 +6,6 @@ import com.fininsight.portfoliomanager.domain.Transaction;
 import com.fininsight.portfoliomanager.domain.User;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
 import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
-import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
 import com.fininsight.portfoliomanager.mapper.TransactionMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -51,7 +49,7 @@ class TransactionServiceTest {
 
         Portfolio portfolio = portfolio(portfolioId, userId);
         Asset asset = asset(assetId, portfolio, "10.00000000", "100.0000");
-        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> {
             Transaction tx = invocation.getArgument(0);
@@ -61,7 +59,7 @@ class TransactionServiceTest {
 
         TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("5.00000000"), new BigDecimal("200.0000"), "USD", null, null, null, null, null);
 
-        transactionService.createTransaction(portfolioId, userId.toString(), request);
+        transactionService.createTransaction(portfolioId, userId, request);
 
         assertThat(asset.getQuantity()).isEqualByComparingTo("15.00000000");
         assertThat(asset.getAvgBuyPrice()).isEqualByComparingTo("133.3333");
@@ -76,13 +74,13 @@ class TransactionServiceTest {
 
         Portfolio portfolio = portfolio(portfolioId, userId);
         Asset asset = asset(assetId, portfolio, "10.00000000", "100.0000");
-        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("5.00000000"), new BigDecimal("200.0000"), "USD", new BigDecimal("15.0000"), null, null, null, null);
 
-        transactionService.createTransaction(portfolioId, userId.toString(), request);
+        transactionService.createTransaction(portfolioId, userId, request);
 
         assertThat(asset.getQuantity()).isEqualByComparingTo("15.00000000");
         assertThat(asset.getAvgBuyPrice()).isEqualByComparingTo("134.3333");
@@ -96,13 +94,13 @@ class TransactionServiceTest {
 
         Portfolio portfolio = portfolio(portfolioId, userId);
         Asset asset = asset(assetId, portfolio, "2.00000000", "100.0000");
-        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
 
         TransactionRequest request = new TransactionRequest(assetId, TransactionType.SELL, new BigDecimal("3.00000000"), new BigDecimal("120.0000"), "USD", null, null, null, null, null);
 
-        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
-            .isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId, request))
+            .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Cannot sell more than owned quantity");
     }
 
@@ -114,13 +112,13 @@ class TransactionServiceTest {
 
         Portfolio portfolio = portfolio(portfolioId, userId);
         Asset asset = asset(assetId, portfolio, "2.00000000", "100.0000");
-        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndId(portfolioId, assetId)).thenReturn(Optional.of(asset));
 
         TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("1.00000000"), new BigDecimal("120.0000"), "EUR", null, null, null, null, null);
 
-        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
-            .isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId, request))
+            .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Transaction currency must match asset currency");
     }
 
@@ -133,13 +131,13 @@ class TransactionServiceTest {
         Portfolio portfolio = portfolio(portfolioId, userId);
         Asset asset = asset(assetId, portfolio, "2.00000000", "100.0000");
         asset.setSymbol("AAPL");
-        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
         when(assetRepository.findByPortfolioIdAndSymbol(portfolioId, "AAPL")).thenReturn(Optional.of(asset));
 
         TransactionRequest request = new TransactionRequest(null, TransactionType.BUY, new BigDecimal("1.00000000"), new BigDecimal("120.0000"), "EUR", null, null, null, "AAPL", com.fininsight.portfoliomanager.domain.enums.AssetType.STOCK);
 
-        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
-            .isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId, request))
+            .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Transaction currency must match asset currency");
     }
 
@@ -150,12 +148,12 @@ class TransactionServiceTest {
         UUID assetId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
         Portfolio portfolio = portfolio(portfolioId, userId);
-        when(portfolioRepository.findByIdAndUserId(portfolioId, userId)).thenReturn(Optional.of(portfolio));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
 
         TransactionRequest request = new TransactionRequest(assetId, TransactionType.BUY, new BigDecimal("1.00000000"), new BigDecimal("120.0000"), "USD", null, Instant.now().plusSeconds(600), null, null, null);
 
-        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId.toString(), request))
-            .isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> transactionService.createTransaction(portfolioId, userId, request))
+            .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Transaction execution time cannot be in the future");
     }
 

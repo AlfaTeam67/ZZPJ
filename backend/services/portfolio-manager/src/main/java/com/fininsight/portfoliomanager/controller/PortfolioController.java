@@ -39,8 +39,8 @@ public class PortfolioController {
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Get all portfolios for the authenticated user")
     public ResponseEntity<List<PortfolioResponse>> getAllPortfolios(@AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getSubject();
-        return ResponseEntity.ok(portfolioService.getAllPortfoliosForUser(userId));
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(portfolioService.getPortfoliosForUser(userId));
     }
 
     @GetMapping("/{id}")
@@ -50,8 +50,8 @@ public class PortfolioController {
         @PathVariable UUID id,
         @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getSubject();
-        return ResponseEntity.ok(portfolioService.getPortfolioById(id, userId));
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(portfolioService.getPortfolio(id, userId));
     }
 
     @PostMapping
@@ -61,7 +61,7 @@ public class PortfolioController {
         @Valid @RequestBody CreatePortfolioRequest request,
         @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getSubject();
+        UUID userId = UUID.fromString(jwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(portfolioService.createPortfolio(request, userId));
     }
 
@@ -73,7 +73,7 @@ public class PortfolioController {
         @Valid @RequestBody UpdatePortfolioRequest request,
         @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getSubject();
+        UUID userId = UUID.fromString(jwt.getSubject());
         return ResponseEntity.ok(portfolioService.updatePortfolio(id, request, userId));
     }
 
@@ -84,7 +84,7 @@ public class PortfolioController {
         @PathVariable UUID id,
         @AuthenticationPrincipal Jwt jwt
     ) {
-        String userId = jwt.getSubject();
+        UUID userId = UUID.fromString(jwt.getSubject());
         portfolioService.deletePortfolio(id, userId);
         return ResponseEntity.noContent().build();
     }
