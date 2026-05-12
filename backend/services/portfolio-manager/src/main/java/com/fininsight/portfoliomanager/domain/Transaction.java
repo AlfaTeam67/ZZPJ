@@ -36,9 +36,8 @@ public class Transaction {
     @EqualsAndHashCode.Include
     private UUID id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "asset_id", nullable = false)
+    @JoinColumn(name = "asset_id")
     private Asset asset;
 
     @NotNull

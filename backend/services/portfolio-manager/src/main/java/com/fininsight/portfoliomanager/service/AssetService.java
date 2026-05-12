@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -42,23 +43,18 @@ public class AssetService {
             throw new PortfolioAccessDeniedException("Access denied to this portfolio");
         }
 
-        Asset existingAsset = assetRepository.findByPortfolioIdAndSymbol(portfolioId, request.symbol())
-            .orElse(null);
+        Optional<Asset> existingAssetOpt = assetRepository.findByPortfolioIdAndSymbol(portfolioId, request.symbol());
 
-        Asset asset;
-        if (existingAsset != null) {
+        Asset asset = existingAssetOpt.map(existingAsset -> {
             if (!existingAsset.getCurrency().equals(request.currency())) {
                 throw new IllegalArgumentException(
                     "Cannot add to asset with a different currency. Existing: "
                     + existingAsset.getCurrency() + ", New: " + request.currency()
                 );
             }
-            asset = existingAsset;
-            updateAverageBuyPrice(asset, request.quantity(), request.avgBuyPrice());
-        } else {
-            asset = createNewAsset(portfolio, request);
-            asset = assetRepository.save(asset);
-        }
+            updateAverageBuyPrice(existingAsset, request.quantity(), request.avgBuyPrice());
+            return existingAsset;
+        }).orElseGet(() -> assetRepository.save(createNewAsset(portfolio, request)));
 
         createBuyTransaction(asset, request);
 

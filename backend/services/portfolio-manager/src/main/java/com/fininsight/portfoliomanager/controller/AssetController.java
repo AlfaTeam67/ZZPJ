@@ -4,6 +4,8 @@ import com.fininsight.portfoliomanager.dto.asset.AddAssetRequest;
 import com.fininsight.portfoliomanager.dto.asset.AssetResponse;
 import com.fininsight.portfoliomanager.service.AssetService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,6 +31,12 @@ public class AssetController {
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Add an asset to a portfolio")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Asset added successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or currency mismatch"),
+        @ApiResponse(responseCode = "403", description = "Access denied to this portfolio"),
+        @ApiResponse(responseCode = "404", description = "Portfolio not found")
+    })
     public ResponseEntity<AssetResponse> addAsset(
         @PathVariable UUID portfolioId,
         @Valid @RequestBody AddAssetRequest request,
@@ -42,6 +50,11 @@ public class AssetController {
     @DeleteMapping("/{assetId}")
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Remove an asset from a portfolio")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Asset removed successfully"),
+        @ApiResponse(responseCode = "403", description = "Access denied to this portfolio"),
+        @ApiResponse(responseCode = "404", description = "Portfolio or asset not found")
+    })
     public ResponseEntity<Void> removeAsset(
         @PathVariable UUID portfolioId,
         @PathVariable UUID assetId,
