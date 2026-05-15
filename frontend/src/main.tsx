@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import App from './App'
 import './index.css'
+import { AuthProvider } from '@/features/auth/AuthProvider'
 import { setupAxiosInterceptors } from '@/lib/axios'
 import { queryClient } from '@/lib/queryClient'
 import { store } from '@/store/store'
@@ -23,7 +24,9 @@ createRoot(rootElement).render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </Provider>

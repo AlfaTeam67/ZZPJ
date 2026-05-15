@@ -20,6 +20,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+    open-in-view: false
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -40,3 +41,25 @@ management:
     web:
       exposure:
         include: health,info
+
+# Application-specific tuning. Wartości można nadpisać w ZZPJ-config/ai-advisor-service.yml.
+app:
+  openrouter:
+    base-url: https://openrouter.ai/api/v1
+    api-key: ${OPENROUTER_API_KEY:}
+    referer: https://fin-insight.dev
+    app-title: Fin-Insight
+    temperature: 0.4
+    max-tokens: 800
+  finnhub:
+    base-url: https://finnhub.io/api/v1
+    api-key: ${FINNHUB_API_KEY:}
+  newsapi:
+    base-url: https://newsapi.org/v2
+    api-key: ${NEWSAPI_KEY:}
+  news:
+    lookback-days: 7
+    per-symbol-limit: 5
+  scheduler:
+    news-cleanup:
+      cron: "0 0 3 * * *"

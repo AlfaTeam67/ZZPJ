@@ -41,7 +41,7 @@ public class RecommendationRepositorySteps {
         this.portfolioId = UUID.fromString(portfolioIdStr);
     }
 
-    @And("a default LLM provider exists")
+    @And("a default LLM provider for repository test exists")
     public void aDefaultLLMProviderExists() {
         llmProvider = llmProviderRepository.findFirstByActiveTrueOrderByPriorityAsc()
                 .orElseGet(() -> llmProviderRepository.save(LlmProvider.builder()
