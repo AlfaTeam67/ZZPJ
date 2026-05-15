@@ -11,17 +11,12 @@ import { useAppSelector } from '@/hooks/store'
 export function useAuth() {
   const { initialized, initError, token, user } = useAppSelector((state) => state.auth)
 
-  const login = useCallback(
-    async (redirectPath?: string) => {
-      const keycloak = getKeycloak()
-      const redirectUri =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}${redirectPath ?? '/'}`
-          : undefined
-      await keycloak.login({ redirectUri })
-    },
-    []
-  )
+  const login = useCallback(async (redirectPath?: string) => {
+    const keycloak = getKeycloak()
+    const redirectUri =
+      typeof window !== 'undefined' ? `${window.location.origin}${redirectPath ?? '/'}` : undefined
+    await keycloak.login({ redirectUri })
+  }, [])
 
   const logout = useCallback(async () => {
     const keycloak = getKeycloak()

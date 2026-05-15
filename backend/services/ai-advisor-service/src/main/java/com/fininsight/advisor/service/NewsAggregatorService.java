@@ -10,11 +10,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -22,10 +24,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Pobiera newsy dla zestawu symboli z Finnhub i NewsAPI, deduplikuje i upserts do news_cache.
+ * Pobiera newsy dla zestawu symboli z Finnhub i NewsAPI, deduplikuje i upsertuje do news_cache.
  *
  * Strategia cache: jeśli w bazie są nieprzeterminowane wpisy dla danego symbolu, używamy ich;
  * w przeciwnym razie wołamy zewnętrzne API. NewsCleanupScheduler i tak posprząta wygasłe.
+ *
+ * UWAGA: metoda orkiestrująca {@link #getNewsForSymbols} celowo NIE jest @Transactional -
+ * trzymanie transakcji przez czas wywołań HTTP do Finnhub/NewsAPI prowadzi do transaction
+ * pinningu i wyczerpania puli HikariCP. Każdy upsert leci w osobnej, krótkiej transakcji
+ * przez {@link NewsCachePersister}.
  */
 @Slf4j
 @Service
@@ -35,6 +42,7 @@ public class NewsAggregatorService {
     private final FinnhubNewsClient finnhubClient;
     private final NewsApiClient newsApiClient;
     private final NewsCacheRepository newsCacheRepository;
+    private final NewsCachePersister persister;
 
     @Value("${app.news.lookback-days:7}")
     private int lookbackDays;
@@ -42,7 +50,6 @@ public class NewsAggregatorService {
     @Value("${app.news.per-symbol-limit:5}")
     private int perSymbolLimit;
 
-    @Transactional
     public List<NewsCache> getNewsForSymbols(Collection<String> symbols) {
         if (symbols == null || symbols.isEmpty()) {
             return List.of();
@@ -55,7 +62,7 @@ public class NewsAggregatorService {
         Map<String, NewsCache> deduped = new LinkedHashMap<>();
 
         for (String symbol : symbols) {
-            // 1) cache
+            // 1) cache - krótkie czytanie z bazy
             List<NewsCache> cached = newsCacheRepository.findBySymbolAndExpiresAtAfterOrderByFetchedAtDesc(symbol, now);
             if (!cached.isEmpty()) {
                 cached.stream().limit(perSymbolLimit)
@@ -63,7 +70,7 @@ public class NewsAggregatorService {
                 continue;
             }
 
-            // 2) external fetch + persist
+            // 2) external fetch - poza transakcją
             List<NewsItem> fresh = new ArrayList<>();
             fresh.addAll(finnhubClient.fetchCompanyNews(symbol, from, to, perSymbolLimit));
 
@@ -71,8 +78,9 @@ public class NewsAggregatorService {
                 fresh.addAll(newsApiClient.fetchByQuery(symbol, symbol, from, perSymbolLimit));
             }
 
+            // 3) upsert per nagłówek - każdy w osobnej krótkiej transakcji
             for (NewsItem item : fresh) {
-                NewsCache saved = upsert(item);
+                NewsCache saved = persister.upsert(item, lookbackDays);
                 deduped.putIfAbsent(dedupKey(saved), saved);
             }
         }
@@ -80,36 +88,11 @@ public class NewsAggregatorService {
         return new ArrayList<>(deduped.values());
     }
 
-    private NewsCache upsert(NewsItem item) {
-        if (item.externalId() != null) {
-            var existing = newsCacheRepository.findByProviderAndExternalId(item.provider(), item.externalId());
-            if (existing.isPresent()) {
-                return existing.get();
-            }
-        }
-        NewsCache entity = NewsCache.builder()
-            .headline(truncate(item.headline(), 1000))
-            .source(truncate(item.source(), 100))
-            .url(item.url())
-            .symbol(item.symbol())
-            .provider(item.provider())
-            .externalId(truncate(item.externalId(), 200))
-            .sentiment(item.sentiment())
-            .fetchedAt(Instant.now())
-            .build();
-        return newsCacheRepository.save(entity);
-    }
-
     private String dedupKey(NewsCache n) {
         if (n.getProvider() != null && n.getExternalId() != null) {
             return n.getProvider() + ":" + n.getExternalId();
         }
         return (n.getHeadline() == null ? "" : n.getHeadline().toLowerCase());
-    }
-
-    private String truncate(String s, int max) {
-        if (s == null) return null;
-        return s.length() <= max ? s : s.substring(0, max);
     }
 
     /**
@@ -123,5 +106,44 @@ public class NewsAggregatorService {
             }
         }
         return result;
+    }
+
+    /**
+     * Wyizolowany bean persystencji. Każdy upsert leci w osobnej REQUIRES_NEW transakcji,
+     * dzięki czemu Hikari connection nie jest trzymane podczas calli HTTP wcześniej.
+     */
+    @org.springframework.stereotype.Component
+    @lombok.RequiredArgsConstructor
+    static class NewsCachePersister {
+
+        private final NewsCacheRepository repository;
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        NewsCache upsert(NewsItem item, int lookbackDays) {
+            if (item.externalId() != null) {
+                var existing = repository.findByProviderAndExternalId(item.provider(), item.externalId());
+                if (existing.isPresent()) {
+                    return existing.get();
+                }
+            }
+            Instant now = Instant.now();
+            NewsCache entity = NewsCache.builder()
+                .headline(truncate(item.headline(), 1000))
+                .source(truncate(item.source(), 100))
+                .url(item.url())
+                .symbol(item.symbol())
+                .provider(item.provider())
+                .externalId(truncate(item.externalId(), 200))
+                .sentiment(item.sentiment())
+                .fetchedAt(now)
+                .expiresAt(now.plus(Math.max(lookbackDays, 1), ChronoUnit.DAYS))
+                .build();
+            return repository.save(entity);
+        }
+
+        private static String truncate(String s, int max) {
+            if (s == null) return null;
+            return s.length() <= max ? s : s.substring(0, max);
+        }
     }
 }

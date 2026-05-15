@@ -31,10 +31,21 @@ export function PortfolioMetricHero() {
         {formatCurrency(data.totalValue, data.currency)}
       </h1>
       <div className="mt-3 flex items-center gap-3 text-sm">
-        <span className={isUp ? 'flex items-center gap-1 text-success' : 'flex items-center gap-1 text-destructive'}>
-          <HugeiconsIcon icon={ArrowUpRight01Icon} className={isUp ? 'size-4' : 'size-4 rotate-90'} aria-hidden />
+        <span
+          className={
+            isUp
+              ? 'flex items-center gap-1 text-success'
+              : 'flex items-center gap-1 text-destructive'
+          }
+        >
+          <HugeiconsIcon
+            icon={ArrowUpRight01Icon}
+            className={isUp ? 'size-4' : 'size-4 rotate-90'}
+            aria-hidden
+          />
           <span>
-            {formatSignedCurrency(data.changeAbsolute, data.currency)} ({formatPercent(data.changePercent)})
+            {formatSignedCurrency(data.changeAbsolute, data.currency)} (
+            {formatPercent(data.changePercent)})
           </span>
         </span>
         <span className="text-muted-foreground">{data.changeLabel}</span>

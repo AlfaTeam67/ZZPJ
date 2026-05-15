@@ -9,6 +9,7 @@ import com.fininsight.advisor.entity.NewsCache;
 import com.fininsight.advisor.entity.Recommendation;
 import com.fininsight.advisor.entity.RecommendationNews;
 import com.fininsight.advisor.entity.enums.RiskTolerance;
+import com.fininsight.advisor.exception.PortfolioNotAvailableException;
 import com.fininsight.advisor.exception.RecommendationNotFoundException;
 import com.fininsight.advisor.repository.RecommendationNewsRepository;
 import com.fininsight.advisor.repository.RecommendationRepository;
@@ -37,24 +38,36 @@ public class AdvisorService {
     private final PromptBuilder promptBuilder;
     private final LlmInvocationService llmInvocationService;
     private final LlmResponseParser parser;
+    private final RecommendationPersister recommendationPersister;
     private final RecommendationRepository recommendationRepository;
     private final RecommendationNewsRepository recommendationNewsRepository;
 
-    @Transactional
+    /**
+     * Orkiestracja generowania rekomendacji.
+     *
+     * UWAGA: metoda celowo NIE jest @Transactional. Wywołania zewnętrzne
+     * (portfolio-manager, Finnhub/NewsAPI, LLM) trwają sekundy i blokowałyby
+     * połączenie HikariCP (transaction pinning). Zapis do bazy idzie tylko
+     * w kontrolowanej transakcji w {@link RecommendationPersister}.
+     */
     public RecommendationResponse generateRecommendation(UUID userId, String bearerToken, RecommendationRequest request) {
         log.info("Generating recommendation user={} portfolio={} risk={} horizon={}",
             userId, request.getPortfolioId(), request.getRiskTolerance(), request.getInvestmentHorizon());
 
-        // 1) Pobierz portfel z portfolio-manager (z propagowanym JWT).
+        // 1) Pobierz portfel z portfolio-manager (z propagowanym JWT). Bez transakcji.
         PortfolioValuationDto valuation = portfolioClient.getValuation(request.getPortfolioId(), bearerToken);
+        if (valuation == null) {
+            throw new PortfolioNotAvailableException(
+                "portfolio-manager returned empty body for portfolio " + request.getPortfolioId());
+        }
 
-        // 2) Pobierz newsy dla unikalnych symboli z portfela.
+        // 2) Pobierz newsy dla unikalnych symboli z portfela. Każdy upsert w osobnej krótkiej transakcji.
         Set<String> symbols = extractSymbols(valuation);
         List<NewsCache> news = newsAggregator.getNewsForSymbols(symbols);
         log.info("Aggregated {} news entries for {} symbols (per provider: {})",
             news.size(), symbols.size(), newsAggregator.countByProvider(news));
 
-        // 3) Zbuduj prompt i zawołaj LLM (z fallbackiem między providerami).
+        // 3) Zbuduj prompt i zawołaj LLM (z fallbackiem między providerami). Bez transakcji.
         List<LlmChatClient.ChatMessage> messages = promptBuilder.build(
             valuation, news, request.getRiskTolerance(), request.getInvestmentHorizon());
         var invocation = llmInvocationService.invoke(messages);
@@ -63,23 +76,15 @@ public class AdvisorService {
         var parsed = parser.parse(invocation.completion().content());
         BigDecimal riskScore = parsed.riskScoreOpt().orElseGet(() -> defaultRiskScore(request.getRiskTolerance()));
 
-        // 5) Zapisz rekomendację + powiązane newsy (M:N).
-        Recommendation rec = Recommendation.builder()
-            .userId(userId)
-            .portfolioId(request.getPortfolioId())
-            .llmProvider(invocation.provider())
-            .promptSummary(buildPromptSummary(request, valuation, news.size()))
-            .llmResponse(parsed.fullText())
-            .riskScore(riskScore)
-            .build();
-        Recommendation saved = recommendationRepository.save(rec);
-
-        if (!news.isEmpty()) {
-            List<RecommendationNews> links = news.stream()
-                .map(n -> new RecommendationNews(saved, n))
-                .toList();
-            recommendationNewsRepository.saveAll(links);
-        }
+        // 5) Persystencja w jednej zwięzłej transakcji - przez osobny bean, żeby AOP zadziałało.
+        Recommendation saved = recommendationPersister.save(
+            userId,
+            request.getPortfolioId(),
+            invocation.provider(),
+            buildPromptSummary(request, valuation, news.size()),
+            parsed.fullText(),
+            riskScore,
+            news);
 
         return mapToResponse(saved, invocation.provider().getModelId(), parsed, news);
     }
@@ -106,18 +111,20 @@ public class AdvisorService {
                 parser.parse(rec.getLlmResponse()), List.of()));
     }
 
+    /**
+     * Filtrujemy po (portfolioId, userId) na poziomie SQL, żeby:
+     *  - nie wyciekała informacja o liczbie cudzych rekomendacji,
+     *  - w odpowiedzi nie pojawiały się nullowe elementy zwracane z mappera.
+     */
     @Transactional(readOnly = true)
     public Page<RecommendationResponse> listForPortfolio(UUID portfolioId, UUID userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return recommendationRepository.findByPortfolioId(portfolioId, pageable)
-            .map(rec -> {
-                if (!rec.getUserId().equals(userId)) {
-                    return null;
-                }
-                return mapToResponse(rec,
-                    rec.getLlmProvider() != null ? rec.getLlmProvider().getModelId() : null,
-                    parser.parse(rec.getLlmResponse()), List.of());
-            });
+        return recommendationRepository.findByPortfolioIdAndUserId(portfolioId, userId, pageable)
+            .map(rec -> mapToResponse(
+                rec,
+                rec.getLlmProvider() != null ? rec.getLlmProvider().getModelId() : null,
+                parser.parse(rec.getLlmResponse()),
+                List.of()));
     }
 
     private Set<String> extractSymbols(PortfolioValuationDto valuation) {

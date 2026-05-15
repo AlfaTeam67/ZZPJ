@@ -116,9 +116,9 @@ export function LoginPage() {
 
               {initialized && initError ? (
                 <p className="rounded-md border border-border/40 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                  Nie udało się połączyć z Keycloakiem ({keycloak.url}). Uruchom backend
-                  poleceniem <code className="text-foreground/80">docker compose up -d keycloak</code>
-                  {' '}i odśwież stronę.
+                  Nie udało się połączyć z Keycloakiem ({keycloak.url}). Uruchom backend poleceniem{' '}
+                  <code className="text-foreground/80">docker compose up -d keycloak</code> i
+                  odśwież stronę.
                 </p>
               ) : null}
 

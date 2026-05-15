@@ -75,8 +75,15 @@ public class PromptBuilder {
         return List.of(LlmChatClient.ChatMessage.system(SYSTEM), LlmChatClient.ChatMessage.user(user.toString()));
     }
 
+    /**
+     * Format BigDecimal pod prompt LLM. Trzymamy do 8 cyfr po przecinku, żeby
+     * pozycje crypto (ETH, BTC) nie traciły precyzji. Negatywny lub pomijalnie
+     * mały scale (np. dla 1E+2) jest podbijany do 0, żeby setScale nie rzucił
+     * ArithmeticException.
+     */
     private String format(BigDecimal v) {
         if (v == null) return "n/a";
-        return v.setScale(Math.min(4, v.scale()), RoundingMode.HALF_UP).toPlainString();
+        int targetScale = Math.max(0, Math.min(8, v.scale()));
+        return v.setScale(targetScale, RoundingMode.HALF_UP).toPlainString();
     }
 }

@@ -16,7 +16,6 @@ import com.fininsight.advisor.repository.RecommendationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -28,7 +27,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +37,7 @@ class AdvisorServiceTest {
     @Mock private PortfolioClient portfolioClient;
     @Mock private NewsAggregatorService newsAggregator;
     @Mock private LlmInvocationService llmInvocationService;
+    @Mock private RecommendationPersister recommendationPersister;
     @Mock private RecommendationRepository recommendationRepository;
     @Mock private RecommendationNewsRepository recommendationNewsRepository;
 
@@ -55,6 +54,7 @@ class AdvisorServiceTest {
             promptBuilder,
             llmInvocationService,
             parser,
+            recommendationPersister,
             recommendationRepository,
             recommendationNewsRepository
         );
@@ -103,12 +103,18 @@ class AdvisorServiceTest {
         );
         when(llmInvocationService.invoke(anyList())).thenReturn(llmResult);
 
-        when(recommendationRepository.save(any(Recommendation.class))).thenAnswer(inv -> {
-            Recommendation r = inv.getArgument(0);
-            r.setId(UUID.randomUUID());
-            r.setCreatedAt(Instant.now());
-            return r;
-        });
+        when(recommendationPersister.save(
+                eq(userId), eq(portfolioId), eq(provider), any(), any(), any(), anyList()))
+            .thenAnswer(inv -> Recommendation.builder()
+                .id(UUID.randomUUID())
+                .userId(inv.getArgument(0))
+                .portfolioId(inv.getArgument(1))
+                .llmProvider(inv.getArgument(2))
+                .promptSummary(inv.getArgument(3))
+                .llmResponse(inv.getArgument(4))
+                .riskScore(inv.getArgument(5))
+                .createdAt(Instant.now())
+                .build());
 
         RecommendationRequest req = RecommendationRequest.builder()
             .portfolioId(portfolioId)
@@ -127,7 +133,7 @@ class AdvisorServiceTest {
         assertThat(resp.getNewsContext()).hasSize(1);
         assertThat(resp.getNewsContext().get(0).getHeadline()).contains("NVIDIA");
 
-        verify(recommendationRepository).save(any(Recommendation.class));
-        verify(recommendationNewsRepository).saveAll(anyList());
+        verify(recommendationPersister).save(
+            eq(userId), eq(portfolioId), eq(provider), any(), any(), any(), anyList());
     }
 }

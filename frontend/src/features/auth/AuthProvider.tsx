@@ -2,7 +2,13 @@ import { useEffect, useRef } from 'react'
 
 import { getKeycloak } from '@/features/auth/keycloak'
 import { useAppDispatch } from '@/hooks/store'
-import { authReady, authInitFailed, signedOut, tokenRefreshed, type AuthUser } from '@/store/slices/authSlice'
+import {
+  authReady,
+  authInitFailed,
+  signedOut,
+  tokenRefreshed,
+  type AuthUser,
+} from '@/store/slices/authSlice'
 
 /**
  * Inicjalizuje Keycloak w trybie check-sso (bez wymuszania od razu logowania)
@@ -29,7 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const buildUser = (): AuthUser | null => {
       const parsed = keycloak.tokenParsed as
-        | { sub?: string; preferred_username?: string; email?: string; given_name?: string; family_name?: string; realm_access?: { roles?: string[] } }
+        | {
+            sub?: string
+            preferred_username?: string
+            email?: string
+            given_name?: string
+            family_name?: string
+            realm_access?: { roles?: string[] }
+          }
         | undefined
       if (!parsed?.sub) {
         return null

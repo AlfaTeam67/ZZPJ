@@ -20,7 +20,14 @@ function RiskGauge({ score }: RiskGaugeProps) {
   return (
     <div className="relative size-16" role="img" aria-label={`Ryzyko ${clamped} na 10`}>
       <svg viewBox="0 0 64 64" className="size-16 -rotate-90">
-        <circle cx="32" cy="32" r={radius} stroke="var(--color-brand-neutral-800)" strokeWidth="4" fill="none" />
+        <circle
+          cx="32"
+          cy="32"
+          r={radius}
+          stroke="var(--color-brand-neutral-800)"
+          strokeWidth="4"
+          fill="none"
+        />
         <circle
           cx="32"
           cy="32"
