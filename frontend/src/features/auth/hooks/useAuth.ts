@@ -1,22 +1,42 @@
 import { useCallback } from 'react'
 
-import { loginDemo } from '@/features/auth/api'
-import { useAppDispatch, useAppSelector } from '@/hooks/store'
-import { setToken } from '@/store/slices/authSlice'
+import { getKeycloak } from '@/features/auth/keycloak'
+import { useAppSelector } from '@/hooks/store'
 
+/**
+ * Cienki hook nad Reduxem + Keycloak singletonem.
+ * Trzymamy stan w Reduxie żeby był spójny z resztą appki (axios interceptor itd.)
+ * a same akcje (login/logout) delegujemy do keycloak-js.
+ */
 export function useAuth() {
-  const token = useAppSelector((state) => state.auth.token)
-  const dispatch = useAppDispatch()
+  const { initialized, initError, token, user } = useAppSelector((state) => state.auth)
 
-  const login = useCallback(async (): Promise<void> => {
-    try {
-      const result = await loginDemo()
-      dispatch(setToken(result.accessToken))
-    } catch {
-      dispatch(setToken(null))
-      throw new Error('Login failed. Please try again.')
-    }
-  }, [dispatch])
+  const login = useCallback(
+    async (redirectPath?: string) => {
+      const keycloak = getKeycloak()
+      const redirectUri =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}${redirectPath ?? '/'}`
+          : undefined
+      await keycloak.login({ redirectUri })
+    },
+    []
+  )
 
-  return { token, login }
+  const logout = useCallback(async () => {
+    const keycloak = getKeycloak()
+    const redirectUri =
+      typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined
+    await keycloak.logout({ redirectUri })
+  }, [])
+
+  return {
+    initialized,
+    initError,
+    token,
+    user,
+    isAuthenticated: Boolean(token && user),
+    login,
+    logout,
+  }
 }
