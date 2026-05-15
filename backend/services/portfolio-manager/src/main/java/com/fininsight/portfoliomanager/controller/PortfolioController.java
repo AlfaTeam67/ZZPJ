@@ -3,7 +3,9 @@ package com.fininsight.portfoliomanager.controller;
 import com.fininsight.portfoliomanager.dto.portfolio.CreatePortfolioRequest;
 import com.fininsight.portfoliomanager.dto.portfolio.PortfolioResponse;
 import com.fininsight.portfoliomanager.dto.portfolio.UpdatePortfolioRequest;
+import com.fininsight.portfoliomanager.dto.valuation.PortfolioValuationResponse;
 import com.fininsight.portfoliomanager.service.PortfolioService;
+import com.fininsight.portfoliomanager.service.ValuationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +36,7 @@ import java.util.UUID;
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
+    private final ValuationService valuationService;
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
@@ -87,5 +90,16 @@ public class PortfolioController {
         UUID userId = UUID.fromString(jwt.getSubject());
         portfolioService.deletePortfolio(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/valuation")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Get portfolio valuation with current market prices")
+    public ResponseEntity<PortfolioValuationResponse> getPortfolioValuation(
+        @PathVariable UUID id,
+        @AuthenticationPrincipal Jwt jwt
+    ) {
+        var userId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(valuationService.valuate(id, userId, jwt.getTokenValue()));
     }
 }

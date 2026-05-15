@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fininsight.portfoliomanager.dto.portfolio.CreatePortfolioRequest;
 import com.fininsight.portfoliomanager.dto.portfolio.PortfolioResponse;
 import com.fininsight.portfoliomanager.dto.portfolio.UpdatePortfolioRequest;
+import com.fininsight.portfoliomanager.dto.valuation.AssetValuationDto;
+import com.fininsight.portfoliomanager.dto.valuation.PortfolioValuationResponse;
+import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
 import com.fininsight.portfoliomanager.service.PortfolioService;
+import com.fininsight.portfoliomanager.service.ValuationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,6 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +54,9 @@ class PortfolioControllerTest {
 
     @MockBean
     private PortfolioService portfolioService;
+
+    @MockBean
+    private ValuationService valuationService;
 
     @MockBean
     private JwtDecoder jwtDecoder;
@@ -146,6 +154,34 @@ class PortfolioControllerTest {
         mockMvc.perform(delete("/api/portfolios/{id}", PORTFOLIO_ID)
                 .with(userJwt()))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getPortfolioValuation_returnsValuationWithStatus200() throws Exception {
+        var assetValuation = new AssetValuationDto(
+            "AAPL", AssetType.STOCK,
+            new BigDecimal("10"), new BigDecimal("150.00"),
+            new BigDecimal("180.00"), new BigDecimal("1800.00"),
+            new BigDecimal("300.00"), new BigDecimal("20.0000")
+        );
+        var response = new PortfolioValuationResponse(
+            PORTFOLIO_ID, new BigDecimal("1800.00"), List.of(assetValuation), Instant.now()
+        );
+        when(valuationService.valuate(eq(PORTFOLIO_ID), eq(USER_ID), any())).thenReturn(response);
+
+        mockMvc.perform(get("/api/portfolios/{id}/valuation", PORTFOLIO_ID)
+                .with(userJwt()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.portfolioId").value(PORTFOLIO_ID.toString()))
+            .andExpect(jsonPath("$.totalValue").value(1800.00))
+            .andExpect(jsonPath("$.assets[0].symbol").value("AAPL"))
+            .andExpect(jsonPath("$.assets[0].currentPrice").value(180.00));
+    }
+
+    @Test
+    void getPortfolioValuation_returns401WithoutAuthentication() throws Exception {
+        mockMvc.perform(get("/api/portfolios/{id}/valuation", PORTFOLIO_ID))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
