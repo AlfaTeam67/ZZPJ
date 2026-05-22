@@ -59,7 +59,10 @@ export function CreatePortfolioForm() {
           </Button>
           {mutation.isError && (
             <p className="text-sm text-destructive mt-2">
-              Error: {(mutation.error as any)?.response?.data?.message || 'Failed to create portfolio'}
+              Error:{' '}
+              {mutation.error instanceof Error
+                ? mutation.error.message
+                : 'Failed to create portfolio'}
             </p>
           )}
         </form>

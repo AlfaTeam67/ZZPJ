@@ -5,7 +5,7 @@ import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { Badge } from '@/components/ui/badge'
 
 export function AdvisorRecommendations() {
-  const [risk, setRisk] = useState<'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE'>('MODERATE')
+  const [risk, setRisk] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM')
   const { data, isLoading, refetch, isFetching } = useRecommendations(risk)
 
   return (
@@ -17,7 +17,7 @@ export function AdvisorRecommendations() {
             <CardDescription>Personalized recommendations based on your holdings.</CardDescription>
           </div>
           <div className="flex gap-2 bg-muted p-1 rounded-md">
-            {(['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const).map((r) => (
+            {(['LOW', 'MEDIUM', 'HIGH'] as const).map((r) => (
               <button
                 key={r}
                 disabled={!data && !isLoading}
@@ -26,7 +26,7 @@ export function AdvisorRecommendations() {
                   risk === r ? 'bg-background shadow-sm font-medium' : 'hover:bg-background/50'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {r === 'MODERATE' ? 'MEDIUM' : r}
+                {r}
               </button>
             ))}
           </div>
@@ -44,14 +44,19 @@ export function AdvisorRecommendations() {
         ) : data ? (
           <>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary">Confidence: {(parseFloat(data.confidence) * 100).toFixed(0)}%</Badge>
+              <Badge variant="secondary">
+                Confidence: {(parseFloat(data.confidence) * 100).toFixed(0)}%
+              </Badge>
               <span className="text-xs text-muted-foreground">
                 Generated at: {new Date(data.timestamp).toLocaleString()}
               </span>
             </div>
             <ul className="grid gap-3">
               {data.recommendations.map((text, idx) => (
-                <li key={idx} className="flex gap-3 items-start p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <li
+                  key={idx}
+                  className="flex gap-3 items-start p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
                   <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
                     {idx + 1}
                   </div>
@@ -62,15 +67,13 @@ export function AdvisorRecommendations() {
           </>
         ) : (
           <div className="py-10 text-center border-2 border-dashed rounded-lg">
-            <p className="text-muted-foreground">No recommendations available. Create a portfolio first!</p>
+            <p className="text-muted-foreground">
+              No recommendations available. Create a portfolio first!
+            </p>
           </div>
         )}
-        
-        <Button 
-          className="w-full" 
-          onClick={() => refetch()} 
-          disabled={isLoading || isFetching}
-        >
+
+        <Button className="w-full" onClick={() => refetch()} disabled={isLoading || isFetching}>
           {isLoading || isFetching ? 'Generating...' : 'Refresh AI Analysis'}
         </Button>
       </CardContent>

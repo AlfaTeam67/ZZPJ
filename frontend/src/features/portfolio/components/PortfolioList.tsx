@@ -1,6 +1,5 @@
 import { usePortfolios } from '../hooks/usePortfolios'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/utils/formatMoney'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -44,8 +43,8 @@ export function PortfolioList() {
                 <Button asChild variant="outline" size="sm">
                   <Link to={`/portfolio/${portfolio.id}`}>Details</Link>
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   size="sm"
                   onClick={() => {
                     if (confirm('Are you sure you want to delete this portfolio?')) {
