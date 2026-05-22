@@ -5,7 +5,7 @@ import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { Badge } from '@/components/ui/badge'
 
 export function AdvisorRecommendations() {
-  const [risk, setRisk] = useState<'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE'>('MODERATE')
+  const [risk, setRisk] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM')
   const { data, isLoading, refetch, isFetching } = useRecommendations(risk)
 
   return (
@@ -17,7 +17,7 @@ export function AdvisorRecommendations() {
             <CardDescription>Personalized recommendations based on your holdings.</CardDescription>
           </div>
           <div className="flex gap-2 bg-muted p-1 rounded-md">
-            {(['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const).map((r) => (
+            {(['LOW', 'MEDIUM', 'HIGH'] as const).map((r) => (
               <button
                 key={r}
                 disabled={!data && !isLoading}
@@ -26,7 +26,7 @@ export function AdvisorRecommendations() {
                   risk === r ? 'bg-background shadow-sm font-medium' : 'hover:bg-background/50'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {r === 'MODERATE' ? 'MEDIUM' : r}
+                {r}
               </button>
             ))}
           </div>

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchRecommendations } from '@/features/advisor/api'
 import { fetchFirstPortfolio } from '@/features/portfolio/api'
 
-export function useRecommendations(riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' = 'MODERATE') {
+export function useRecommendations(riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM') {
   return useQuery({
     queryKey: ['advisor', 'recommendations', riskTolerance],
     queryFn: async () => {
