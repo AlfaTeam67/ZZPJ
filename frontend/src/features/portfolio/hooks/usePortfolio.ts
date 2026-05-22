@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { fetchPortfolio } from '@/features/portfolio/api'
+import { fetchFirstPortfolio } from '@/features/portfolio/api'
 
 export function usePortfolio() {
   return useQuery({
     queryKey: ['portfolio', 'overview'],
-    queryFn: fetchPortfolio,
+    queryFn: fetchFirstPortfolio,
   })
 }

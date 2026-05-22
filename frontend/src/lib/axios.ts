@@ -3,8 +3,10 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { getKeycloak } from '@/features/auth/keycloak'
 import { env } from '@/lib/env'
 
+const baseURL = import.meta.env.DEV ? '' : env.apiUrl
+
 export const apiClient = axios.create({
-  baseURL: env.apiUrl,
+  baseURL,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

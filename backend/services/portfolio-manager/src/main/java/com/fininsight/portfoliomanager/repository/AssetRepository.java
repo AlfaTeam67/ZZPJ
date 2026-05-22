@@ -19,7 +19,7 @@ public interface AssetRepository extends JpaRepository<Asset, UUID> {
     Optional<Asset> findByPortfolioIdAndId(UUID portfolioId, UUID id);
 
     @Query("""
-        SELECT a.portfolio.id AS portfolioId, COALESCE(SUM(a.quantity * a.avgBuyPrice), 0) AS totalValue
+        SELECT a.portfolio.id AS portfolioId, a.currency AS currency, COALESCE(SUM(a.quantity * a.avgBuyPrice), 0) AS totalValue
         FROM DataAsset a
         WHERE a.portfolio.id IN :portfolioIds
         GROUP BY a.portfolio.id, a.currency
@@ -27,7 +27,7 @@ public interface AssetRepository extends JpaRepository<Asset, UUID> {
     List<PortfolioCurrencyTotalValueProjection> findTotalValuesByPortfolioIds(@Param("portfolioIds") Collection<UUID> portfolioIds);
 
     @Query("""
-        SELECT a.portfolio.id AS portfolioId, COALESCE(SUM(a.quantity * a.avgBuyPrice), 0) AS totalValue
+        SELECT a.portfolio.id AS portfolioId, a.currency AS currency, COALESCE(SUM(a.quantity * a.avgBuyPrice), 0) AS totalValue
         FROM DataAsset a
         WHERE a.portfolio.id = :portfolioId
         GROUP BY a.portfolio.id, a.currency

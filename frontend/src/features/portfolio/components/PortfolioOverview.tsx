@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePortfolio } from '@/features/portfolio/hooks/usePortfolio'
 import { formatMoney } from '@/utils/formatMoney'
@@ -17,7 +19,18 @@ export function PortfolioOverview() {
   if (!data) {
     return (
       <Card>
-        <CardContent className="pt-6">No portfolio data.</CardContent>
+        <CardHeader>
+          <CardTitle>Welcome to FinInsight</CardTitle>
+          <CardDescription>You don't have a portfolio yet.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Create your first portfolio to start tracking your assets and get AI recommendations.
+          </p>
+          <Button asChild>
+            <Link to="/portfolio">Create Portfolio</Link>
+          </Button>
+        </CardContent>
       </Card>
     )
   }

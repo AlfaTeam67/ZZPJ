@@ -6,6 +6,7 @@ import { AdvisorPage } from '@/pages/AdvisorPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { PortfolioPage } from '@/pages/PortfolioPage'
+import { PortfolioDetailsPage } from '@/pages/PortfolioDetailsPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="portfolio" element={<PortfolioPage />} />
+          <Route path="portfolio/:id" element={<PortfolioDetailsPage />} />
           <Route path="advisor" element={<AdvisorPage />} />
         </Route>
       </Route>
