@@ -9,6 +9,7 @@ import './index.css'
 import { setupAxiosInterceptors } from '@/lib/axios'
 import { queryClient } from '@/lib/queryClient'
 import { store } from '@/store/store'
+import { setAuth, logout } from '@/store/slices/authSlice'
 
 const rootElement = document.getElementById('root')
 
@@ -16,7 +17,22 @@ if (!rootElement) {
   throw new Error("Root element '#root' was not found.")
 }
 
-setupAxiosInterceptors(() => store.getState().auth.token)
+setupAxiosInterceptors(
+  () => store.getState().auth.token,
+  () => store.getState().auth.refreshToken,
+  (tokens) => {
+    store.dispatch(setAuth({ token: tokens.accessToken, refreshToken: tokens.refreshToken }))
+  },
+  () => {
+    store.dispatch(logout())
+  }
+)
+
+// Expose store to window in dev for easy token injection during local testing
+if (import.meta.env.DEV) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(window as any).store = store
+}
 
 createRoot(rootElement).render(
   <StrictMode>
