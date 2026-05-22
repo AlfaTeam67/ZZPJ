@@ -1,18 +1,21 @@
-import type { Recommendation } from '@/types/advisor'
+import type { Recommendation, NewsItem } from '@/types/advisor'
+import { apiClient } from '@/lib/axios'
+import { env } from '@/lib/env'
 
-export async function fetchRecommendations(): Promise<Recommendation[]> {
-  return [
-    {
-      id: 'rec-1',
-      title: 'Rebalance tech exposure',
-      confidence: '0.82',
-      summary: 'Reduce concentration in large-cap tech by adding defensive ETF position.',
-    },
-    {
-      id: 'rec-2',
-      title: 'Set monthly DCA plan',
-      confidence: '0.74',
-      summary: 'Automate monthly recurring buy to smooth volatility in entry points.',
-    },
-  ]
+export interface RecommendationRequest {
+  userId: string
+  portfolioId?: string
+  riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH'
+  includeNews?: boolean
+}
+
+export interface RecommendationResponse {
+  recommendations: string[]
+  confidence: string
+  timestamp: string
+}
+
+export async function fetchRecommendations(payload: RecommendationRequest): Promise<RecommendationResponse> {
+  const { data } = await apiClient.post<RecommendationResponse>(`${env.advisorApiUrl}/api/recommendations`, payload)
+  return data
 }

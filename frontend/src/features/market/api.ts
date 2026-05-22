@@ -1,41 +1,56 @@
-import { toPriceTicker, type PriceSnapshot, type PriceTicker } from '@/types/market'
+import { toPriceTicker, type PriceSnapshot, type PriceTicker, type SupportedSymbol } from '@/types/market'
+import { apiClient } from '@/lib/axios'
+import { env } from '@/lib/env'
+
+export interface SymbolDto {
+  symbol: string
+  type: 'STOCK' | 'CRYPTO' | 'FOREX'
+  apiSource: string
+  active: boolean
+  baseCurrency?: string
+}
+
+export interface MarketPriceDto {
+  symbol: string
+  source: string
+  price: string
+  currency: string
+  changePct24h?: string
+  volume24h?: string
+  fetchedAt?: string
+}
 
 export async function fetchMarketSnapshots(): Promise<PriceSnapshot[]> {
-  return [
-    {
-      id: '1',
-      symbol: 'AAPL',
-      source: 'ALPHA_VANTAGE',
-      price: '184.65',
-      currency: 'USD',
-      changePct24h: '1.24',
-      volume24h: '52451321.21',
-      fetchedAt: '2026-04-02T08:55:00.000Z',
-    },
-    {
-      id: '2',
-      symbol: 'MSFT',
-      source: 'ALPHA_VANTAGE',
-      price: '412.31',
-      currency: 'USD',
-      changePct24h: '-0.34',
-      volume24h: '33451102.42',
-      fetchedAt: '2026-04-02T08:55:00.000Z',
-    },
-    {
-      id: '3',
-      symbol: 'NVDA',
-      source: 'ALPHA_VANTAGE',
-      price: '957.18',
-      currency: 'USD',
-      changePct24h: '2.48',
-      volume24h: '75421345.66',
-      fetchedAt: '2026-04-02T08:55:00.000Z',
-    },
-  ]
+  const { data } = await apiClient.get<PriceSnapshot[]>(`${env.marketApiUrl}/api/market-prices/latest`)
+  return data
 }
 
 export async function fetchPriceTicker(): Promise<PriceTicker[]> {
   const snapshots = await fetchMarketSnapshots()
   return snapshots.map(toPriceTicker)
+}
+
+export async function fetchPriceHistory(ticker: string): Promise<PriceSnapshot[]> {
+  const { data } = await apiClient.get<PriceSnapshot[]>(`${env.marketApiUrl}/api/market-prices/symbol/${ticker}`)
+  return data
+}
+
+export async function addMarketPrice(priceDto: MarketPriceDto): Promise<PriceSnapshot> {
+  const { data } = await apiClient.post<PriceSnapshot>(`${env.marketApiUrl}/api/market-prices`, priceDto)
+  return data
+}
+
+export async function fetchSymbols(): Promise<SupportedSymbol[]> {
+  const { data } = await apiClient.get<SupportedSymbol[]>(`${env.marketApiUrl}/api/symbols`)
+  return data
+}
+
+export async function fetchSymbolDetails(symbol: string): Promise<SupportedSymbol> {
+  const { data } = await apiClient.get<SupportedSymbol>(`${env.marketApiUrl}/api/symbols/${symbol}`)
+  return data
+}
+
+export async function createSymbol(symbolDto: SymbolDto): Promise<SupportedSymbol> {
+  const { data } = await apiClient.post<SupportedSymbol>(`${env.marketApiUrl}/api/symbols`, symbolDto)
+  return data
 }
