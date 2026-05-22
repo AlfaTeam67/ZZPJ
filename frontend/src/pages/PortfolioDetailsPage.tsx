@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchPortfolio } from '@/features/portfolio/api'
 import { AssetList } from '@/features/portfolio/components/AssetList'
 import { AddAssetForm } from '@/features/portfolio/components/AddAssetForm'
+import { TransactionHistory } from '@/features/portfolio/components/TransactionHistory'
+import { TransactionForm } from '@/features/portfolio/components/TransactionForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatMoney } from '@/utils/formatMoney'
@@ -72,9 +74,11 @@ export function PortfolioDetailsPage() {
       <div className="grid gap-6 lg:grid-cols-[1fr,350px]">
         <div className="space-y-6">
           <AssetList portfolioId={portfolio.id} assets={portfolio.assets || []} />
+          <TransactionHistory portfolioId={portfolio.id} />
         </div>
         <aside className="space-y-6">
           <AddAssetForm portfolioId={portfolio.id} />
+          <TransactionForm portfolioId={portfolio.id} />
         </aside>
       </div>
     </div>

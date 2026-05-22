@@ -7,6 +7,7 @@ import { AuthPage } from '@/pages/AuthPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { PortfolioPage } from '@/pages/PortfolioPage'
 import { PortfolioDetailsPage } from '@/pages/PortfolioDetailsPage'
+import { MarketPage } from '@/pages/MarketPage'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route index element={<DashboardPage />} />
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="portfolio/:id" element={<PortfolioDetailsPage />} />
+        <Route path="market" element={<MarketPage />} />
         <Route path="advisor" element={<AdvisorPage />} />
       </Route>
       <Route path="login" element={<AuthPage />} />

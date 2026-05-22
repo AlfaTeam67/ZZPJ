@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 const navigation = [
   { to: '/', label: 'Dashboard' },
   { to: '/portfolio', label: 'Portfolio' },
+  { to: '/market', label: 'Market' },
   { to: '/advisor', label: 'AI Advisor' },
   { to: '/login', label: 'Auth' },
 ]
