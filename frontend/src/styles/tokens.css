@@ -1,0 +1,68 @@
+/*
+ * Fin-Insight palette tokens.
+ *
+ * Cztery rodziny kolorów: primary (ciepły beż), secondary (zieleń),
+ * tertiary (koral) i neutral. Każda rodzina ma rampę 50–950 do użycia
+ * w wykresach, badge'ach, tłach, ikonach itd.
+ *
+ * Wszystkie wartości w OKLCH zgodnie z konwencją reszty pliku index.css
+ * i Tailwind 4. Bazowe heksy z designu:
+ *   primary   #D4B896   (warm beige)
+ *   secondary #7DC498   (mint green)
+ *   tertiary  #D47070   (coral red)
+ *   neutral   #100F0D   (near black)
+ */
+
+:root {
+  /* primary - warm beige */
+  --color-primary-50: oklch(0.975 0.012 80);
+  --color-primary-100: oklch(0.945 0.02 80);
+  --color-primary-200: oklch(0.905 0.032 78);
+  --color-primary-300: oklch(0.85 0.046 76);
+  --color-primary-400: oklch(0.84 0.052 76); /* base #D4B896 */
+  --color-primary-500: oklch(0.78 0.057 75);
+  --color-primary-600: oklch(0.66 0.057 70);
+  --color-primary-700: oklch(0.54 0.052 68);
+  --color-primary-800: oklch(0.4 0.04 65);
+  --color-primary-900: oklch(0.28 0.03 62);
+  --color-primary-950: oklch(0.18 0.02 60);
+
+  /* secondary - mint green */
+  --color-secondary-50: oklch(0.965 0.025 160);
+  --color-secondary-100: oklch(0.94 0.04 158);
+  --color-secondary-200: oklch(0.895 0.065 156);
+  --color-secondary-300: oklch(0.85 0.085 154);
+  --color-secondary-400: oklch(0.79 0.105 154); /* base #7DC498 */
+  --color-secondary-500: oklch(0.72 0.115 152);
+  --color-secondary-600: oklch(0.62 0.115 150);
+  --color-secondary-700: oklch(0.5 0.1 148);
+  --color-secondary-800: oklch(0.38 0.08 146);
+  --color-secondary-900: oklch(0.27 0.06 144);
+  --color-secondary-950: oklch(0.18 0.04 142);
+
+  /* tertiary - coral / red */
+  --color-tertiary-50: oklch(0.97 0.012 22);
+  --color-tertiary-100: oklch(0.945 0.025 22);
+  --color-tertiary-200: oklch(0.895 0.05 22);
+  --color-tertiary-300: oklch(0.84 0.085 22);
+  --color-tertiary-400: oklch(0.7 0.13 22); /* base #D47070 */
+  --color-tertiary-500: oklch(0.62 0.155 22);
+  --color-tertiary-600: oklch(0.54 0.16 22);
+  --color-tertiary-700: oklch(0.45 0.15 22);
+  --color-tertiary-800: oklch(0.35 0.12 22);
+  --color-tertiary-900: oklch(0.25 0.08 22);
+  --color-tertiary-950: oklch(0.16 0.05 22);
+
+  /* neutral - near-black to off-white */
+  --color-neutral-50: oklch(0.98 0 0);
+  --color-neutral-100: oklch(0.945 0 0);
+  --color-neutral-200: oklch(0.89 0 0);
+  --color-neutral-300: oklch(0.8 0 0);
+  --color-neutral-400: oklch(0.68 0 0);
+  --color-neutral-500: oklch(0.555 0 0);
+  --color-neutral-600: oklch(0.43 0 0);
+  --color-neutral-700: oklch(0.32 0 0);
+  --color-neutral-800: oklch(0.22 0 0);
+  --color-neutral-900: oklch(0.13 0 0);
+  --color-neutral-950: oklch(0.05 0 0); /* base #100F0D */
+}

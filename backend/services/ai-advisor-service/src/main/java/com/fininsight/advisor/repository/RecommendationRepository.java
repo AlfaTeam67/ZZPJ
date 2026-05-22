@@ -13,5 +13,5 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
 
     Page<Recommendation> findByUserId(UUID userId, Pageable pageable);
 
-    Page<Recommendation> findByPortfolioId(UUID portfolioId, Pageable pageable);
+    Page<Recommendation> findByPortfolioIdAndUserId(UUID portfolioId, UUID userId, Pageable pageable);
 }

@@ -6,10 +6,10 @@ import { BrowserRouter } from 'react-router-dom'
 
 import App from './App'
 import './index.css'
+import { AuthProvider } from '@/features/auth/AuthProvider'
 import { setupAxiosInterceptors } from '@/lib/axios'
 import { queryClient } from '@/lib/queryClient'
 import { store } from '@/store/store'
-import { setAuth, logout } from '@/store/slices/authSlice'
 
 const rootElement = document.getElementById('root')
 
@@ -17,16 +17,7 @@ if (!rootElement) {
   throw new Error("Root element '#root' was not found.")
 }
 
-setupAxiosInterceptors(
-  () => store.getState().auth.token,
-  () => store.getState().auth.refreshToken,
-  (tokens) => {
-    store.dispatch(setAuth({ token: tokens.accessToken, refreshToken: tokens.refreshToken }))
-  },
-  () => {
-    store.dispatch(logout())
-  }
-)
+setupAxiosInterceptors(() => store.getState().auth.token)
 
 // Expose store to window in dev for easy token injection during local testing
 if (import.meta.env.DEV) {
@@ -39,7 +30,9 @@ createRoot(rootElement).render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </Provider>

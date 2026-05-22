@@ -1,5 +1,6 @@
 package com.fininsight.advisor.entity;
 
+import com.fininsight.advisor.entity.enums.NewsProvider;
 import com.fininsight.advisor.entity.enums.NewsSentiment;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "news_cache", indexes = {
-    @Index(name = "idx_news_expires", columnList = "expires_at")
+    @Index(name = "idx_news_expires", columnList = "expires_at"),
+    @Index(name = "idx_news_symbol_fetched", columnList = "symbol, fetched_at DESC")
 })
 @Getter
 @Setter
@@ -52,6 +54,16 @@ public class NewsCache {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private NewsSentiment sentiment;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private NewsProvider provider;
+
+    @Column(length = 20)
+    private String symbol;
+
+    @Column(name = "external_id", length = 200)
+    private String externalId;
 
     @Column(name = "fetched_at", nullable = false)
     private Instant fetchedAt;

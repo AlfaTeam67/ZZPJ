@@ -291,6 +291,10 @@ services:
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      # External API keys consumed by ai-advisor-service.
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
+      NEWSAPI_KEY: ${NEWSAPI_KEY:-}
     ports:
       - "${AI_ADVISOR_PORT:-8083}:8083"
     depends_on:
