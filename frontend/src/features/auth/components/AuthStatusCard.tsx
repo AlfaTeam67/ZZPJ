@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useKeycloak } from '@/features/auth/hooks/useKeycloak'
-import { cn } from '@/lib/utils'
 
 const navigation = [
   { to: '/', label: 'Dashboard' },
@@ -25,7 +24,7 @@ export function AuthStatusCard() {
       await login()
       setErrorMessage(null)
       // Redirect back to the page user was trying to access
-      const from = (location.state as any)?.from?.pathname || '/'
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/'
       navigate(from, { replace: true })
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Login failed.')
@@ -40,7 +39,7 @@ export function AuthStatusCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm">Status: {token ? 'authenticated' : 'not authenticated'}</p>
-        
+
         {token && (
           <div className="space-y-2 pt-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -61,7 +60,7 @@ export function AuthStatusCard() {
         )}
 
         {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
-        
+
         <Button type="button" onClick={() => void handleLoginClick()} className="w-full">
           Demo login (Refresh Token)
         </Button>

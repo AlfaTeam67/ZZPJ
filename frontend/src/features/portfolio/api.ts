@@ -67,8 +67,14 @@ export async function createPortfolio(request: CreatePortfolioRequest): Promise<
   return data
 }
 
-export async function updatePortfolio(id: string, request: UpdatePortfolioRequest): Promise<Portfolio> {
-  const { data } = await apiClient.put<Portfolio>(`${env.portfolioApiUrl}/api/portfolios/${id}`, request)
+export async function updatePortfolio(
+  id: string,
+  request: UpdatePortfolioRequest
+): Promise<Portfolio> {
+  const { data } = await apiClient.put<Portfolio>(
+    `${env.portfolioApiUrl}/api/portfolios/${id}`,
+    request
+  )
   return data
 }
 
@@ -77,12 +83,17 @@ export async function deletePortfolio(id: string): Promise<void> {
 }
 
 export async function fetchPortfolioValuation(id: string): Promise<PortfolioValuation> {
-  const { data } = await apiClient.get<PortfolioValuation>(`${env.portfolioApiUrl}/api/portfolios/${id}/valuation`)
+  const { data } = await apiClient.get<PortfolioValuation>(
+    `${env.portfolioApiUrl}/api/portfolios/${id}/valuation`
+  )
   return data
 }
 
 export async function addAsset(portfolioId: string, request: AddAssetRequest): Promise<Asset> {
-  const { data } = await apiClient.post<Asset>(`${env.portfolioApiUrl}/api/portfolios/${portfolioId}/assets`, request)
+  const { data } = await apiClient.post<Asset>(
+    `${env.portfolioApiUrl}/api/portfolios/${portfolioId}/assets`,
+    request
+  )
   return data
 }
 
@@ -91,11 +102,19 @@ export async function removeAsset(portfolioId: string, assetId: string): Promise
 }
 
 export async function fetchTransactions(portfolioId: string): Promise<Transaction[]> {
-  const { data } = await apiClient.get<Transaction[]>(`${env.portfolioApiUrl}/api/portfolios/${portfolioId}/transactions`)
+  const { data } = await apiClient.get<Transaction[]>(
+    `${env.portfolioApiUrl}/api/portfolios/${portfolioId}/transactions`
+  )
   return data
 }
 
-export async function createTransaction(portfolioId: string, request: TransactionRequest): Promise<Transaction> {
-  const { data } = await apiClient.post<Transaction>(`${env.portfolioApiUrl}/api/portfolios/${portfolioId}/transactions`, request)
+export async function createTransaction(
+  portfolioId: string,
+  request: TransactionRequest
+): Promise<Transaction> {
+  const { data } = await apiClient.post<Transaction>(
+    `${env.portfolioApiUrl}/api/portfolios/${portfolioId}/transactions`,
+    request
+  )
   return data
 }

@@ -36,9 +36,9 @@ export function setupAxiosInterceptors(
 
   // Response Interceptor for handling 401s
   let isRefreshing = false
-  let failedQueue: any[] = []
+  let failedQueue: { resolve: (value: unknown) => void; reject: (reason: unknown) => void }[] = []
 
-  const processQueue = (error: any, token: string | null = null) => {
+  const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach((prom) => {
       if (error) {
         prom.reject(error)
@@ -52,7 +52,7 @@ export function setupAxiosInterceptors(
   apiClient.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      const originalRequest = error.config as any
+      const originalRequest = error.config as AxiosError['config'] & { _retry?: boolean }
 
       // If error is 401 and we haven't retried yet
       if (error.response?.status === 401 && !originalRequest._retry) {
@@ -91,7 +91,7 @@ export function setupAxiosInterceptors(
 
           const { access_token, refresh_token } = response.data
           onTokenRefreshed({ accessToken: access_token, refreshToken: refresh_token })
-          
+
           processQueue(null, access_token)
           originalRequest.headers.Authorization = `Bearer ${access_token}`
           return apiClient(originalRequest)

@@ -1,5 +1,5 @@
 import { type Asset } from '@/types/portfolio/asset'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatMoney } from '@/utils/formatMoney'
 import { Button } from '@/components/ui/button'
@@ -56,13 +56,16 @@ export function AssetList({ portfolioId, assets }: AssetListProps) {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="font-bold">
-                    {formatMoney((parseFloat(asset.quantity) * parseFloat(asset.avgBuyPrice)).toString(), asset.currency)}
+                    {formatMoney(
+                      (parseFloat(asset.quantity) * parseFloat(asset.avgBuyPrice)).toString(),
+                      asset.currency
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground">Total Invested</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => {
                     if (confirm('Remove this asset?')) {
