@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, beforeAll, afterEach, afterAll } from 'vitest';
+import { server } from '@/test/mocks/server';
 
-// Mock Keycloak
+// 1. Mockowanie Keycloak (Zabezpieczenia)
 vi.mock('keycloak-js', () => ({
   default: vi.fn(() => ({
     init: vi.fn().mockResolvedValue(true),
@@ -30,9 +31,9 @@ vi.mock('keycloak-js', () => ({
   })),
 }));
 
-// Mock axios
+// 2. Mockowanie Axios (Klient HTTP)
 vi.mock('axios', () => {
-  const axios = {
+  const axiosMock = {
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
@@ -51,40 +52,13 @@ vi.mock('axios', () => {
     },
   };
 
-  axios.create = vi.fn(() => axios);
+  axiosMock.create = vi.fn(() => axiosMock);
   return {
-    default: axios,
+    default: axiosMock,
   };
 });
 
-// Mock React Query
-vi.mock('@tanstack/react-query', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    useQuery: vi.fn(() => ({
-      data: undefined,
-      isLoading: false,
-      isError: false,
-      error: null,
-    })),
-    useMutation: vi.fn(() => ({
-      mutate: vi.fn(),
-      mutateAsync: vi.fn(),
-      isLoading: false,
-      isError: false,
-      error: null,
-      data: undefined,
-    })),
-    useQueryClient: vi.fn(() => ({
-      invalidateQueries: vi.fn(),
-      setQueryData: vi.fn(),
-      getQueryData: vi.fn(),
-    })),
-  };
-});
-
-// Mock window.matchMedia
+// 3. Mockowanie API przeglądarkowych (MatchMedia i IntersectionObserver)
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({
@@ -99,14 +73,17 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-})) as any;
+// POPRAWIONE: window zamiast global, aby zapobiec błędowi ts(2304)
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  value: vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  })),
+});
 
-// Suppress console errors in tests (optional)
+// 4. Ograniczanie zbędnych warningów w logach konsoli
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: any[]) => {
@@ -124,11 +101,9 @@ afterAll(() => {
   console.error = originalError;
 });
 
-// Setup MSW for API mocking
-import { server } from '@/test/mocks/server';
-
+// 5. Globalne uruchomienie serwera atrap sieciowych MSW
 beforeAll(() => {
-  server.listen();
+  server.listen({ onUnhandledRequest: 'bypass' });
 });
 
 afterEach(() => {
