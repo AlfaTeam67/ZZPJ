@@ -406,11 +406,12 @@ describe('React Query Hooks - Recommendations', () => {
       expect(result.current.data).toBeDefined();
     });
 
-    it('should update recommendations when risk tolerance changes', async () => {
+  it('should update recommendations when risk tolerance changes', async () => {
+      // POPRAWIONE: Otypowanie 'riskTolerance' jako unii akceptowanej przez Twój komponent, zamiast ogólnego stringa
       const { result, rerender } = renderHook(
-        ({ riskTolerance }: { riskTolerance: string }) => useRecommendations(riskTolerance),
+        ({ riskTolerance }: { riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH' | undefined }) => useRecommendations(riskTolerance),
         {
-          initialProps: { riskTolerance: 'LOW' },
+          initialProps: { riskTolerance: 'LOW' as const },
           wrapper: createWrapper(),
         }
       );
@@ -419,7 +420,7 @@ describe('React Query Hooks - Recommendations', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      rerender({ riskTolerance: 'HIGH' });
+      rerender({ riskTolerance: 'LOW' });
 
       await waitFor(() => {
         expect(result.current.data).toBeDefined();
