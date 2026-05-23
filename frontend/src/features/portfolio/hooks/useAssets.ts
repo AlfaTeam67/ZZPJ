@@ -1,15 +1,18 @@
-import { useMemo } from 'react'
-
 import { usePortfolio } from '@/features/portfolio/hooks/usePortfolio'
 
-export function useAssets() {
+export function useAssets(portfolioId: string | null) {
   const portfolioQuery = usePortfolio()
 
-  return useMemo(
-    () => ({
+  if (!portfolioId) {
+    return {
       ...portfolioQuery,
       data: [],
-    }),
-    [portfolioQuery]
-  )
+    }
+  }
+
+  // Derive assets from the current portfolio
+  return {
+    ...portfolioQuery,
+    data: portfolioQuery.data?.assets || [],
+  }
 }
