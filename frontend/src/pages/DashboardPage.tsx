@@ -1,16 +1,17 @@
-import { AdvisorRecommendations } from '@/features/advisor/components/AdvisorRecommendations'
-import { MarketTicker } from '@/features/market/components/MarketTicker'
-import { PortfolioOverview } from '@/features/portfolio/components/PortfolioOverview'
+import { AdvisorSnapshotCard } from '@/features/dashboard/components/AdvisorSnapshotCard'
+import { PerformanceChart } from '@/features/dashboard/components/PerformanceChart'
+import { PortfolioMetricHero } from '@/features/dashboard/components/PortfolioMetricHero'
+import { WatchlistCard } from '@/features/dashboard/components/WatchlistCard'
 
 export function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      <PortfolioMetricHero />
+      <PerformanceChart />
       <div className="grid gap-6 lg:grid-cols-2">
-        <PortfolioOverview />
-        <MarketTicker />
+        <WatchlistCard />
+        <AdvisorSnapshotCard />
       </div>
-      <AdvisorRecommendations />
     </div>
   )
 }

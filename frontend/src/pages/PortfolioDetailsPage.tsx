@@ -13,14 +13,18 @@ import type { Portfolio } from '@/types/portfolio/portfolio'
 export function PortfolioDetailsPage() {
   const { id } = useParams<{ id: string }>()
 
-  const { data: portfolio, isLoading, error } = useQuery<Portfolio>({
+  const {
+    data: portfolio,
+    isLoading,
+    error,
+  } = useQuery<Portfolio>({
     queryKey: ['portfolio', id],
     queryFn: () => fetchPortfolio(id!),
     enabled: !!id,
   })
 
   if (isLoading) return <div className="p-8 text-center">Loading portfolio details...</div>
-  
+
   if (error || !portfolio) {
     return (
       <div className="p-8 text-center">
@@ -36,27 +40,33 @@ export function PortfolioDetailsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/portfolio" className="text-sm text-muted-foreground hover:text-primary mb-2 inline-block">
+          <Link
+            to="/portfolio"
+            className="text-sm text-muted-foreground hover:text-primary mb-2 inline-block"
+          >
             ← Back to Portfolios
           </Link>
           <h1 className="text-3xl font-bold tracking-tight">{portfolio.name}</h1>
-          {portfolio.description && <p className="text-muted-foreground">{portfolio.description}</p>}
+          {portfolio.description && (
+            <p className="text-muted-foreground">{portfolio.description}</p>
+          )}
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
-        {portfolio.totals && Object.entries(portfolio.totals).map(([currency, total]) => (
-          <Card key={currency}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Value ({currency})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatMoney(total, currency)}</div>
-            </CardContent>
-          </Card>
-        ))}
+        {portfolio.totals &&
+          Object.entries(portfolio.totals).map(([currency, total]) => (
+            <Card key={currency}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Value ({currency})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatMoney(total, currency)}</div>
+              </CardContent>
+            </Card>
+          ))}
         {(!portfolio.totals || Object.keys(portfolio.totals).length === 0) && (
           <Card>
             <CardHeader className="pb-2">
