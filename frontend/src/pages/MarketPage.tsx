@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { usePriceTicker } from '@/features/market/hooks/usePriceTicker'
 import { usePriceHistory } from '@/features/market/hooks/usePriceHistory'
 import { formatMoney } from '@/utils/formatMoney'
@@ -39,9 +38,8 @@ export function MarketPage() {
                     <button
                       key={item.symbol}
                       onClick={() => setSelectedSymbol(item.symbol)}
-                      className={`w-full flex items-center justify-between rounded-lg border p-3 transition-colors ${
-                        selectedSymbol === item.symbol ? 'bg-muted border-primary' : 'hover:bg-muted/50'
-                      }`}
+                      className={`w-full flex items-center justify-between rounded-lg border p-3 transition-colors ${selectedSymbol === item.symbol ? 'bg-muted border-primary' : 'hover:bg-muted/50'
+                        }`}
                     >
                       <div className="text-left">
                         <p className="font-medium">{item.symbol}</p>
@@ -49,13 +47,12 @@ export function MarketPage() {
                       <div className="text-right">
                         <p className="font-medium">{formatMoney(item.price, item.currency)}</p>
                         <p
-                          className={`text-sm ${
-                            item.trend === 'UP'
+                          className={`text-sm ${item.trend === 'UP'
                               ? 'text-green-600'
                               : item.trend === 'DOWN'
                                 ? 'text-red-600'
                                 : 'text-slate-500'
-                          }`}
+                            }`}
                         >
                           {item.trend === 'UP' ? '+' : ''}
                           {item.changePct24h ?? '0'}%
@@ -86,13 +83,12 @@ export function MarketPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">24h Change</p>
                   <p
-                    className={`text-2xl font-bold ${
-                      selectedPrice.trend === 'UP'
+                    className={`text-2xl font-bold ${selectedPrice.trend === 'UP'
                         ? 'text-green-600'
                         : selectedPrice.trend === 'DOWN'
                           ? 'text-red-600'
                           : 'text-slate-500'
-                    }`}
+                      }`}
                   >
                     {selectedPrice.trend === 'UP' ? '+' : ''}
                     {selectedPrice.changePct24h ?? '0'}%

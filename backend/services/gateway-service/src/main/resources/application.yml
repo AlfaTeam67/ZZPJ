@@ -46,4 +46,4 @@ management:
       enabled: true
   health:
     redis:
-      enabled: false
+      enabled: true

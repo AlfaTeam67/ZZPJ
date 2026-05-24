@@ -40,7 +40,6 @@ export function TransactionForm({ portfolioId }: TransactionFormProps) {
     return null
   }
 
-  const selectedAsset = assets?.find((a) => a.id === formData.assetId)
   const total = formData.quantity && formData.price ? (parseFloat(formData.quantity) * parseFloat(formData.price)).toFixed(2) : '0.00'
 
   return (

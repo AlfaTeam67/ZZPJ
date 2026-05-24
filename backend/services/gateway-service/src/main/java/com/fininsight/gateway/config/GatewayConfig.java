@@ -16,8 +16,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Configuration
 public class GatewayConfig {
 
@@ -71,7 +69,7 @@ public class GatewayConfig {
             String swaggerPrefix = "/api-docs/" + prefix;
             String openApiPrefix = "/v3/api-docs/" + prefix;
             if (path.startsWith(swaggerPrefix + "/") || path.startsWith(openApiPrefix + "/")) {
-                String newPath = path.replace("/" + prefix, "");
+                String newPath = path.replaceFirst("/" + prefix, "");
                 ServerHttpRequest newRequest = request.mutate().path(newPath).build();
                 return chain.filter(exchange.mutate().request(newRequest).build());
             }
@@ -86,22 +84,9 @@ public class GatewayConfig {
 
     @Bean
     public KeyResolver userKeyResolver() {
-        return exchange -> {
-            ServerHttpRequest request = exchange.getRequest();
-            String token = extractBearerToken(request);
-            if (token != null) {
-                try {
-                    String payload = token.split("\\.")[1];
-                    String decoded = new String(java.util.Base64.getUrlDecoder().decode(payload));
-                    String sub = extractJsonField(decoded, "sub");
-                    if (sub != null) {
-                        return Mono.just(sub);
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-            return Mono.just("anonymous");
-        };
+        return exchange -> exchange.getPrincipal()
+            .map(java.security.Principal::getName)
+            .defaultIfEmpty("anonymous");
     }
 
     @Bean
@@ -109,21 +94,10 @@ public class GatewayConfig {
         return (exchange, chain) -> chain.filter(exchange)
             .then(Mono.fromRunnable(() -> {
                 ServerHttpResponse response = exchange.getResponse();
-                if (response.getStatusCode() == HttpStatusCode.valueOf(429)) {
-                    response.getHeaders().add(HttpHeaders.RETRY_AFTER, "1");
+                if (response.getStatusCode() == org.springframework.http.HttpStatus.TOO_MANY_REQUESTS) {
+                    response.getHeaders().set(org.springframework.http.HttpHeaders.RETRY_AFTER, "1");
                 }
             }));
-    }
-
-    private String extractBearerToken(ServerHttpRequest request) {
-        List<String> authHeaders = request.getHeaders().get("Authorization");
-        if (authHeaders != null && !authHeaders.isEmpty()) {
-            String header = authHeaders.get(0);
-            if (header.startsWith("Bearer ")) {
-                return header.substring(7);
-            }
-        }
-        return null;
     }
 
     private String extractJsonField(String json, String field) {
