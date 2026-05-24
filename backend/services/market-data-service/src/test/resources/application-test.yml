@@ -30,6 +30,15 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
 
+# Disable real scheduler and Finnhub calls in test environment
+market-data:
+  scheduler:
+    enabled: false
+
+finnhub:
+  base-url: http://localhost:9999
+  api-key: test-key
+
 logging:
   level:
     pl.alfateam: DEBUG

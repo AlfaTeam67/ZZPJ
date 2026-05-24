@@ -49,6 +49,11 @@ management:
     redis:
       enabled: false
 
+# Scheduler is enabled by default; override in test profile or via config server
+market-data:
+  scheduler:
+    enabled: true
+
 logging:
   level:
     org.springframework.security: DEBUG

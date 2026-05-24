@@ -249,6 +249,7 @@ services:
       SPRING_REDIS_PORT: ${REDIS_PORT_INTERNAL:-6379}
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
     ports:
       - "${MARKET_DATA_PORT:-8082}:8082"
     depends_on:
