@@ -71,10 +71,7 @@ export async function updatePortfolio(
   id: string,
   request: UpdatePortfolioRequest
 ): Promise<Portfolio> {
-  const { data } = await apiClient.put<Portfolio>(
-    `${env.apiUrl}/api/portfolios/${id}`,
-    request
-  )
+  const { data } = await apiClient.put<Portfolio>(`${env.apiUrl}/api/portfolios/${id}`, request)
   return data
 }
 

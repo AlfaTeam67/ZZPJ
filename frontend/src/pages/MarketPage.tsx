@@ -38,8 +38,11 @@ export function MarketPage() {
                     <button
                       key={item.symbol}
                       onClick={() => setSelectedSymbol(item.symbol)}
-                      className={`w-full flex items-center justify-between rounded-lg border p-3 transition-colors ${selectedSymbol === item.symbol ? 'bg-muted border-primary' : 'hover:bg-muted/50'
-                        }`}
+                      className={`w-full flex items-center justify-between rounded-lg border p-3 transition-colors ${
+                        selectedSymbol === item.symbol
+                          ? 'bg-muted border-primary'
+                          : 'hover:bg-muted/50'
+                      }`}
                     >
                       <div className="text-left">
                         <p className="font-medium">{item.symbol}</p>
@@ -47,12 +50,13 @@ export function MarketPage() {
                       <div className="text-right">
                         <p className="font-medium">{formatMoney(item.price, item.currency)}</p>
                         <p
-                          className={`text-sm ${item.trend === 'UP'
+                          className={`text-sm ${
+                            item.trend === 'UP'
                               ? 'text-green-600'
                               : item.trend === 'DOWN'
                                 ? 'text-red-600'
                                 : 'text-slate-500'
-                            }`}
+                          }`}
                         >
                           {item.trend === 'UP' ? '+' : ''}
                           {item.changePct24h ?? '0'}%
@@ -77,18 +81,21 @@ export function MarketPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Current Price</p>
-                  <p className="text-3xl font-bold">{formatMoney(selectedPrice.price, selectedPrice.currency)}</p>
+                  <p className="text-3xl font-bold">
+                    {formatMoney(selectedPrice.price, selectedPrice.currency)}
+                  </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-muted-foreground">24h Change</p>
                   <p
-                    className={`text-2xl font-bold ${selectedPrice.trend === 'UP'
+                    className={`text-2xl font-bold ${
+                      selectedPrice.trend === 'UP'
                         ? 'text-green-600'
                         : selectedPrice.trend === 'DOWN'
                           ? 'text-red-600'
                           : 'text-slate-500'
-                      }`}
+                    }`}
                   >
                     {selectedPrice.trend === 'UP' ? '+' : ''}
                     {selectedPrice.changePct24h ?? '0'}%
@@ -104,7 +111,9 @@ export function MarketPage() {
                           <span className="text-muted-foreground">
                             {new Date(snapshot.fetchedAt).toLocaleString()}
                           </span>
-                          <span className="font-medium">{formatMoney(snapshot.price, snapshot.currency)}</span>
+                          <span className="font-medium">
+                            {formatMoney(snapshot.price, snapshot.currency)}
+                          </span>
                         </div>
                       ))}
                     </div>
