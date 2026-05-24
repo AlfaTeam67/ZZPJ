@@ -1,10 +1,21 @@
 -- V5__seed_demo_data.sql
 -- Demo data for testing the application
 -- Demo user (Keycloak): testuser / test123
--- Demo user UUID: should match the user ID from Keycloak (treating email as identifier)
+--
+-- IMPORTANT: UUID HANDLING
+-- In production, users are created automatically when they first log in via Keycloak.
+-- The JWT token's 'sub' claim contains the Keycloak-assigned UUID.
+-- This seed data uses a fixed UUID for demo purposes only.
+-- 
+-- To find the actual Keycloak UUID for testuser:
+--   1. Login with testuser/test123 at http://localhost:5173
+--   2. Check browser DevTools Console: window.store.getState().auth.user.id
+--   3. Update the UUID below if needed, or update Keycloak user ID if you prefer fixed IDs
+--
+-- For fixed UUIDs in Keycloak, edit fin-insight-realm.json users[].id before import.
 
 -- Insert demo user (if not exists)
--- Note: In production, users should come from Keycloak. This is just for local testing.
+-- Note: This is automatically handled on first login. Can be omitted if Keycloak users are used.
 INSERT INTO users (id, created_at)
 VALUES ('123e4567-e89b-12d3-a456-426614174000', NOW())
 ON CONFLICT (id) DO NOTHING;

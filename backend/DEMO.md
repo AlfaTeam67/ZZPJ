@@ -56,12 +56,11 @@ docker exec -it fin-insight-portfolio-db psql -U user -d portfolio -c "SELECT * 
 Expected output: Should show 3 demo portfolios
 
 ```
-                   id                   |                 user_id                  |          name          |         description          |         created_at         |         updated_at         
-----------------------------------------+----------------------------------------+------------------------+------------------------------+-----------------------------+-----------------------------
- 223e4567-e89b-12d3-a456-426614174001  | 123e4567-e89b-12d3-a456-426614174000 | Growth Portfolio       | Long-term stock investments  | 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
- 223e4567-e89b-12d3-a456-426614174002  | 123e4567-e89b-12d3-a456-426614174000 | Crypto Holdings        | Digital assets ...           | 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
- 223e4567-e89b-12d3-a456-426614174003  | 123e4567-e89b-12d3-a456-426614174000 | Forex Trading          | Currency exchange ...       | 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
- 223e4567-e89b-12d3-a456-426614174004  | 123e4567-e89b-12d3-a456-426614174000 | Diversified Mixed...   | Mix of stocks, crypto...    | 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
+                   id                   |                 user_id                  |           name            |            description            |         created_at         |         updated_at         
+----------------------------------------+----------------------------------------+----------------------------+-------------------------------------+-----------------------------+-----------------------------
+ 223e4567-e89b-12d3-a456-426614174001  | 123e4567-e89b-12d3-a456-426614174000 | Growth Portfolio           | Long-term stock investments       | 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
+ 223e4567-e89b-12d3-a456-426614174002  | 123e4567-e89b-12d3-a456-426614174000 | Crypto Holdings            | Digital assets and cryptocurrencies| 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
+ 223e4567-e89b-12d3-a456-426614174003  | 123e4567-e89b-12d3-a456-426614174000 | Diversified Mixed Assets   | Mix of stocks and cryptocurrencies | 2024-05-24 12:00:00+00     | 2024-05-24 12:00:00+00
 ```
 
 ### 3. Login with Demo User
@@ -123,9 +122,9 @@ Digital assets and cryptocurrencies with volatility.
 - BTC: 0.5 BTC purchased
 - ETH: Multiple purchases (3 + 2 coins)
 
-### Portfolio 3: Diversified Mixed Assets
+### Portfolio 3: Diversified Mixed Assets ✅
 
-Combination of stocks and cryptocurrencies.
+Combination of stocks and cryptocurrencies for balanced exposure.
 
 **Assets:**
 | Symbol  | Type   | Quantity | Avg Buy Price | Currency |

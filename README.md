@@ -255,7 +255,7 @@ Scenariusz obejmuje:
 - ✅ **API Gateway** — Request routing, load balancing, circuit breakers
 - ✅ **Configuration Management** — Centralized config server, environment-specific profiles
 - ✅ **Distributed Tracing** — Tracking requests across services
-- **Lesson:** Microservices złożoność rosnąć z liczbą serwisów; potrzebne monitoring i logging
+- **Lesson:** Złożoność mikroserwisów rośnie wraz z ich liczbą; potrzebny jest monitoring i logging
 
 #### OAuth2 & Keycloak
 - ✅ **OpenID Connect** — Authorization Code Flow with PKCE
@@ -282,7 +282,7 @@ Scenariusz obejmuje:
 - ✅ **React Query** — Server state management, caching, auto-refetch
 - ✅ **Redux Toolkit** — Client state (auth, UI) vs server state (portfolio data)
 - ✅ **Component Organization** — Feature-based folder structure
-- **Lesson:** Separacja server state i client state jest crucially importante
+- **Lesson:** Separacja server state i client state jest kluczowa dla wydajności i maintainability
 
 #### Authentication Flow
 - ✅ **Keycloak JS Adapter** — Token management, automatic refresh
