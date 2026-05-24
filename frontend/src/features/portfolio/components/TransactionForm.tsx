@@ -40,8 +40,10 @@ export function TransactionForm({ portfolioId }: TransactionFormProps) {
     return null
   }
 
-  const selectedAsset = assets?.find((a) => a.id === formData.assetId)
-  const total = formData.quantity && formData.price ? (parseFloat(formData.quantity) * parseFloat(formData.price)).toFixed(2) : '0.00'
+  const total =
+    formData.quantity && formData.price
+      ? (parseFloat(formData.quantity) * parseFloat(formData.price)).toFixed(2)
+      : '0.00'
 
   return (
     <Card>
@@ -153,7 +155,9 @@ export function TransactionForm({ portfolioId }: TransactionFormProps) {
 
           <Button
             onClick={() => createMutation.mutate()}
-            disabled={!formData.quantity || !formData.price || !formData.assetId || createMutation.isPending}
+            disabled={
+              !formData.quantity || !formData.price || !formData.assetId || createMutation.isPending
+            }
             className="w-full"
           >
             {createMutation.isPending ? 'Saving...' : 'Record Transaction'}

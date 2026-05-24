@@ -26,9 +26,7 @@ export interface MarketPriceDto {
 }
 
 export async function fetchMarketSnapshots(): Promise<PriceSnapshot[]> {
-  const { data } = await apiClient.get<PriceSnapshot[]>(
-    `${env.marketApiUrl}/api/market-prices/latest`
-  )
+  const { data } = await apiClient.get<PriceSnapshot[]>(`${env.apiUrl}/api/market-prices/latest`)
   return data
 }
 
@@ -39,33 +37,27 @@ export async function fetchPriceTicker(): Promise<PriceTicker[]> {
 
 export async function fetchPriceHistory(ticker: string): Promise<PriceSnapshot[]> {
   const { data } = await apiClient.get<PriceSnapshot[]>(
-    `${env.marketApiUrl}/api/market-prices/symbol/${ticker}`
+    `${env.apiUrl}/api/market-prices/symbol/${ticker}`
   )
   return data
 }
 
 export async function addMarketPrice(priceDto: MarketPriceDto): Promise<PriceSnapshot> {
-  const { data } = await apiClient.post<PriceSnapshot>(
-    `${env.marketApiUrl}/api/market-prices`,
-    priceDto
-  )
+  const { data } = await apiClient.post<PriceSnapshot>(`${env.apiUrl}/api/market-prices`, priceDto)
   return data
 }
 
 export async function fetchSymbols(): Promise<SupportedSymbol[]> {
-  const { data } = await apiClient.get<SupportedSymbol[]>(`${env.marketApiUrl}/api/symbols`)
+  const { data } = await apiClient.get<SupportedSymbol[]>(`${env.apiUrl}/api/symbols`)
   return data
 }
 
 export async function fetchSymbolDetails(symbol: string): Promise<SupportedSymbol> {
-  const { data } = await apiClient.get<SupportedSymbol>(`${env.marketApiUrl}/api/symbols/${symbol}`)
+  const { data } = await apiClient.get<SupportedSymbol>(`${env.apiUrl}/api/symbols/${symbol}`)
   return data
 }
 
 export async function createSymbol(symbolDto: SymbolDto): Promise<SupportedSymbol> {
-  const { data } = await apiClient.post<SupportedSymbol>(
-    `${env.marketApiUrl}/api/symbols`,
-    symbolDto
-  )
+  const { data } = await apiClient.post<SupportedSymbol>(`${env.apiUrl}/api/symbols`, symbolDto)
   return data
 }

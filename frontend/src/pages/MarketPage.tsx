@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { usePriceTicker } from '@/features/market/hooks/usePriceTicker'
 import { usePriceHistory } from '@/features/market/hooks/usePriceHistory'
 import { formatMoney } from '@/utils/formatMoney'
@@ -40,7 +39,9 @@ export function MarketPage() {
                       key={item.symbol}
                       onClick={() => setSelectedSymbol(item.symbol)}
                       className={`w-full flex items-center justify-between rounded-lg border p-3 transition-colors ${
-                        selectedSymbol === item.symbol ? 'bg-muted border-primary' : 'hover:bg-muted/50'
+                        selectedSymbol === item.symbol
+                          ? 'bg-muted border-primary'
+                          : 'hover:bg-muted/50'
                       }`}
                     >
                       <div className="text-left">
@@ -80,7 +81,9 @@ export function MarketPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Current Price</p>
-                  <p className="text-3xl font-bold">{formatMoney(selectedPrice.price, selectedPrice.currency)}</p>
+                  <p className="text-3xl font-bold">
+                    {formatMoney(selectedPrice.price, selectedPrice.currency)}
+                  </p>
                 </div>
 
                 <div>
@@ -108,7 +111,9 @@ export function MarketPage() {
                           <span className="text-muted-foreground">
                             {new Date(snapshot.fetchedAt).toLocaleString()}
                           </span>
-                          <span className="font-medium">{formatMoney(snapshot.price, snapshot.currency)}</span>
+                          <span className="font-medium">
+                            {formatMoney(snapshot.price, snapshot.currency)}
+                          </span>
                         </div>
                       ))}
                     </div>
