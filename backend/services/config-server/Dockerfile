@@ -20,6 +20,7 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 VOLUME /tmp
 COPY --from=builder /app/services/config-server/build/libs/*.jar app.jar
-COPY docker/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+COPY docker/entrypoint.sh /app/entrypoint.sh.tmp
+RUN dos2unix /app/entrypoint.sh.tmp && mv /app/entrypoint.sh.tmp /app/entrypoint.sh && chmod +x /app/entrypoint.sh || \
+    (tr -d '\r' < /app/entrypoint.sh.tmp > /app/entrypoint.sh && chmod +x /app/entrypoint.sh && rm /app/entrypoint.sh.tmp)
 ENTRYPOINT ["/app/entrypoint.sh"]
