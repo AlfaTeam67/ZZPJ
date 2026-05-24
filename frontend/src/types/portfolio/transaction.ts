@@ -4,6 +4,7 @@ export interface Transaction {
   id: string
   assetId: string
   portfolioId: string
+  symbol: string
   type: TransactionType
   quantity: string // string — BigDecimal
   price: string // string — BigDecimal
