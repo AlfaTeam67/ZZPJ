@@ -96,10 +96,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       )
     })
 
+    const silentRedirectUri =
+      import.meta.env.VITE_KEYCLOAK_SILENT_REDIRECT_URI ||
+      `${window.location.origin}/silent-check-sso.html`
+
     Promise.race([
       keycloak.init({
         pkceMethod: 'S256',
-        checkLoginIframe: false,
+        checkLoginIframe: true,
+        silentCheckSsoRedirectUri: silentRedirectUri,
       }),
       timeoutPromise,
     ])

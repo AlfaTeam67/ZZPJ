@@ -12,19 +12,10 @@ function readEnvOptional(name: string, fallback: string): string {
 }
 
 const isDev = import.meta.env.DEV
-const apiUrl = readEnv('VITE_API_URL')
+const apiUrl = isDev ? '' : readEnv('VITE_API_URL')
 
 export const env = {
   apiUrl,
-  portfolioApiUrl: isDev
-    ? ''
-    : readEnvOptional('VITE_PORTFOLIO_API_URL', apiUrl || 'http://localhost:8081'),
-  marketApiUrl: isDev
-    ? ''
-    : readEnvOptional('VITE_MARKET_API_URL', apiUrl || 'http://localhost:8082'),
-  advisorApiUrl: isDev
-    ? ''
-    : readEnvOptional('VITE_ADVISOR_API_URL', apiUrl || 'http://localhost:8083'),
   keycloak: {
     url: readEnvOptional('VITE_KEYCLOAK_URL', 'http://localhost:8080'),
     realm: readEnvOptional('VITE_KEYCLOAK_REALM', 'fin-insight'),

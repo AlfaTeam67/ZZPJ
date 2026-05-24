@@ -18,7 +18,7 @@ export async function fetchRecommendations(
   payload: RecommendationRequest
 ): Promise<RecommendationResponse> {
   const { data } = await apiClient.post<RecommendationResponse>(
-    `${env.advisorApiUrl}/api/recommendations`,
+    `${env.apiUrl}/api/recommendations`,
     payload
   )
   return data
