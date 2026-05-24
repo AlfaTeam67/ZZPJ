@@ -132,7 +132,7 @@ export const handlers = [
 
   // Dodawanie nowej transakcji (createTransaction)
   http.post(`${PORTFOLIO_API}/api/portfolios/:portfolioId/transactions`, async ({ request, params }) => {
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as Record<string, unknown> & { executedAt?: string };
     return HttpResponse.json(
       {
         id: 'mocked-tx-id',
