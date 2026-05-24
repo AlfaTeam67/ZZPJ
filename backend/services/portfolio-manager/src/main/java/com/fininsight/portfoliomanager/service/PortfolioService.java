@@ -36,6 +36,10 @@ public class PortfolioService {
     @Transactional(readOnly = true)
     public List<PortfolioResponse> getPortfoliosForUser(UUID userId) {
         List<Portfolio> portfolios = portfolioRepository.findByUserId(userId);
+        if (portfolios.isEmpty()) {
+            return List.of();
+        }
+
         Map<UUID, List<AssetRepository.PortfolioCurrencyTotalValueProjection>> totalsByPortfolioId = assetRepository.findTotalValuesByPortfolioIds(
             portfolios.stream().map(Portfolio::getId).toList()
         ).stream().collect(Collectors.groupingBy(
