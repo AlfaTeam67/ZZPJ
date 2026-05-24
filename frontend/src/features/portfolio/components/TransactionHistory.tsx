@@ -42,9 +42,7 @@ export function TransactionHistory({ portfolioId }: TransactionHistoryProps) {
                   <tr key={tx.id} className="border-b hover:bg-muted/50">
                     <td className="py-2 px-2">{new Date(tx.executedAt).toLocaleDateString()}</td>
                     <td className="py-2 px-2">
-                      <Badge variant={tx.type === 'BUY' ? 'default' : 'outline'}>
-                        {tx.type}
-                      </Badge>
+                      <Badge variant={tx.type === 'BUY' ? 'default' : 'outline'}>{tx.type}</Badge>
                     </td>
                     <td className="py-2 px-2 font-medium">{tx.symbol}</td>
                     <td className="py-2 px-2 text-right">{tx.quantity}</td>
