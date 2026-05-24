@@ -7,9 +7,7 @@ VALUES
     ('TSLA', 'STOCK', 'alphavantage', TRUE, 'USD', NOW()),
     ('AMZN', 'STOCK', 'alphavantage', TRUE, 'USD', NOW()),
     ('BTC-USD', 'CRYPTO', 'coingecko', TRUE, 'USD', NOW()),
-    ('ETH-USD', 'CRYPTO', 'coingecko', TRUE, 'USD', NOW()),
-    ('EUR', 'FOREX', 'nbp', TRUE, 'PLN', NOW()),
-    ('GBP', 'FOREX', 'nbp', TRUE, 'PLN', NOW());
+    ('ETH-USD', 'CRYPTO', 'coingecko', TRUE, 'USD', NOW());
 
 -- Insert latest price snapshots
 INSERT INTO price_snapshots (symbol, source, price, currency, change_pct_24h, volume_24h, fetched_at)
@@ -20,6 +18,4 @@ VALUES
     ('TSLA', 'alphavantage', '242.80', 'USD', '-1.50', '118000000', NOW()),
     ('AMZN', 'alphavantage', '187.30', 'USD', '0.45', '35600000', NOW()),
     ('BTC-USD', 'coingecko', '62543.50', 'USD', '3.75', '31500000000', NOW()),
-    ('ETH-USD', 'coingecko', '3428.20', 'USD', '2.50', '14800000000', NOW()),
-    ('EUR', 'nbp', '4.25', 'PLN', '0.10', '0', NOW()),
-    ('GBP', 'nbp', '5.12', 'PLN', '-0.05', '0', NOW());
+    ('ETH-USD', 'coingecko', '3428.20', 'USD', '2.50', '14800000000', NOW());
