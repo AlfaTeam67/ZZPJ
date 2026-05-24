@@ -155,5 +155,8 @@ export const createMockKeycloak = (overrides = {}) => ({
   ...overrides,
 });
 
-// Re-export testing library utilities for convenience
+// Re-export testing library utilities for convenience.
+// This file is a test helper, not an HMR-affected component module, so the
+// react-refresh rule does not apply meaningfully here.
+// eslint-disable-next-line react-refresh/only-export-components
 export * from '@testing-library/react';

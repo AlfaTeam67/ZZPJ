@@ -2,11 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { configureStore, PreloadedState } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authReducer } from '@/store/slices/authSlice';
 
-const createTestStore = (preloadedState?: PreloadedState<any>) => {
+type AuthPreloadedState = {
+  auth: {
+    token: string | null;
+    user: unknown;
+  };
+};
+
+const createTestStore = (preloadedState?: AuthPreloadedState) => {
   return configureStore({
     reducer: {
       auth: authReducer,

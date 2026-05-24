@@ -86,7 +86,7 @@ Object.defineProperty(window, 'IntersectionObserver', {
 // 4. Ograniczanie zbędnych warningów w logach konsoli
 const originalError = console.error;
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning: ReactDOM.render')

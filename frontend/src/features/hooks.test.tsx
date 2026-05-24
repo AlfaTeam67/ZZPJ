@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import * as portfolioApi from '@/features/portfolio/api';
@@ -201,9 +200,8 @@ describe('React Query Hooks Integration', () => {
     });
 
     it('should not retry on error (retry: false config)', () => {
-      const mockFetch = vi.fn().mockRejectedValue(new Error('Error'));
       const queryOptions = { retry: false };
-      
+
       expect(queryOptions.retry).toBe(false);
     });
   });

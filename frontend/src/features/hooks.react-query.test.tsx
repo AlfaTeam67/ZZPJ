@@ -238,7 +238,7 @@ describe('React Query Hooks - Market Data', () => {
         expect(result.current.data?.length).toBeGreaterThan(0);
       });
 
-      const marketData = (result.current.data as any)?.[0];
+      const marketData = (result.current.data as Array<Record<string, unknown>>)?.[0];
       expect(marketData).toHaveProperty('symbol');
       expect(marketData).toHaveProperty('price');
       expect(marketData).toHaveProperty('change');
@@ -255,7 +255,7 @@ describe('React Query Hooks - Market Data', () => {
         expect(result.current.data?.length).toBeGreaterThan(0);
       });
 
-      const marketData = (result.current.data as any)?.[0];
+      const marketData = (result.current.data as Array<Record<string, unknown>>)?.[0];
       expect(typeof marketData?.price).toBe('number');
     });
 
@@ -302,7 +302,7 @@ describe('React Query Hooks - Market Data', () => {
 
       expect(result.current.data).toBeDefined();
       // Szukamy obiektu AAPL wewnątrz zwróconej tablicy
-      const aaplData = result.current.data?.find((item: any) => item.symbol === 'AAPL');
+      const aaplData = result.current.data?.find((item: Record<string, unknown>) => item.symbol === 'AAPL');
       expect(aaplData).toBeDefined();
       expect(aaplData?.symbol).toBe('AAPL');
     });
@@ -318,7 +318,7 @@ describe('React Query Hooks - Market Data', () => {
       });
 
       // Szukamy obiektu AAPL wewnątrz tablicy, aby sprawdzić jego unikalne właściwości finansowe
-      const marketData = result.current.data?.find((item: any) => item.symbol === 'AAPL');
+      const marketData = result.current.data?.find((item: Record<string, unknown>) => item.symbol === 'AAPL');
       expect(marketData).toHaveProperty('high52w');
       expect(marketData).toHaveProperty('low52w');
       expect(marketData).toHaveProperty('marketCap');
