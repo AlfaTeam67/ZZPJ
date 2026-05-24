@@ -1,13 +1,13 @@
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { vi } from 'vitest';
-import { store } from '@/store/store';
+import React, { ReactElement } from 'react'
+import { render, RenderOptions } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { vi } from 'vitest'
+import { store } from '@/store/store'
 
 /**
  * Custom render function that includes all providers
- * 
+ *
  * Use this instead of render() to test components that need:
  * - Redux store
  * - React Query
@@ -25,33 +25,28 @@ const createTestQueryClient = () =>
         retry: false,
       },
     },
-  });
+  })
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  queryClient?: QueryClient;
+  queryClient?: QueryClient
 }
 
 export function renderWithProviders(
   ui: ReactElement,
-  {
-    queryClient = createTestQueryClient(),
-    ...renderOptions
-  }: CustomRenderOptions = {}
+  { queryClient = createTestQueryClient(), ...renderOptions }: CustomRenderOptions = {}
 ) {
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </Provider>
-    );
+    )
   }
 
   return {
     ...render(ui, { wrapper: Wrapper, ...renderOptions }),
     queryClient,
-  };
+  }
 }
 
 /**
@@ -63,7 +58,7 @@ export const mockUser = {
   email: 'test@fininsight.local',
   firstName: 'Test',
   lastName: 'User',
-};
+}
 
 export const mockAdminUser = {
   id: '550e8400-e29b-41d4-a716-446655440001',
@@ -71,7 +66,7 @@ export const mockAdminUser = {
   email: 'admin@fininsight.local',
   firstName: 'Admin',
   lastName: 'User',
-};
+}
 
 /**
  * Mock portfolio data for testing
@@ -86,7 +81,7 @@ export const mockPortfolio = {
   createdAt: new Date('2024-01-01').toISOString(),
   updatedAt: new Date('2024-01-15').toISOString(),
   assets: [],
-};
+}
 
 /**
  * Mock API responses for common endpoints
@@ -121,15 +116,14 @@ export const mockApiResponses = {
       ],
     },
   },
-};
+}
 
 /**
  * Wait for async operations in tests
- * 
+ *
  * Usage: await waitForAsync();
  */
-export const waitForAsync = () =>
-  new Promise((resolve) => setTimeout(resolve, 0));
+export const waitForAsync = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 /**
  * Create a mock Keycloak instance
@@ -153,10 +147,10 @@ export const createMockKeycloak = (overrides = {}) => ({
   realm: 'fin-insight',
   clientId: 'fin-insight-client',
   ...overrides,
-});
+})
 
 // Re-export testing library utilities for convenience.
 // This file is a test helper, not an HMR-affected component module, so the
 // react-refresh rule does not apply meaningfully here.
 // eslint-disable-next-line react-refresh/only-export-components
-export * from '@testing-library/react';
+export * from '@testing-library/react'

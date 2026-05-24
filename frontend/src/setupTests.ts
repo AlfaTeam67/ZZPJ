@@ -1,6 +1,6 @@
-import '@testing-library/jest-dom';
-import { vi, beforeAll, afterEach, afterAll } from 'vitest';
-import { server } from '@/test/mocks/server';
+import '@testing-library/jest-dom'
+import { vi, beforeAll, afterEach, afterAll } from 'vitest'
+import { server } from '@/test/mocks/server'
 
 // 1. Mockowanie Keycloak (Zabezpieczenia)
 vi.mock('keycloak-js', () => ({
@@ -29,7 +29,7 @@ vi.mock('keycloak-js', () => ({
     realm: 'fin-insight',
     clientId: 'fin-insight-client',
   })),
-}));
+}))
 
 // 2. Mockowanie Axios (Klient HTTP)
 vi.mock('axios', () => {
@@ -50,13 +50,13 @@ vi.mock('axios', () => {
         eject: vi.fn(),
       },
     },
-  };
+  }
 
-  axiosMock.create = vi.fn(() => axiosMock);
+  axiosMock.create = vi.fn(() => axiosMock)
   return {
     default: axiosMock,
-  };
-});
+  }
+})
 
 // 3. Mockowanie API przeglądarkowych (MatchMedia i IntersectionObserver)
 Object.defineProperty(window, 'matchMedia', {
@@ -71,7 +71,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-});
+})
 
 // POPRAWIONE: window zamiast global, aby zapobiec błędowi ts(2304)
 Object.defineProperty(window, 'IntersectionObserver', {
@@ -81,35 +81,32 @@ Object.defineProperty(window, 'IntersectionObserver', {
     unobserve: vi.fn(),
     disconnect: vi.fn(),
   })),
-});
+})
 
 // 4. Ograniczanie zbędnych warningów w logach konsoli
-const originalError = console.error;
+const originalError = console.error
 beforeAll(() => {
   console.error = (...args: unknown[]) => {
-    if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render')
-    ) {
-      return;
+    if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render')) {
+      return
     }
-    originalError.call(console, ...args);
-  };
-});
+    originalError.call(console, ...args)
+  }
+})
 
 afterAll(() => {
-  console.error = originalError;
-});
+  console.error = originalError
+})
 
 // 5. Globalne uruchomienie serwera atrap sieciowych MSW
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
-});
+  server.listen({ onUnhandledRequest: 'bypass' })
+})
 
 afterEach(() => {
-  server.resetHandlers();
-});
+  server.resetHandlers()
+})
 
 afterAll(() => {
-  server.close();
-});
+  server.close()
+})

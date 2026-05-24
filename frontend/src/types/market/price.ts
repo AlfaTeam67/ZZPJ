@@ -36,7 +36,6 @@ export function toPriceTicker(snapshot: PriceSnapshot): PriceTicker {
     price: snapshot.price,
     currency: snapshot.currency,
     changePct24h: change !== undefined ? String(change) : undefined,
-    trend:
-      change === undefined || change === 0 ? 'NEUTRAL' : change > 0 ? 'UP' : 'DOWN',
+    trend: change === undefined || change === 0 ? 'NEUTRAL' : change > 0 ? 'UP' : 'DOWN',
   }
 }
