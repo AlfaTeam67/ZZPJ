@@ -60,27 +60,27 @@ VALUES
     ('AMZN', 'alphavantage', '187.3000', 'USD', '0.45', '35600000', NOW());
 
 -- ============================================
--- BTC-USD - Bitcoin Historical Prices
+-- BINANCE:BTCUSDT - Bitcoin Historical Prices
 -- ============================================
 INSERT INTO price_snapshots (symbol, source, price, currency, change_pct_24h, volume_24h, fetched_at)
 VALUES
-    ('BTC-USD', 'coingecko', '58000.0000', 'USD', '2.50', '30000000000', NOW() - INTERVAL '200 days'),
-    ('BTC-USD', 'coingecko', '59500.0000', 'USD', '2.59', '30500000000', NOW() - INTERVAL '160 days'),
-    ('BTC-USD', 'coingecko', '61000.0000', 'USD', '2.52', '31000000000', NOW() - INTERVAL '120 days'),
-    ('BTC-USD', 'coingecko', '62500.0000', 'USD', '2.46', '31200000000', NOW() - INTERVAL '80 days'),
-    ('BTC-USD', 'coingecko', '64000.0000', 'USD', '2.40', '31500000000', NOW() - INTERVAL '40 days'),
-    ('BTC-USD', 'coingecko', '62543.5000', 'USD', '3.75', '31500000000', NOW());
+    ('BINANCE:BTCUSDT', 'finnhub', '58000.0000', 'USD', '2.50', '30000000000', NOW() - INTERVAL '200 days'),
+    ('BINANCE:BTCUSDT', 'finnhub', '59500.0000', 'USD', '2.59', '30500000000', NOW() - INTERVAL '160 days'),
+    ('BINANCE:BTCUSDT', 'finnhub', '61000.0000', 'USD', '2.52', '31000000000', NOW() - INTERVAL '120 days'),
+    ('BINANCE:BTCUSDT', 'finnhub', '62500.0000', 'USD', '2.46', '31200000000', NOW() - INTERVAL '80 days'),
+    ('BINANCE:BTCUSDT', 'finnhub', '64000.0000', 'USD', '2.40', '31500000000', NOW() - INTERVAL '40 days'),
+    ('BINANCE:BTCUSDT', 'finnhub', '62543.5000', 'USD', '3.75', '31500000000', NOW());
 
 -- ============================================
--- ETH-USD - Ethereum Historical Prices
+-- BINANCE:ETHUSDT - Ethereum Historical Prices
 -- ============================================
 INSERT INTO price_snapshots (symbol, source, price, currency, change_pct_24h, volume_24h, fetched_at)
 VALUES
-    ('ETH-USD', 'coingecko', '2400.0000', 'USD', '1.50', '14000000000', NOW() - INTERVAL '180 days'),
-    ('ETH-USD', 'coingecko', '2550.0000', 'USD', '6.25', '14300000000', NOW() - INTERVAL '140 days'),
-    ('ETH-USD', 'coingecko', '2800.0000', 'USD', '9.80', '14500000000', NOW() - INTERVAL '100 days'),
-    ('ETH-USD', 'coingecko', '3100.0000', 'USD', '10.71', '14700000000', NOW() - INTERVAL '60 days'),
-    ('ETH-USD', 'coingecko', '3350.0000', 'USD', '8.06', '14800000000', NOW() - INTERVAL '20 days'),
-    ('ETH-USD', 'coingecko', '3428.2000', 'USD', '2.50', '14800000000', NOW());
+    ('BINANCE:ETHUSDT', 'finnhub', '2400.0000', 'USD', '1.50', '14000000000', NOW() - INTERVAL '180 days'),
+    ('BINANCE:ETHUSDT', 'finnhub', '2550.0000', 'USD', '6.25', '14300000000', NOW() - INTERVAL '140 days'),
+    ('BINANCE:ETHUSDT', 'finnhub', '2800.0000', 'USD', '9.80', '14500000000', NOW() - INTERVAL '100 days'),
+    ('BINANCE:ETHUSDT', 'finnhub', '3100.0000', 'USD', '10.71', '14700000000', NOW() - INTERVAL '60 days'),
+    ('BINANCE:ETHUSDT', 'finnhub', '3350.0000', 'USD', '8.06', '14800000000', NOW() - INTERVAL '20 days'),
+    ('BINANCE:ETHUSDT', 'finnhub', '3428.2000', 'USD', '2.50', '14800000000', NOW());
 
 
