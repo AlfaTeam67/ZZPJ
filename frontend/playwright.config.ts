@@ -1,14 +1,14 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: false, 
+  fullyParallel: false,
   forbidOnly: false,
   retries: 0,
-  workers: 1, 
+  workers: 1,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173', 
+    baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -25,4 +25,4 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 60 * 1000,
   },
-});
+})

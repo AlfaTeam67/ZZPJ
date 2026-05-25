@@ -19,3 +19,12 @@ spring:
 eureka:
   client:
     enabled: false
+
+# Disable scheduler and Finnhub calls during migration-only run
+market-data:
+  scheduler:
+    enabled: false
+
+finnhub:
+  api-key: migration-placeholder
+  base-url: http://localhost:9999

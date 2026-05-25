@@ -1,8 +1,8 @@
-import { http, HttpResponse } from 'msw';
-import { env } from '@/lib/env';
+import { http, HttpResponse } from 'msw'
+import { env } from '@/lib/env'
 
-const MARKET_API = env.apiUrl;
-const PORTFOLIO_API = env.apiUrl;
+const MARKET_API = env.apiUrl
+const PORTFOLIO_API = env.apiUrl
 
 export const handlers = [
   // =========================================================================
@@ -13,11 +13,11 @@ export const handlers = [
   http.get(`${PORTFOLIO_API}/api/portfolios`, ({ request }) => {
     // SCENARIUSZ 401: Brak nagłówka lub jawne żądanie błędu autoryzacji
     if (request.headers.get('Authorization') === 'Bearer trigger-401') {
-      return new HttpResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+      return new HttpResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
     }
     // SCENARIUSZ 500: Wymuszenie błędu serwera przez nagłówek testowy
     if (request.headers.get('x-trigger-error') === '500') {
-      return new HttpResponse(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+      return new HttpResponse(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 })
     }
 
     return HttpResponse.json([
@@ -41,14 +41,14 @@ export const handlers = [
           },
         ],
       },
-    ]);
+    ])
   }),
 
   // Pobieranie konkretnego portfela po ID (fetchPortfolio)
   http.get(`${PORTFOLIO_API}/api/portfolios/:id`, ({ params }) => {
     // SCENARIUSZ 404: Nie znaleziono portfela
     if (params.id === '999') {
-      return HttpResponse.json({ error: 'Portfolio not found' }, { status: 404 });
+      return HttpResponse.json({ error: 'Portfolio not found' }, { status: 404 })
     }
 
     return HttpResponse.json({
@@ -59,12 +59,12 @@ export const handlers = [
       currency: 'USD',
       totals: { USD: '15000.00' },
       assets: [],
-    });
+    })
   }),
 
   // Tworzenie portfela (createPortfolio)
   http.post(`${PORTFOLIO_API}/api/portfolios`, async ({ request }) => {
-    const body = (await request.json()) as { name: string; description?: string };
+    const body = (await request.json()) as { name: string; description?: string }
     return HttpResponse.json(
       {
         id: 'mocked-portfolio-id',
@@ -76,21 +76,21 @@ export const handlers = [
         assets: [],
       },
       { status: 201 }
-    );
+    )
   }),
 
   // Usuwanie portfela (deletePortfolio)
   http.delete(`${PORTFOLIO_API}/api/portfolios/:id`, ({ params }) => {
     if (params.id === '999') {
-      return HttpResponse.json({ error: 'Portfolio not found' }, { status: 404 });
+      return HttpResponse.json({ error: 'Portfolio not found' }, { status: 404 })
     }
-    return new HttpResponse(null, { status: 204 });
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // Wycena portfela (fetchPortfolioValuation)
   http.get(`${PORTFOLIO_API}/api/portfolios/:id/valuation`, ({ params }) => {
     if (params.id === '999') {
-      return HttpResponse.json({ error: 'Portfolio not found' }, { status: 404 });
+      return HttpResponse.json({ error: 'Portfolio not found' }, { status: 404 })
     }
 
     return HttpResponse.json({
@@ -105,13 +105,13 @@ export const handlers = [
           profitPercentage: '20.00',
         },
       ],
-    });
+    })
   }),
 
   // Pobieranie transakcji (fetchTransactions)
   http.get(`${PORTFOLIO_API}/api/portfolios/:portfolioId/transactions`, ({ params }) => {
     if (params.portfolioId === '999') {
-      return HttpResponse.json([], { status: 404 });
+      return HttpResponse.json([], { status: 404 })
     }
 
     return HttpResponse.json([
@@ -126,22 +126,25 @@ export const handlers = [
         currency: 'USD',
         executedAt: '2026-05-01T12:00:00Z',
       },
-    ]);
+    ])
   }),
 
   // Dodawanie nowej transakcji (createTransaction)
-  http.post(`${PORTFOLIO_API}/api/portfolios/:portfolioId/transactions`, async ({ request, params }) => {
-    const body = (await request.json()) as any;
-    return HttpResponse.json(
-      {
-        id: 'mocked-tx-id',
-        portfolioId: params.portfolioId,
-        ...body,
-        executedAt: body.executedAt || new Date().toISOString(),
-      },
-      { status: 201 }
-    );
-  }),
+  http.post(
+    `${PORTFOLIO_API}/api/portfolios/:portfolioId/transactions`,
+    async ({ request, params }) => {
+      const body = (await request.json()) as Record<string, unknown> & { executedAt?: string }
+      return HttpResponse.json(
+        {
+          id: 'mocked-tx-id',
+          portfolioId: params.portfolioId,
+          ...body,
+          executedAt: body.executedAt || new Date().toISOString(),
+        },
+        { status: 201 }
+      )
+    }
+  ),
 
   // =========================================================================
   // 2. HANDLERY DLA MARKET-DATA ENDPOINTS (`env.marketApiUrl`)
@@ -170,21 +173,21 @@ export const handlers = [
         low52w: 30000,
         marketCap: 1200000000000,
       },
-    ]);
+    ])
   }),
 
   // Historia cenowa symbolu (fetchPriceHistory)
   http.get(`${MARKET_API}/api/market-prices/symbol/:ticker`, ({ params }) => {
     // SCENARIUSZ 404: Nieznany ticker giełdowy
     if (params.ticker === 'UNKNOWN') {
-      return HttpResponse.json({ error: 'Symbol not found' }, { status: 404 });
+      return HttpResponse.json({ error: 'Symbol not found' }, { status: 404 })
     }
 
     return HttpResponse.json([
       { symbol: params.ticker, price: 175.0, timestamp: '2026-05-20T12:00:00Z' },
       { symbol: params.ticker, price: 178.0, timestamp: '2026-05-21T12:00:00Z' },
       { symbol: params.ticker, price: 180.5, timestamp: '2026-05-22T12:00:00Z' },
-    ]);
+    ])
   }),
 
   // Pobieranie listy dostępnych symboli (fetchSymbols)
@@ -192,7 +195,7 @@ export const handlers = [
     return HttpResponse.json([
       { symbol: 'AAPL', type: 'STOCK', active: true },
       { symbol: 'BTC', type: 'CRYPTO', active: true },
-    ]);
+    ])
   }),
 
   // =========================================================================
@@ -214,6 +217,6 @@ export const handlers = [
       riskScore: 4.5,
       modelId: 'gpt-4',
       createdAt: '2026-05-23T12:00:00Z',
-    });
+    })
   }),
-];
+]

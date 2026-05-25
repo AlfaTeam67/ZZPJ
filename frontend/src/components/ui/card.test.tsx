@@ -1,6 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
 
 describe('Card Components', () => {
   describe('Card', () => {
@@ -9,39 +16,37 @@ describe('Card Components', () => {
         <Card>
           <div>Content</div>
         </Card>
-      );
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card).toBeInTheDocument();
-    });
+      )
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card).toBeInTheDocument()
+    })
 
     it('should render card with children', () => {
       render(
         <Card>
           <p>Test content</p>
         </Card>
-      );
-      expect(screen.getByText('Test content')).toBeInTheDocument();
-    });
+      )
+      expect(screen.getByText('Test content')).toBeInTheDocument()
+    })
 
     it('should apply default size', () => {
-      const { container } = render(<Card>Content</Card>);
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card).toHaveAttribute('data-size', 'default');
-    });
+      const { container } = render(<Card>Content</Card>)
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card).toHaveAttribute('data-size', 'default')
+    })
 
     it('should apply small size variant', () => {
-      const { container } = render(<Card size="sm">Content</Card>);
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card).toHaveAttribute('data-size', 'sm');
-    });
+      const { container } = render(<Card size="sm">Content</Card>)
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card).toHaveAttribute('data-size', 'sm')
+    })
 
     it('should apply custom className', () => {
-      const { container } = render(
-        <Card className="custom-class">Content</Card>
-      );
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card).toHaveClass('custom-class');
-    });
+      const { container } = render(<Card className="custom-class">Content</Card>)
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card).toHaveClass('custom-class')
+    })
 
     it('should support multiple children', () => {
       render(
@@ -50,19 +55,19 @@ describe('Card Components', () => {
           <p>Second</p>
           <p>Third</p>
         </Card>
-      );
-      expect(screen.getByText('First')).toBeInTheDocument();
-      expect(screen.getByText('Second')).toBeInTheDocument();
-      expect(screen.getByText('Third')).toBeInTheDocument();
-    });
+      )
+      expect(screen.getByText('First')).toBeInTheDocument()
+      expect(screen.getByText('Second')).toBeInTheDocument()
+      expect(screen.getByText('Third')).toBeInTheDocument()
+    })
 
     it('should have proper styling classes', () => {
-      const { container } = render(<Card>Content</Card>);
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card?.className).toContain('rounded-2xl');
-      expect(card?.className).toContain('bg-card');
-    });
-  });
+      const { container } = render(<Card>Content</Card>)
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card?.className).toContain('rounded-2xl')
+      expect(card?.className).toContain('bg-card')
+    })
+  })
 
   describe('CardHeader', () => {
     it('should render card header', () => {
@@ -70,22 +75,22 @@ describe('Card Components', () => {
         <Card>
           <CardHeader>Header content</CardHeader>
         </Card>
-      );
-      const header = container.querySelector('[data-slot="card-header"]');
-      expect(header).toBeInTheDocument();
-      expect(screen.getByText('Header content')).toBeInTheDocument();
-    });
+      )
+      const header = container.querySelector('[data-slot="card-header"]')
+      expect(header).toBeInTheDocument()
+      expect(screen.getByText('Header content')).toBeInTheDocument()
+    })
 
     it('should apply proper classes', () => {
       const { container } = render(
         <Card>
           <CardHeader>Header</CardHeader>
         </Card>
-      );
-      const header = container.querySelector('[data-slot="card-header"]');
-      expect(header?.className).toContain('px-6');
-    });
-  });
+      )
+      const header = container.querySelector('[data-slot="card-header"]')
+      expect(header?.className).toContain('px-6')
+    })
+  })
 
   describe('CardTitle', () => {
     it('should render card title', () => {
@@ -95,9 +100,9 @@ describe('Card Components', () => {
             <CardTitle>My Title</CardTitle>
           </CardHeader>
         </Card>
-      );
-      expect(screen.getByText('My Title')).toBeInTheDocument();
-    });
+      )
+      expect(screen.getByText('My Title')).toBeInTheDocument()
+    })
 
     it('should have heading styles', () => {
       const { container } = render(
@@ -106,12 +111,12 @@ describe('Card Components', () => {
             <CardTitle>Title</CardTitle>
           </CardHeader>
         </Card>
-      );
-      const title = container.querySelector('[data-slot="card-title"]');
-      expect(title?.className).toContain('font-heading');
-      expect(title?.className).toContain('font-medium');
-    });
-  });
+      )
+      const title = container.querySelector('[data-slot="card-title"]')
+      expect(title?.className).toContain('font-heading')
+      expect(title?.className).toContain('font-medium')
+    })
+  })
 
   describe('CardDescription', () => {
     it('should render card description', () => {
@@ -121,9 +126,9 @@ describe('Card Components', () => {
             <CardDescription>My description</CardDescription>
           </CardHeader>
         </Card>
-      );
-      expect(screen.getByText('My description')).toBeInTheDocument();
-    });
+      )
+      expect(screen.getByText('My description')).toBeInTheDocument()
+    })
 
     it('should have muted styling', () => {
       const { container } = render(
@@ -132,11 +137,11 @@ describe('Card Components', () => {
             <CardDescription>Description</CardDescription>
           </CardHeader>
         </Card>
-      );
-      const description = container.querySelector('[data-slot="card-description"]');
-      expect(description?.className).toContain('text-muted-foreground');
-    });
-  });
+      )
+      const description = container.querySelector('[data-slot="card-description"]')
+      expect(description?.className).toContain('text-muted-foreground')
+    })
+  })
 
   describe('CardContent', () => {
     it('should render card content', () => {
@@ -144,9 +149,9 @@ describe('Card Components', () => {
         <Card>
           <CardContent>Main content</CardContent>
         </Card>
-      );
-      expect(screen.getByText('Main content')).toBeInTheDocument();
-    });
+      )
+      expect(screen.getByText('Main content')).toBeInTheDocument()
+    })
 
     it('should support nested elements', () => {
       render(
@@ -155,10 +160,10 @@ describe('Card Components', () => {
             <div data-testid="nested">Nested element</div>
           </CardContent>
         </Card>
-      );
-      expect(screen.getByTestId('nested')).toBeInTheDocument();
-    });
-  });
+      )
+      expect(screen.getByTestId('nested')).toBeInTheDocument()
+    })
+  })
 
   describe('CardFooter', () => {
     it('should render card footer', () => {
@@ -167,9 +172,9 @@ describe('Card Components', () => {
           <CardContent>Content</CardContent>
           <CardFooter>Footer</CardFooter>
         </Card>
-      );
-      expect(screen.getByText('Footer')).toBeInTheDocument();
-    });
+      )
+      expect(screen.getByText('Footer')).toBeInTheDocument()
+    })
 
     it('should support action buttons in footer', () => {
       render(
@@ -180,11 +185,11 @@ describe('Card Components', () => {
             <button>Save</button>
           </CardFooter>
         </Card>
-      );
-      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
-    });
-  });
+      )
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
+    })
+  })
 
   describe('Complete Card Structure', () => {
     it('should render complete card with all sections', () => {
@@ -199,16 +204,16 @@ describe('Card Components', () => {
             <button>Action</button>
           </CardFooter>
         </Card>
-      );
+      )
 
-      expect(screen.getByText('Title')).toBeInTheDocument();
-      expect(screen.getByText('Description')).toBeInTheDocument();
-      expect(screen.getByText('Main content goes here')).toBeInTheDocument();
-      expect(screen.getByRole('button')).toBeInTheDocument();
+      expect(screen.getByText('Title')).toBeInTheDocument()
+      expect(screen.getByText('Description')).toBeInTheDocument()
+      expect(screen.getByText('Main content goes here')).toBeInTheDocument()
+      expect(screen.getByRole('button')).toBeInTheDocument()
 
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card).toBeInTheDocument();
-    });
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card).toBeInTheDocument()
+    })
 
     it('should maintain proper spacing', () => {
       const { container } = render(
@@ -219,10 +224,10 @@ describe('Card Components', () => {
           <CardContent>Content</CardContent>
           <CardFooter>Footer</CardFooter>
         </Card>
-      );
+      )
 
-      const card = container.querySelector('[data-slot="card"]');
-      expect(card?.className).toContain('gap-6');
-    });
-  });
-});
+      const card = container.querySelector('[data-slot="card"]')
+      expect(card?.className).toContain('gap-6')
+    })
+  })
+})

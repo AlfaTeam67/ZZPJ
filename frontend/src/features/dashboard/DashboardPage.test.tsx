@@ -1,14 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter } from 'react-router-dom'
 
-import { PortfolioMetricHero } from '@/features/dashboard/components/PortfolioMetricHero';
-import { PerformanceChart } from '@/features/dashboard/components/PerformanceChart';
-import { WatchlistCard } from '@/features/dashboard/components/WatchlistCard';
-import { AdvisorSnapshotCard } from '@/features/dashboard/components/AdvisorSnapshotCard';
+import { PortfolioMetricHero } from '@/features/dashboard/components/PortfolioMetricHero'
+import { PerformanceChart } from '@/features/dashboard/components/PerformanceChart'
+import { WatchlistCard } from '@/features/dashboard/components/WatchlistCard'
+import { AdvisorSnapshotCard } from '@/features/dashboard/components/AdvisorSnapshotCard'
 
-vi.unmock('@tanstack/react-query');
+vi.unmock('@tanstack/react-query')
 
 // Mockowanie warstwy API dla Dashboardu
 vi.mock('@/features/dashboard/api', () => ({
@@ -34,13 +35,13 @@ vi.mock('@/features/dashboard/api', () => ({
     riskScore: 4,
     riskLabel: 'Umiarkowane ryzyko',
   }),
-}));
+}))
 
 const createTestQueryClient = () =>
-  new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })
 
 const renderDashboard = () => {
-  const queryClient = createTestQueryClient();
+  const queryClient = createTestQueryClient()
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -52,34 +53,34 @@ const renderDashboard = () => {
         </div>
       </BrowserRouter>
     </QueryClientProvider>
-  );
-};
+  )
+}
 
 describe('Integration - DashboardPage', () => {
   it('should render all dashboard sections and metrics correctly', async () => {
-    renderDashboard();
+    renderDashboard()
 
     // POPRAWIONE: Wszystkie kluczowe asercje trafiły do wnętrza waitFor,
     // dając bibliotece React Testing Library czas na odebranie danych z makiety API.
     await waitFor(() => {
       // Weryfikacja metryk Hero
-      expect(screen.getByText('Całkowita wartość portfela')).toBeInTheDocument();
-      
+      expect(screen.getByText('Całkowita wartość portfela')).toBeInTheDocument()
+
       // POPRAWIONE: Uproszczony regex bez błędnej alternatywy logicznej, łapie kwotę niezależnie od spacji
-      expect(screen.getByText(/124\s?500/)).toBeInTheDocument();
+      expect(screen.getByText(/124\s?500/)).toBeInTheDocument()
 
       // Weryfikacja wykresu (szukamy po roli i obecności ścieżek SVG)
-      expect(screen.getByLabelText('Wykres historii wyników portfela')).toBeInTheDocument();
+      expect(screen.getByLabelText('Wykres historii wyników portfela')).toBeInTheDocument()
 
       // Weryfikacja listy obserwowanych (Watchlist)
-      expect(screen.getByText('Twoje akcje')).toBeInTheDocument();
-      expect(screen.getByText('AAPL')).toBeInTheDocument();
-      expect(screen.getByText('BTC')).toBeInTheDocument();
+      expect(screen.getByText('Twoje akcje')).toBeInTheDocument()
+      expect(screen.getByText('AAPL')).toBeInTheDocument()
+      expect(screen.getByText('BTC')).toBeInTheDocument()
 
       // Weryfikacja karty analizy AI
-      expect(screen.getByText('Ostatnia analiza AI')).toBeInTheDocument();
-      expect(screen.getByText('GPT-4')).toBeInTheDocument();
-      expect(screen.getByText(/Stabilny wzrost/i)).toBeInTheDocument();
-    });
-  });
-});
+      expect(screen.getByText('Ostatnia analiza AI')).toBeInTheDocument()
+      expect(screen.getByText('GPT-4')).toBeInTheDocument()
+      expect(screen.getByText(/Stabilny wzrost/i)).toBeInTheDocument()
+    })
+  })
+})
