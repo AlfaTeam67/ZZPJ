@@ -54,20 +54,18 @@ vi.mock('@/features/market/api', () => ({
 
 vi.mock('@/features/advisor/api', () => ({
   fetchRecommendations: vi.fn().mockResolvedValue({
-    userId: 'user-1',
+    id: 'rec-uuid-1',
     portfolioId: '1',
-    recommendations: [
-      {
-        id: 'rec-1',
-        title: 'Diversify your portfolio',
-        description: 'Consider adding bonds to reduce risk',
-        action: 'ADD_ASSET',
-        asset: { symbol: 'BND', name: 'Bond ETF' },
-        riskLevel: 'LOW',
-        expectedReturn: 0.05,
-        confidence: 0.85,
-      },
+    summary: 'Twój portfel wykazuje stabilny wzrost.',
+    fullText: 'Twój portfel wykazuje stabilny wzrost. Rekomendowana dywersyfikacja o obligacje.',
+    bulletPoints: [
+      'Diversify your portfolio by adding bonds to reduce risk',
+      'Consider increasing exposure to international markets',
     ],
+    newsContext: [],
+    riskScore: 4.5,
+    modelId: 'gpt-4',
+    createdAt: '2026-05-23T12:00:00Z',
   }),
 }))
 
