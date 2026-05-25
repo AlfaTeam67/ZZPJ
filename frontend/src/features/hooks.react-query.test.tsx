@@ -348,17 +348,17 @@ describe('React Query Hooks - Recommendations', () => {
       expect(result.current.isLoading).toBe(true);
     });
 
-    it('should have recommendations array', async () => {
+    it('should have bulletPoints array', async () => {
       const { result } = renderHook(() => useRecommendations(), {
         wrapper: createWrapper(),
       });
 
       await waitFor(() => {
-        expect(result.current.data?.recommendations).toBeDefined();
+        expect(result.current.data?.bulletPoints).toBeDefined();
       });
 
-      expect(Array.isArray(result.current.data?.recommendations)).toBe(true);
-      expect(result.current.data?.recommendations?.length).toBeGreaterThan(0);
+      expect(Array.isArray(result.current.data?.bulletPoints)).toBe(true);
+      expect(result.current.data?.bulletPoints?.length).toBeGreaterThan(0);
     });
 
     it('should contain recommendation properties', async () => {
@@ -367,18 +367,14 @@ describe('React Query Hooks - Recommendations', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.data?.recommendations?.length).toBeGreaterThan(0);
+        expect(result.current.data?.bulletPoints?.length).toBeGreaterThan(0);
       });
 
-      const recommendation = result.current.data?.recommendations?.[0];
-      expect(recommendation).toHaveProperty('id');
-      expect(recommendation).toHaveProperty('title');
-      expect(recommendation).toHaveProperty('description');
-      expect(recommendation).toHaveProperty('action');
-      expect(recommendation).toHaveProperty('asset');
-      expect(recommendation).toHaveProperty('riskLevel');
-      expect(recommendation).toHaveProperty('expectedReturn');
-      expect(recommendation).toHaveProperty('confidence');
+      const bullet = result.current.data?.bulletPoints?.[0];
+      expect(typeof bullet).toBe('string');
+      expect(result.current.data).toHaveProperty('riskScore');
+      expect(result.current.data).toHaveProperty('modelId');
+      expect(result.current.data).toHaveProperty('createdAt');
     });
 
     it('should have no error on successful fetch', async () => {
@@ -409,7 +405,7 @@ describe('React Query Hooks - Recommendations', () => {
   it('should update recommendations when risk tolerance changes', async () => {
       // POPRAWIONE: Otypowanie 'riskTolerance' jako unii akceptowanej przez Twój komponent, zamiast ogólnego stringa
       const { result, rerender } = renderHook(
-        ({ riskTolerance }: { riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH' | undefined }) => useRecommendations(riskTolerance),
+        ({ riskTolerance }: { riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE' | undefined }) => useRecommendations(riskTolerance),
         {
           initialProps: { riskTolerance: 'LOW' as const },
           wrapper: createWrapper(),
