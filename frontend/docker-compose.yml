@@ -1,3 +1,5 @@
+name: fin-insight-frontend
+
 services:
   frontend:
     build:

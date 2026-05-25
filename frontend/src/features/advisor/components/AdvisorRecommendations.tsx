@@ -5,8 +5,9 @@ import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { Badge } from '@/components/ui/badge'
 
 export function AdvisorRecommendations() {
-  const [risk, setRisk] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM')
-  const { data, isLoading, refetch, isFetching } = useRecommendations(risk)
+  const [risk, setRisk] = useState<'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE'>('MODERATE')
+  const [horizon, setHorizon] = useState<'SHORT_TERM' | 'MID_TERM' | 'LONG_TERM'>('MID_TERM')
+  const { data, isLoading, refetch, isFetching } = useRecommendations(risk, horizon)
 
   return (
     <Card>
@@ -16,19 +17,33 @@ export function AdvisorRecommendations() {
             <CardTitle>AI Portfolio Insights</CardTitle>
             <CardDescription>Personalized recommendations based on your holdings.</CardDescription>
           </div>
-          <div className="flex gap-2 bg-muted p-1 rounded-md">
-            {(['LOW', 'MEDIUM', 'HIGH'] as const).map((r) => (
-              <button
-                key={r}
-                disabled={!data && !isLoading}
-                onClick={() => setRisk(r)}
-                className={`px-3 py-1 text-xs rounded-sm transition-colors ${
-                  risk === r ? 'bg-background shadow-sm font-medium' : 'hover:bg-background/50'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {r}
-              </button>
-            ))}
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-2 bg-muted p-1 rounded-md">
+              {(['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRisk(r)}
+                  className={`px-3 py-1 text-xs rounded-sm transition-colors ${
+                    risk === r ? 'bg-background shadow-sm font-medium' : 'hover:bg-background/50'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 bg-muted p-1 rounded-md">
+              {(['SHORT_TERM', 'MID_TERM', 'LONG_TERM'] as const).map((h) => (
+                <button
+                  key={h}
+                  onClick={() => setHorizon(h)}
+                  className={`px-3 py-1 text-xs rounded-sm transition-colors ${
+                    horizon === h ? 'bg-background shadow-sm font-medium' : 'hover:bg-background/50'
+                  }`}
+                >
+                  {h.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -44,15 +59,14 @@ export function AdvisorRecommendations() {
         ) : data ? (
           <>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary">
-                Confidence: {(parseFloat(data.confidence) * 100).toFixed(0)}%
-              </Badge>
+              <Badge variant="secondary">Risk score: {data.riskScore?.toFixed(1) ?? 'N/A'}</Badge>
               <span className="text-xs text-muted-foreground">
-                Generated at: {new Date(data.timestamp).toLocaleString()}
+                {data.modelId} · {new Date(data.createdAt).toLocaleString()}
               </span>
             </div>
+            {data.summary && <p className="text-sm text-muted-foreground italic">{data.summary}</p>}
             <ul className="grid gap-3">
-              {data.recommendations.map((text, idx) => (
+              {data.bulletPoints?.map((text, idx) => (
                 <li
                   key={idx}
                   className="flex gap-3 items-start p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"

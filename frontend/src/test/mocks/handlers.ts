@@ -1,9 +1,8 @@
 import { http, HttpResponse } from 'msw'
 import { env } from '@/lib/env'
 
-// Korzystamy z dokładnie tych samych zmiennych środowiskowych, co Twój kod produkcyjny
-const MARKET_API = env.marketApiUrl
-const PORTFOLIO_API = env.portfolioApiUrl
+const MARKET_API = env.apiUrl
+const PORTFOLIO_API = env.apiUrl
 
 export const handlers = [
   // =========================================================================
@@ -204,27 +203,20 @@ export const handlers = [
   // =========================================================================
 
   // Pobieranie rekomendacji AI i podsumowania (wykorzystywane w testach)
-  http.get('http://localhost:8080/api/recommendations', () => {
+  http.post('http://localhost:8080/api/recommendations', () => {
     return HttpResponse.json({
-      userId: 'user-1',
+      id: 'rec-uuid-1',
       portfolioId: '1',
-      modelTag: 'GPT-4',
-      generatedAt: '2026-05-23',
-      body: 'Twój portfel wykazuje stabilny wzrost. Rekomendowana dywersyfikacja o obligacje.',
-      riskScore: 4,
-      riskLabel: 'Umiarkowane ryzyko',
-      recommendations: [
-        {
-          id: 'rec-1',
-          title: 'Diversify your portfolio',
-          description: 'Consider adding bonds to reduce risk',
-          action: 'ADD_ASSET',
-          asset: { symbol: 'BND', name: 'Bond ETF' },
-          riskLevel: 'LOW',
-          expectedReturn: 0.05,
-          confidence: 0.85,
-        },
+      summary: 'Twój portfel wykazuje stabilny wzrost.',
+      fullText: 'Twój portfel wykazuje stabilny wzrost. Rekomendowana dywersyfikacja o obligacje.',
+      bulletPoints: [
+        'Diversify your portfolio by adding bonds to reduce risk',
+        'Consider increasing exposure to international markets',
       ],
+      newsContext: [],
+      riskScore: 4.5,
+      modelId: 'gpt-4',
+      createdAt: '2026-05-23T12:00:00Z',
     })
   }),
 ]
