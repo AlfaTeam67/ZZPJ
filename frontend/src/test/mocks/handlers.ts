@@ -1,9 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import { env } from '@/lib/env';
 
-// Korzystamy z dokładnie tych samych zmiennych środowiskowych, co Twój kod produkcyjny
-const MARKET_API = env.marketApiUrl;
-const PORTFOLIO_API = env.portfolioApiUrl;
+const MARKET_API = env.apiUrl;
+const PORTFOLIO_API = env.apiUrl;
 
 export const handlers = [
   // =========================================================================

@@ -2,15 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { configureStore, PreloadedState } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authReducer } from '@/store/slices/authSlice';
 
-const createTestStore = (preloadedState?: PreloadedState<any>) => {
-  return configureStore({
-    reducer: {
-      auth: authReducer,
-    },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createTestStore = (preloadedState?: any) => {
+  return (configureStore as any)({
+    reducer: { auth: authReducer },
     preloadedState,
   });
 };
@@ -62,7 +61,7 @@ describe('ProtectedRoute Component', () => {
           <Route path="/" element={<TestComponent />} />
           <Route path="/login" element={<div>Login Page</div>} />
         </Routes>,
-        { preloadedState: { auth: { token: null, user: null } } }
+        { preloadedState: { auth: { token: null as unknown as string, user: null } } }
       );
 
       expect(screen.getByText('Login Page')).toBeInTheDocument();
@@ -202,7 +201,7 @@ describe('ProtectedRoute Component', () => {
           <Route path="/" element={<TestComponent />} />
           <Route path="/login" element={<div>Login</div>} />
         </Routes>,
-        { preloadedState: { auth: { token: null, user: null } } }
+        { preloadedState: { auth: { token: null as unknown as string, user: null } } }
       );
 
       expect(screen.getByText('Login')).toBeInTheDocument();
