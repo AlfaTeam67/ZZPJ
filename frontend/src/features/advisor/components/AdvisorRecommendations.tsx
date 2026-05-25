@@ -59,16 +59,12 @@ export function AdvisorRecommendations() {
         ) : data ? (
           <>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary">
-                Risk score: {data.riskScore?.toFixed(1) ?? 'N/A'}
-              </Badge>
+              <Badge variant="secondary">Risk score: {data.riskScore?.toFixed(1) ?? 'N/A'}</Badge>
               <span className="text-xs text-muted-foreground">
                 {data.modelId} · {new Date(data.createdAt).toLocaleString()}
               </span>
             </div>
-            {data.summary && (
-              <p className="text-sm text-muted-foreground italic">{data.summary}</p>
-            )}
+            {data.summary && <p className="text-sm text-muted-foreground italic">{data.summary}</p>}
             <ul className="grid gap-3">
               {data.bulletPoints?.map((text, idx) => (
                 <li

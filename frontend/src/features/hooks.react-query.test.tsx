@@ -415,8 +415,11 @@ describe('React Query Hooks - Recommendations', () => {
     it('should update recommendations when risk tolerance changes', async () => {
       // POPRAWIONE: Otypowanie 'riskTolerance' jako unii akceptowanej przez Twój komponent, zamiast ogólnego stringa
       const { result, rerender } = renderHook(
-        ({ riskTolerance }: { riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE' | undefined }) =>
-          useRecommendations(riskTolerance),
+        ({
+          riskTolerance,
+        }: {
+          riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE' | undefined
+        }) => useRecommendations(riskTolerance),
         {
           initialProps: { riskTolerance: 'LOW' as const },
           wrapper: createWrapper(),
