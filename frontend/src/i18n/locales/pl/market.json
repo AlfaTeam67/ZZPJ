@@ -1,0 +1,12 @@
+{
+  "title": "Dane rynkowe",
+  "subtitle": "Przeglądaj ceny rynkowe i historię cen różnych aktywów.",
+  "all-symbols": "Wszystkie symbole",
+  "all-symbols-desc": "Aktualne ceny rynkowe i zmiana 24h.",
+  "no-data": "Brak danych rynkowych.",
+  "loading": "Ładowanie danych rynkowych…",
+  "current-price": "Aktualna cena",
+  "change-24h": "Zmiana 24h",
+  "price-history": "Historia cen",
+  "price-details": "Szczegóły ceny"
+}

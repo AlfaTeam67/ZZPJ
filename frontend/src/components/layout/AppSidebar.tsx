@@ -9,6 +9,7 @@ import {
   Settings01Icon,
 } from '@hugeicons/core-free-icons'
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
@@ -16,25 +17,27 @@ import { cn } from '@/lib/utils'
 
 interface NavItem {
   to: string
-  label: string
+  labelKey: string
   icon: IconSvgElement
 }
 
 const navigation: NavItem[] = [
-  { to: '/', label: 'Kokpit', icon: DashboardSquare02Icon },
-  { to: '/portfolio', label: 'Portfel', icon: Briefcase01Icon },
-  { to: '/market', label: 'Rynek', icon: ChartLineData02Icon },
-  { to: '/advisor', label: 'Doradca AI', icon: AiBrain02Icon },
+  { to: '/', labelKey: 'dashboard', icon: DashboardSquare02Icon },
+  { to: '/portfolio', labelKey: 'portfolio', icon: Briefcase01Icon },
+  { to: '/market', labelKey: 'market', icon: ChartLineData02Icon },
+  { to: '/advisor', labelKey: 'advisor', icon: AiBrain02Icon },
 ]
 
 export function AppSidebar() {
   const { user, logout } = useAuth()
+  const { t } = useTranslation('nav')
+
   const displayName = user
     ? [user.firstName, user.lastName].filter(Boolean).join(' ') ||
       user.username ||
       user.email ||
-      'Uzytkownik'
-    : 'Goscinnie'
+      t('guest')
+    : t('guest')
 
   return (
     <aside className="flex h-full flex-col gap-6 border-r border-border/40 bg-card/40 px-4 py-6">
@@ -64,7 +67,7 @@ export function AppSidebar() {
                   className={cn('size-4', isActive ? 'text-foreground' : 'text-muted-foreground')}
                   aria-hidden
                 />
-                {item.label}
+                {t(item.labelKey as 'dashboard' | 'portfolio' | 'market' | 'advisor')}
               </>
             )}
           </NavLink>
@@ -84,7 +87,7 @@ export function AppSidebar() {
           }
         >
           <HugeiconsIcon icon={Settings01Icon} className="size-4" aria-hidden />
-          Ustawienia
+          {t('settings')}
         </NavLink>
 
         <div className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-3">
@@ -92,7 +95,7 @@ export function AppSidebar() {
             <HugeiconsIcon icon={Crown02Icon} className="size-4" aria-hidden />
           </span>
           <div className="min-w-0 leading-tight">
-            <p className="truncate text-sm font-semibold">Portfel Premium</p>
+            <p className="truncate text-sm font-semibold">{t('premium')}</p>
             <p className="truncate text-xs text-muted-foreground">{displayName}</p>
           </div>
         </div>
@@ -104,7 +107,7 @@ export function AppSidebar() {
           onClick={() => void logout()}
         >
           <HugeiconsIcon icon={Logout03Icon} className="size-4" aria-hidden />
-          Wyloguj
+          {t('logout')}
         </Button>
       </div>
     </aside>

@@ -1,0 +1,19 @@
+{
+  "app-name": "Fin-Insight",
+  "loading": "Loading…",
+  "error": "An error occurred",
+  "retry": "Try again",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "save": "Save",
+  "create": "Create",
+  "back": "Back",
+  "details": "Details",
+  "no-data": "No data",
+  "confirm-delete": "Are you sure you want to delete?",
+  "total-value": "Total value",
+  "search": "Search",
+  "search-placeholder": "Search stocks…",
+  "notifications": "Notifications",
+  "account": "Account"
+}

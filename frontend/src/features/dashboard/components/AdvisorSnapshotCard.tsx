@@ -1,24 +1,29 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { useAdvisorSnapshot } from '@/features/dashboard/hooks/useDashboard'
 import { cn } from '@/lib/utils'
 
 interface RiskGaugeProps {
-  /** Wartość 0..10 */
   score: number
 }
 
 function RiskGauge({ score }: RiskGaugeProps) {
+  const { t } = useTranslation('dashboard')
   const clamped = Math.min(Math.max(score, 0), 10)
   const radius = 26
   const circumference = 2 * Math.PI * radius
   const dash = (clamped / 10) * circumference
 
   return (
-    <div className="relative size-16" role="img" aria-label={`Ryzyko ${clamped} na 10`}>
+    <div
+      className="relative size-16"
+      role="img"
+      aria-label={t('advisor-risk-aria', { score: clamped })}
+    >
       <svg viewBox="0 0 64 64" className="size-16 -rotate-90">
         <circle
           cx="32"
@@ -48,6 +53,7 @@ function RiskGauge({ score }: RiskGaugeProps) {
 
 export function AdvisorSnapshotCard() {
   const { data, isLoading } = useAdvisorSnapshot()
+  const { t } = useTranslation('dashboard')
 
   return (
     <section
@@ -56,13 +62,13 @@ export function AdvisorSnapshotCard() {
     >
       <header className="flex items-center justify-between">
         <h2 id="advisor-snapshot-title" className="text-base font-semibold">
-          Ostatnia analiza AI
+          {t('advisor-title')}
         </h2>
         <Link
           to="/advisor"
           className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
-          Historia analiz
+          {t('advisor-link')}
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-3" aria-hidden />
         </Link>
       </header>
@@ -94,11 +100,11 @@ export function AdvisorSnapshotCard() {
               <RiskGauge score={data.riskScore} />
               <div>
                 <p className="text-sm font-semibold">{data.riskLabel}</p>
-                <p className="text-xs text-muted-foreground">Wskaźnik stabilności portfela</p>
+                <p className="text-xs text-muted-foreground">{t('advisor-risk-label')}</p>
               </div>
             </div>
             <Button asChild size="sm">
-              <Link to="/advisor">Pełny raport</Link>
+              <Link to="/advisor">{t('advisor-full-report')}</Link>
             </Button>
           </div>
         </div>

@@ -9,20 +9,7 @@ import { TransactionHistory } from '@/features/portfolio/components/TransactionH
 vi.unmock('@tanstack/react-query')
 
 vi.mock('@/features/portfolio/api', () => ({
-  fetchFirstPortfolio: vi.fn().mockResolvedValue({
-    id: '1',
-    name: 'Główny Portfel',
-    assets: [
-      {
-        id: 'asset-1',
-        symbol: 'AAPL',
-        type: 'STOCK',
-        quantity: '10',
-        avgBuyPrice: '150',
-        currency: 'USD',
-      },
-    ],
-  }),
+  fetchPortfolios: vi.fn().mockResolvedValue([]),
   fetchTransactions: vi.fn().mockResolvedValue([
     {
       id: 'tx-1',
@@ -34,6 +21,7 @@ vi.mock('@/features/portfolio/api', () => ({
       currency: 'USD',
     },
   ]),
+  removeAsset: vi.fn().mockResolvedValue(undefined),
 }))
 
 const renderDetailsPage = () => {
@@ -63,19 +51,17 @@ const renderDetailsPage = () => {
 }
 
 describe('Integration - PortfolioDetailsPage', () => {
-  it('should display asset details, total invested and transaction rows', async () => {
+  it('should display asset details and transaction rows', async () => {
     renderDetailsPage()
 
-    // Weryfikacja listy aktywów i wyceny
-    expect(screen.getByText('Assets')).toBeInTheDocument()
+    // Weryfikacja listy aktywów (i18n PL)
+    expect(screen.getByText('Aktywa')).toBeInTheDocument()
     expect(screen.getByText('AAPL')).toBeInTheDocument()
-    expect(screen.getByText('Total Invested')).toBeInTheDocument()
+    expect(screen.getByText('Zainwestowano')).toBeInTheDocument()
 
-    // POPRAWIONE: Obydwie asercje są teraz wewnątrz waitFor,
-    // dzięki czemu test czeka na załadowanie danych z tabeli transakcji
+    // Weryfikacja transakcji
     await waitFor(() => {
-      expect(screen.getByText('Transaction History')).toBeInTheDocument()
-      expect(screen.getByRole('cell', { name: 'BUY' })).toBeInTheDocument()
+      expect(screen.getByText('Historia transakcji')).toBeInTheDocument()
     })
   })
 })

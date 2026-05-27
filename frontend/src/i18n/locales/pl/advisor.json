@@ -1,0 +1,18 @@
+{
+  "title": "Doradca AI",
+  "insights-title": "Analiza portfela AI",
+  "insights-subtitle": "Spersonalizowane rekomendacje na podstawie Twoich aktywów.",
+  "empty": "Utwórz portfel, aby otrzymać porady finansowe wspierane AI.",
+  "analyzing": "Analizowanie danych rynkowych i kontekstu portfela…",
+  "no-recommendations": "Brak rekomendacji. Najpierw utwórz portfel!",
+  "refresh": "Odśwież analizę AI",
+  "refreshing": "Generowanie…",
+  "risk-score": "Wynik ryzyka: {{score}}",
+  "risk-low": "Niskie",
+  "risk-moderate": "Umiarkowane",
+  "risk-high": "Wysokie",
+  "risk-aggressive": "Agresywne",
+  "horizon-short": "Krótki termin",
+  "horizon-mid": "Średni termin",
+  "horizon-long": "Długi termin"
+}

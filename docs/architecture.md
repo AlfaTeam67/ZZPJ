@@ -105,3 +105,7 @@ Planowana integracja z message brokerem (RabbitMQ/Kafka) dla zdarzeń domenowych
 - Load balancer (Nginx/HAProxy)
 - Monitoring (Prometheus, Grafana)
 - Logging (ELK Stack)
+
+## Frontend — Internationalization (i18n)
+
+Frontend obsługuje dwujęzyczność PL/EN za pomocą `react-i18next`. Konfiguracja w `src/i18n/config.ts`. Tłumaczenia w `src/i18n/locales/{pl,en}/*.json` (7 namespace'ów). Detekcja języka: localStorage → navigator → fallback PL. Przełącznik w `AppHeader` i `LoginPage`. Szczegóły: `docs/frontend/i18n.md`.

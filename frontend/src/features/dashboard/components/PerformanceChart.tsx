@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 import { usePerformanceSeries } from '@/features/dashboard/hooks/useDashboard'
 import type { ChartRange, PerformancePoint } from '@/features/dashboard/types'
 
-const RANGES: { id: ChartRange; label: string }[] = [
-  { id: '1W', label: '1T' },
-  { id: '1M', label: '1M' },
-  { id: '3M', label: '3M' },
-  { id: '1Y', label: '1R' },
-]
+const RANGE_IDS: ChartRange[] = ['1W', '1M', '3M', '1Y']
+const RANGE_KEYS: Record<ChartRange, string> = {
+  '1W': 'range-1w',
+  '1M': 'range-1m',
+  '3M': 'range-3m',
+  '1Y': 'range-1y',
+}
 
 const VIEW = { width: 1000, height: 280, padX: 24, padY: 32 }
 
@@ -60,6 +62,7 @@ function buildGeometry(series: PerformancePoint[]): ChartGeometry {
 export function PerformanceChart() {
   const [range, setRange] = useState<ChartRange>('1Y')
   const { data, isLoading } = usePerformanceSeries(range)
+  const { t } = useTranslation('dashboard')
 
   const geometry = useMemo(() => buildGeometry(data ?? []), [data])
   const hasData = !isLoading && (data?.length ?? 0) > 1
@@ -72,24 +75,24 @@ export function PerformanceChart() {
       <header className="flex items-start justify-between gap-4">
         <div>
           <h2 id="performance-title" className="text-base font-semibold">
-            Historia wyników
+            {t('chart-title')}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Ostatnie 12 miesięcy aktywności</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('chart-subtitle')}</p>
         </div>
         <div
           role="tablist"
-          aria-label="Zakres wykresu"
+          aria-label={t('chart-range-label')}
           className="flex items-center gap-1 rounded-full border border-border/40 bg-muted/30 p-1"
         >
-          {RANGES.map((option) => {
-            const active = option.id === range
+          {RANGE_IDS.map((id) => {
+            const active = id === range
             return (
               <button
-                key={option.id}
+                key={id}
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setRange(option.id)}
+                onClick={() => setRange(id)}
                 className={cn(
                   'rounded-full px-3 py-1 text-xs font-medium transition-colors',
                   active
@@ -97,7 +100,7 @@ export function PerformanceChart() {
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {option.label}
+                {t(RANGE_KEYS[id] as 'range-1w' | 'range-1m' | 'range-3m' | 'range-1y')}
               </button>
             )
           })}
@@ -110,7 +113,7 @@ export function PerformanceChart() {
             viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
             className="h-[260px] w-full"
             role="img"
-            aria-label="Wykres historii wyników portfela"
+            aria-label={t('chart-aria')}
             preserveAspectRatio="none"
           >
             <defs>
@@ -128,7 +131,6 @@ export function PerformanceChart() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* highlight last point */}
             {geometry.points.length > 0 ? (
               <circle
                 cx={geometry.points[geometry.points.length - 1].x}
@@ -142,7 +144,7 @@ export function PerformanceChart() {
           </svg>
         ) : (
           <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
-            Wczytywanie wykresu…
+            {t('chart-loading')}
           </div>
         )}
       </div>

@@ -68,8 +68,9 @@ public class AdvisorService {
             news.size(), symbols.size(), newsAggregator.countByProvider(news));
 
         // 3) Zbuduj prompt i zawołaj LLM (z fallbackiem między providerami). Bez transakcji.
+        String language = request.getLanguage() != null ? request.getLanguage() : "en";
         List<LlmChatClient.ChatMessage> messages = promptBuilder.build(
-            valuation, news, request.getRiskTolerance(), request.getInvestmentHorizon());
+            valuation, news, request.getRiskTolerance(), request.getInvestmentHorizon(), language);
         var invocation = llmInvocationService.invoke(messages);
 
         // 4) Sparsuj odpowiedź modelu.

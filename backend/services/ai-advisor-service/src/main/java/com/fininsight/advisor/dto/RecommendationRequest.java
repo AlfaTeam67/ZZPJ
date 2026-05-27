@@ -28,4 +28,10 @@ public class RecommendationRequest {
 
     @NotNull(message = "Investment horizon is required")
     private InvestmentHorizon investmentHorizon;
+
+    /**
+     * Language code for the generated recommendation (e.g. "pl", "en").
+     * Defaults to "en" if not provided.
+     */
+    private String language;
 }

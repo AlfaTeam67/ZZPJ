@@ -18,11 +18,12 @@ vi.mock('@/features/portfolio/api', () => ({
       id: '1',
       name: 'Fundusz Emerytalny',
       description: 'Cele długoterminowe',
-      totals: { USD: 50000 },
+      totals: { USD: '50000' },
     },
-    { id: '2', name: 'Kryptowaluty', description: 'Wysokie ryzyko', totals: { USD: 12000 } },
+    { id: '2', name: 'Kryptowaluty', description: 'Wysokie ryzyko', totals: { USD: '12000' } },
   ]),
   createPortfolio: () => mockCreatePortfolio(),
+  deletePortfolio: vi.fn().mockResolvedValue(undefined),
 }))
 
 const renderPortfolioPage = () => {
@@ -50,11 +51,11 @@ describe('Integration - PortfolioPage', () => {
     })
     expect(screen.getByText('Kryptowaluty')).toBeInTheDocument()
 
-    // Weryfikacja i interakcja z formularzem tworzenia
-    expect(screen.getByLabelText(/Portfolio Name/i)).toBeInTheDocument()
-    const nameInput = screen.getByLabelText(/Portfolio Name/i)
-    const descInput = screen.getByLabelText(/Description/i)
-    const submitButton = screen.getByRole('button', { name: /Create Portfolio/i })
+    // Weryfikacja i interakcja z formularzem tworzenia (i18n PL labels)
+    expect(screen.getByLabelText(/Nazwa portfela/i)).toBeInTheDocument()
+    const nameInput = screen.getByLabelText(/Nazwa portfela/i)
+    const descInput = screen.getByLabelText(/Opis/i)
+    const submitButton = screen.getByRole('button', { name: /Utwórz portfel/i })
 
     await user.type(nameInput, 'Nowy Fundusz')
     await user.type(descInput, 'Oszczędności wakacyjne')

@@ -7,10 +7,12 @@ import {
 } from '@hugeicons/core-free-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
+import { useTranslation, Trans } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useKeycloak } from '@/features/auth/hooks/useKeycloak'
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 
 const APP_VERSION = '0.1.0'
 
@@ -21,6 +23,7 @@ export function LoginPage() {
   const location = useLocation()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation('auth')
 
   const redirectTo = useMemo(() => params.get('from') ?? '/', [params])
 
@@ -34,7 +37,7 @@ export function LoginPage() {
 
   const handleLogin = async () => {
     if (!keycloak.isConfigured) {
-      setError('Keycloak nie jest skonfigurowany. Ustaw VITE_KEYCLOAK_* w pliku .env.')
+      setError(t('keycloak-not-configured'))
       return
     }
     setSubmitting(true)
@@ -43,13 +46,12 @@ export function LoginPage() {
       await login(redirectTo)
     } catch (err) {
       setSubmitting(false)
-      setError(err instanceof Error ? err.message : 'Nie udało się rozpocząć logowania.')
+      setError(err instanceof Error ? err.message : t('login-error'))
     }
   }
 
   return (
     <div className="dark relative min-h-screen overflow-hidden bg-brand-neutral-950 text-foreground">
-      {/* tło - subtelny gradient + winieta jak na designie */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.012_70/0.55)_0%,_transparent_60%)]"
@@ -62,11 +64,14 @@ export function LoginPage() {
       <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-8">
         <header className="flex items-center justify-between">
           <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            AlfaTeam · ZZPJ 2025/2026
+            {t('team-label')}
           </span>
-          <span className="text-xs text-muted-foreground">
-            v{APP_VERSION} · realm <code className="text-foreground/70">{keycloak.realm}</code>
-          </span>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <span className="text-xs text-muted-foreground">
+              v{APP_VERSION} · realm <code className="text-foreground/70">{keycloak.realm}</code>
+            </span>
+          </div>
         </header>
 
         <main className="flex flex-1 items-center justify-center">
@@ -83,11 +88,9 @@ export function LoginPage() {
                 />
               </div>
               <h1 id="login-title" className="text-3xl font-semibold tracking-tight">
-                Fin-Insight
+                {t('title')}
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Twój osobisty asystent inwestycyjny
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t('subtitle')}</p>
             </div>
 
             <div className="mt-8 space-y-3">
@@ -99,10 +102,10 @@ export function LoginPage() {
               >
                 <HugeiconsIcon icon={Key01Icon} className="size-4" aria-hidden />
                 {submitting
-                  ? 'Przekierowywanie…'
+                  ? t('login-redirecting')
                   : !initialized
-                    ? 'Łączę z Keycloakiem…'
-                    : 'Zaloguj się przez Keycloak'}
+                    ? t('login-connecting')
+                    : t('login-button')}
               </Button>
 
               {error ? (
@@ -116,23 +119,24 @@ export function LoginPage() {
 
               {initialized && initError ? (
                 <p className="rounded-md border border-border/40 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                  Nie udało się połączyć z Keycloakiem ({keycloak.url}). Uruchom backend poleceniem{' '}
-                  <code className="text-foreground/80">docker compose up -d keycloak</code> i
-                  odśwież stronę.
+                  <Trans
+                    t={t}
+                    i18nKey="keycloak-connection-error"
+                    values={{ url: keycloak.url }}
+                    components={{ code: <code className="text-foreground/80" /> }}
+                  />
                 </p>
               ) : null}
 
               {!keycloak.isConfigured ? (
-                <p className="text-xs text-muted-foreground">
-                  Brak konfiguracji Keycloaka - sprawdź zmienne środowiskowe.
-                </p>
+                <p className="text-xs text-muted-foreground">{t('keycloak-missing-config')}</p>
               ) : null}
             </div>
 
             <div className="mt-8 border-t border-border/40 pt-6 text-center">
               <p className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
                 <HugeiconsIcon icon={SecurityCheckIcon} className="size-3" aria-hidden />
-                Szyfrowane połączenie TLS 1.3
+                {t('tls-info')}
               </p>
               <div className="mt-4 flex items-center justify-center gap-6 text-xs">
                 <a
@@ -141,7 +145,7 @@ export function LoginPage() {
                   rel="noreferrer"
                   className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
-                  Polityka prywatności
+                  {t('privacy-policy')}
                 </a>
                 <a
                   href="https://fin-insight.dev/tos"
@@ -149,7 +153,7 @@ export function LoginPage() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
-                  Warunki użytkowania
+                  {t('terms-of-service')}
                   <HugeiconsIcon icon={LinkSquare02Icon} className="size-3" aria-hidden />
                 </a>
               </div>
@@ -159,7 +163,9 @@ export function LoginPage() {
 
         <footer className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           <span className="opacity-60">fin-insight</span>
-          <span className="opacity-60">ver. {APP_VERSION} · oslona danych</span>
+          <span className="opacity-60">
+            ver. {APP_VERSION} · {t('data-protection')}
+          </span>
         </footer>
       </div>
     </div>

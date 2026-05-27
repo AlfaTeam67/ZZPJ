@@ -29,9 +29,15 @@ public class PromptBuilder {
         PortfolioValuationDto valuation,
         List<NewsCache> news,
         RiskTolerance risk,
-        InvestmentHorizon horizon
+        InvestmentHorizon horizon,
+        String language
     ) {
+        String langInstruction = "pl".equalsIgnoreCase(language)
+            ? "\nIMPORTANT: Respond entirely in Polish (polski).\n"
+            : "";
+
         StringBuilder user = new StringBuilder(2048);
+        user.append(langInstruction);
         user.append("Risk tolerance: ").append(risk).append('\n');
         user.append("Investment horizon: ").append(horizon).append('\n');
         user.append("Portfolio total value: ").append(format(valuation.totalValue())).append('\n');

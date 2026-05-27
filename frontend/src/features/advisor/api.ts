@@ -5,6 +5,7 @@ export interface RecommendationRequest {
   portfolioId: string
   riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE'
   investmentHorizon: 'SHORT_TERM' | 'MID_TERM' | 'LONG_TERM'
+  language?: string
 }
 
 export interface NewsItem {

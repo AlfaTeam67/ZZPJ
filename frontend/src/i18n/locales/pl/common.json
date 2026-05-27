@@ -1,0 +1,19 @@
+{
+  "app-name": "Fin-Insight",
+  "loading": "Ładowanie…",
+  "error": "Wystąpił błąd",
+  "retry": "Spróbuj ponownie",
+  "delete": "Usuń",
+  "cancel": "Anuluj",
+  "save": "Zapisz",
+  "create": "Utwórz",
+  "back": "Wróć",
+  "details": "Szczegóły",
+  "no-data": "Brak danych",
+  "confirm-delete": "Czy na pewno chcesz usunąć?",
+  "total-value": "Całkowita wartość",
+  "search": "Szukaj",
+  "search-placeholder": "Szukaj akcji…",
+  "notifications": "Powiadomienia",
+  "account": "Konto"
+}
