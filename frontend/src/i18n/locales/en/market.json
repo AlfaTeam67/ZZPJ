@@ -1,0 +1,12 @@
+{
+  "title": "Market Data",
+  "subtitle": "Browse market prices and view price history for different assets.",
+  "all-symbols": "All Symbols",
+  "all-symbols-desc": "Current market prices and 24h change.",
+  "no-data": "No market data available.",
+  "loading": "Loading market data…",
+  "current-price": "Current Price",
+  "change-24h": "24h Change",
+  "price-history": "Price History",
+  "price-details": "Price Details"
+}

@@ -309,3 +309,29 @@ npm run lint
 - [ ] Nie ma `console.log()` / `System.out.println()`
 - [ ] Nie ma hardcodowanych wartości
 - [ ] PR ma opis i linkowanie do Linear
+
+---
+
+## 🌐 i18n — Konwencje kluczy tłumaczeń
+
+### Namespace'y
+
+Każdy feature ma swój namespace (plik JSON): `common`, `nav`, `auth`, `portfolio`, `dashboard`, `market`, `advisor`.
+
+### Format kluczy
+
+- **kebab-case**: `create-title`, `no-portfolios`, `col-date`
+- **Brak literałów w JSX** — każdy widoczny string musi pochodzić z `t()`
+- **Interpolacja**: `{{variable}}` — np. `"units": "{{count}} szt. @ {{price}} śr."`
+- **Pluralizacja PL**: `_one`, `_few`, `_many` (np. `assets-count_one`, `assets-count_few`, `assets-count_many`)
+- **Pluralizacja EN**: `_one`, `_other`
+
+### Użycie w komponentach
+
+```tsx
+const { t } = useTranslation('portfolio') // namespace per feature
+```
+
+### Format liczb
+
+`formatCurrency(value, currency, fractionDigits, locale)` — locale przekazywany z `useLanguage().locale`, NIE importować i18next wewnątrz utils.

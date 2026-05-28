@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePriceTicker } from '@/features/market/hooks/usePriceTicker'
 import { usePriceHistory } from '@/features/market/hooks/usePriceHistory'
 import { formatMoney } from '@/utils/formatMoney'
 
 export function MarketPage() {
+  const { t } = useTranslation('market')
   const { data: prices, isLoading } = usePriceTicker()
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
   const { data: history } = usePriceHistory(selectedSymbol)
@@ -14,10 +16,8 @@ export function MarketPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Market Data</h1>
-        <p className="text-muted-foreground">
-          Browse market prices and view price history for different assets.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1fr,350px]">

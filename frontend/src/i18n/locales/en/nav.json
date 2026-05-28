@@ -1,0 +1,10 @@
+{
+  "dashboard": "Dashboard",
+  "portfolio": "Portfolio",
+  "market": "Market",
+  "advisor": "AI Advisor",
+  "settings": "Settings",
+  "premium": "Portfolio Premium",
+  "guest": "Guest",
+  "logout": "Logout"
+}

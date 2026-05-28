@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 
+import './i18n/config'
 import App from './App'
 import './index.css'
 import { AuthProvider } from '@/features/auth/AuthProvider'

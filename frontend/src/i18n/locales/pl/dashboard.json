@@ -1,0 +1,19 @@
+{
+  "total-label": "Całkowita wartość portfela",
+  "chart-title": "Historia wyników",
+  "chart-subtitle": "Ostatnie 12 miesięcy aktywności",
+  "chart-range-label": "Zakres wykresu",
+  "chart-loading": "Wczytywanie wykresu…",
+  "chart-aria": "Wykres historii wyników portfela",
+  "watchlist-title": "Twoje akcje",
+  "watchlist-link": "Zobacz wszystkie",
+  "advisor-title": "Ostatnia analiza AI",
+  "advisor-link": "Historia analiz",
+  "advisor-risk-label": "Wskaźnik stabilności portfela",
+  "advisor-full-report": "Pełny raport",
+  "advisor-risk-aria": "Ryzyko {{score}} na 10",
+  "range-1w": "1T",
+  "range-1m": "1M",
+  "range-3m": "3M",
+  "range-1y": "1R"
+}

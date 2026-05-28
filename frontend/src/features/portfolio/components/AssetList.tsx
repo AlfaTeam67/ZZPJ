@@ -1,9 +1,11 @@
-import { type Asset } from '@/types/portfolio/asset'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { formatMoney } from '@/utils/formatMoney'
-import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import Decimal from 'decimal.js'
+
+import { type Asset } from '@/types/portfolio/asset'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { formatMoney } from '@/utils/formatMoney'
 import { removeAsset } from '../api'
 
 interface AssetListProps {
@@ -12,6 +14,7 @@ interface AssetListProps {
 }
 
 export function AssetList({ portfolioId, assets }: AssetListProps) {
+  const { t } = useTranslation('portfolio')
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
@@ -22,64 +25,62 @@ export function AssetList({ portfolioId, assets }: AssetListProps) {
     },
   })
 
-  if (assets.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-6 text-center text-muted-foreground">
-          No assets in this portfolio.
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Assets</h3>
-      <div className="grid gap-4">
-        {assets.map((asset) => (
-          <Card key={asset.id}>
-            <CardContent className="flex items-center justify-between p-4">
+    <section className="rounded-2xl border border-border/40 bg-card/60 p-6">
+      <h2 className="text-base font-semibold">{t('assets-title')}</h2>
+
+      {assets.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">{t('no-assets')}</p>
+      ) : (
+        <div className="mt-4 space-y-3">
+          {assets.map((asset) => (
+            <div
+              key={asset.id}
+              className="flex items-center justify-between rounded-xl border border-border/30 p-4"
+            >
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                   {asset.symbol.substring(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold">{asset.symbol}</span>
+                    <span className="font-semibold">{asset.symbol}</span>
                     <Badge variant="secondary">{asset.type}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {asset.quantity} units @ {formatMoney(asset.avgBuyPrice, asset.currency)} avg
+                    {t('units', { price: formatMoney(asset.avgBuyPrice, asset.currency) })}
+                    {' · '}
+                    {asset.quantity}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="font-bold">
+                  <p className="font-semibold tabular-nums">
                     {formatMoney(
-                      (parseFloat(asset.quantity) * parseFloat(asset.avgBuyPrice)).toString(),
+                      new Decimal(asset.quantity).mul(new Decimal(asset.avgBuyPrice)).toString(),
                       asset.currency
                     )}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total Invested</p>
+                  <p className="text-xs text-muted-foreground">{t('total-invested')}</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => {
-                    if (confirm('Remove this asset?')) {
+                    if (confirm(t('remove-asset-confirm'))) {
                       deleteMutation.mutate(asset.id)
                     }
                   }}
                 >
-                  Remove
+                  {t('remove-asset')}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }

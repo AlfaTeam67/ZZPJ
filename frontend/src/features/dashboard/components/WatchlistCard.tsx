@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import { useWatchlist } from '@/features/dashboard/hooks/useDashboard'
 import { cn } from '@/lib/utils'
@@ -8,6 +9,7 @@ import { formatCurrency, formatPercent } from '@/utils/formatNumber'
 
 export function WatchlistCard() {
   const { data, isLoading } = useWatchlist()
+  const { t } = useTranslation('dashboard')
 
   return (
     <section
@@ -16,13 +18,13 @@ export function WatchlistCard() {
     >
       <header className="flex items-center justify-between">
         <h2 id="watchlist-title" className="text-base font-semibold">
-          Twoje akcje
+          {t('watchlist-title')}
         </h2>
         <Link
           to="/portfolio"
           className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
-          Zobacz wszystkie
+          {t('watchlist-link')}
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-3" aria-hidden />
         </Link>
       </header>

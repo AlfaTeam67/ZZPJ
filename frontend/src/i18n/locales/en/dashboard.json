@@ -1,0 +1,19 @@
+{
+  "total-label": "Total portfolio value",
+  "chart-title": "Performance History",
+  "chart-subtitle": "Last 12 months of activity",
+  "chart-range-label": "Chart range",
+  "chart-loading": "Loading chart…",
+  "chart-aria": "Portfolio performance history chart",
+  "watchlist-title": "Your Stocks",
+  "watchlist-link": "View all",
+  "advisor-title": "Latest AI Analysis",
+  "advisor-link": "Analysis history",
+  "advisor-risk-label": "Portfolio stability index",
+  "advisor-full-report": "Full report",
+  "advisor-risk-aria": "Risk {{score}} out of 10",
+  "range-1w": "1W",
+  "range-1m": "1M",
+  "range-3m": "3M",
+  "range-1y": "1Y"
+}

@@ -1,0 +1,18 @@
+{
+  "title": "AI Advisor",
+  "insights-title": "AI Portfolio Insights",
+  "insights-subtitle": "Personalized recommendations based on your holdings.",
+  "empty": "Create a portfolio to receive AI-powered financial advice.",
+  "analyzing": "Analyzing market data and portfolio context…",
+  "no-recommendations": "No recommendations available. Create a portfolio first!",
+  "refresh": "Refresh AI Analysis",
+  "refreshing": "Generating…",
+  "risk-score": "Risk score: {{score}}",
+  "risk-low": "Low",
+  "risk-moderate": "Moderate",
+  "risk-high": "High",
+  "risk-aggressive": "Aggressive",
+  "horizon-short": "Short term",
+  "horizon-mid": "Mid term",
+  "horizon-long": "Long term"
+}

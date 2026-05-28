@@ -1,17 +1,23 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Notification03Icon, Search01Icon, UserIcon } from '@hugeicons/core-free-icons'
 import { useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
-const TITLES: Record<string, string> = {
-  '/': 'Kokpit',
-  '/portfolio': 'Portfel',
-  '/market': 'Rynek',
-  '/advisor': 'Doradca AI',
-  '/settings': 'Ustawienia',
-}
+import { LanguageSwitcher } from './LanguageSwitcher'
 
 export function AppHeader() {
   const location = useLocation()
+  const { t } = useTranslation('nav')
+  const { t: tc } = useTranslation('common')
+
+  const TITLES: Record<string, string> = {
+    '/': t('dashboard'),
+    '/portfolio': t('portfolio'),
+    '/market': t('market'),
+    '/advisor': t('advisor'),
+    '/settings': t('settings'),
+  }
+
   const title = TITLES[location.pathname] ?? 'Fin-Insight'
 
   return (
@@ -19,28 +25,29 @@ export function AppHeader() {
       <h1 className="text-base font-semibold tracking-tight">{title}</h1>
 
       <div className="flex items-center gap-3">
+        <LanguageSwitcher />
         <label className="relative hidden md:block">
-          <span className="sr-only">Szukaj</span>
+          <span className="sr-only">{tc('search')}</span>
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <HugeiconsIcon icon={Search01Icon} className="size-4" aria-hidden />
           </span>
           <input
             type="search"
-            placeholder="Szukaj akcji…"
+            placeholder={tc('search-placeholder')}
             className="h-9 w-64 rounded-full border border-border/40 bg-muted/30 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
           />
         </label>
         <button
           type="button"
           className="flex size-9 items-center justify-center rounded-full border border-border/40 bg-muted/30 text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Powiadomienia"
+          aria-label={tc('notifications')}
         >
           <HugeiconsIcon icon={Notification03Icon} className="size-4" aria-hidden />
         </button>
         <button
           type="button"
           className="flex size-9 items-center justify-center rounded-full border border-border/40 bg-muted/30 text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Konto"
+          aria-label={tc('account')}
         >
           <HugeiconsIcon icon={UserIcon} className="size-4" aria-hidden />
         </button>

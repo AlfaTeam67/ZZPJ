@@ -1,11 +1,13 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowUpRight01Icon } from '@hugeicons/core-free-icons'
+import { useTranslation } from 'react-i18next'
 
 import { usePortfolioMetric } from '@/features/dashboard/hooks/useDashboard'
 import { formatCurrency, formatPercent, formatSignedCurrency } from '@/utils/formatNumber'
 
 export function PortfolioMetricHero() {
   const { data, isLoading } = usePortfolioMetric()
+  const { t } = useTranslation('dashboard')
 
   if (isLoading || !data) {
     return (
@@ -25,7 +27,7 @@ export function PortfolioMetricHero() {
         id="portfolio-total-label"
         className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground"
       >
-        Całkowita wartość portfela
+        {t('total-label')}
       </p>
       <h1 className="mt-2 font-heading text-5xl font-semibold tracking-tight">
         {formatCurrency(data.totalValue, data.currency)}

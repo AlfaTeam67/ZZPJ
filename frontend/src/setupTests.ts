@@ -2,6 +2,13 @@ import '@testing-library/jest-dom'
 import { vi, beforeAll, afterEach, afterAll } from 'vitest'
 import { server } from '@/test/mocks/server'
 
+// Initialize i18n for tests (synchronous, PL as default)
+import '@/i18n/config'
+import i18n from 'i18next'
+beforeAll(async () => {
+  await i18n.changeLanguage('pl')
+})
+
 // 1. Mockowanie Keycloak (Zabezpieczenia)
 vi.mock('keycloak-js', () => ({
   default: vi.fn(() => ({
