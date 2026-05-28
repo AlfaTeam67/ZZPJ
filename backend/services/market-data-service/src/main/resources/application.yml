@@ -53,6 +53,16 @@ management:
 market-data:
   scheduler:
     enabled: true
+    cron-crypto: "0 */1 * * * *"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      finnhub-circuit:
+        slidingWindowSize: 5
+        failureRateThreshold: 60
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 2
 
 logging:
   level:
