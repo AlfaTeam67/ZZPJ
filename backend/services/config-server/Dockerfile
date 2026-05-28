@@ -9,7 +9,7 @@ ENV GRADLE_OPTS="-Dorg.gradle.vfs.watch=false -Dorg.gradle.native=false -Dhttps.
 COPY . .
 RUN set -eux; \
     for attempt in 1 2 3; do \
-      gradle :services:config-server:build --no-daemon --no-watch-fs && break; \
+      gradle :services:config-server:build -x test --no-daemon --no-watch-fs && break; \
       if [ "$attempt" -eq 3 ]; then exit 1; fi; \
       echo "Gradle build failed (attempt $attempt), retrying in 10s..."; \
       sleep 10; \

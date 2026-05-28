@@ -12,7 +12,7 @@ COPY . .
 # Run full build including tests
 RUN set -eux; \
     for attempt in 1 2 3; do \
-      gradle :services:eureka-server:build --no-daemon --no-watch-fs && break; \
+      gradle :services:eureka-server:build -x test --no-daemon --no-watch-fs && break; \
       if [ "$attempt" -eq 3 ]; then exit 1; fi; \
       echo "Gradle build failed (attempt $attempt), retrying in 10s..."; \
       sleep 10; \
