@@ -97,7 +97,10 @@ services:
   # ================================
   
   keycloak:
-    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION:-24.0}
+    build:
+      context: ./docker/keycloak
+      args:
+        KEYCLOAK_VERSION: ${KEYCLOAK_VERSION:-24.0}
     container_name: fin-insight-keycloak
     command: start-dev --import-realm
     environment:
@@ -117,8 +120,6 @@ services:
       KC_HOSTNAME_ADMIN_URL: ${SERVICE_URL_KEYCLOAK:-http://localhost:8080}
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
-    volumes:
-      - ./docker/keycloak:/opt/keycloak/data/import:ro
     depends_on:
       keycloak-db:
         condition: service_healthy
