@@ -38,7 +38,7 @@ public class GatewayConfig {
                 )
                 .uri("lb://portfolio-manager"))
             .route("market-data-api", r -> r
-                .path("/api/market-prices/**", "/api/symbols/**",
+                .path("/api/market-prices/**", "/api/symbols/**", "/api/prices/**",
                       "/api-docs/market/**", "/v3/api-docs/market/**")
                 .filters(f -> f
                     .requestRateLimiter(config -> config

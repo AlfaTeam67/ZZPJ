@@ -28,6 +28,11 @@ public class MarketDataSchedulerProperties {
     private String cronAlways = "0 */10 * * * *";
 
     /**
+     * Cron expression for crypto-only refresh (24/7, every minute).
+     */
+    private String cronCrypto = "0 */5 * * * *";
+
+    /**
      * Minimum pause between individual Finnhub calls to stay within the
      * free-tier rate limit (60 req/min → ~1 100 ms gap is safe).
      */
