@@ -14,8 +14,6 @@ services:
       POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak_pass}
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U keycloak"]
       interval: 10s
@@ -33,8 +31,6 @@ services:
       - portfolio-db-data:/var/lib/postgresql/data
     ports:
       - "${PORTFOLIO_DB_PORT:-5433}:5432"
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PORTFOLIO_DB_USER:-user} -d ${PORTFOLIO_DB_NAME:-portfolio}"]
       interval: 10s
@@ -52,8 +48,6 @@ services:
       - market-data-db-data:/var/lib/postgresql/data
     ports:
       - "${MARKET_DATA_DB_PORT:-5434}:5432"
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${MARKET_DATA_DB_USER:-user} -d ${MARKET_DATA_DB_NAME:-marketdata}"]
       interval: 10s
@@ -71,8 +65,6 @@ services:
       - advisor-db-data:/var/lib/postgresql/data
     ports:
       - "${ADVISOR_DB_PORT:-5435}:5432"
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${ADVISOR_DB_USER:-user} -d ${ADVISOR_DB_NAME:-advisor}"]
       interval: 10s
@@ -84,8 +76,6 @@ services:
     container_name: fin-insight-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -123,8 +113,6 @@ services:
     depends_on:
       keycloak-db:
         condition: service_healthy
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: localhost:8080\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3"]
       interval: 30s
@@ -146,8 +134,6 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
     ports:
       - "${EUREKA_SERVER_PORT:-8761}:8761"
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1"]
       interval: 20s
@@ -177,8 +163,6 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8888/actuator/health || exit 1"]
       interval: 20s
@@ -219,8 +203,6 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
       interval: 30s
@@ -265,8 +247,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8082/actuator/health || exit 1"]
       interval: 30s
@@ -309,8 +289,6 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8083/actuator/health || exit 1"]
       interval: 30s
@@ -345,23 +323,12 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    networks:
-      - fin-insight-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8084/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
-
-# ================================
-# Networks
-# ================================
-
-networks:
-  fin-insight-network:
-    name: fin-insight-network
-    driver: bridge
 
 # ================================
 # Volumes
