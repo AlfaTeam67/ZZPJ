@@ -2,6 +2,7 @@ package com.fininsight.marketdata.sse;
 
 import com.fininsight.marketdata.dto.price.MarketPriceResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
+@ConditionalOnProperty(name = "market-data.scheduler.enabled", havingValue = "true", matchIfMissing = true)
 @Slf4j
 public class PriceSseBroadcaster {
 
