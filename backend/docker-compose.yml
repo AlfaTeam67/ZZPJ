@@ -190,7 +190,7 @@ services:
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
       KEYCLOAK_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
-      KEYCLOAK_SECONDARY_ISSUER_URI: http://localhost:8080/realms/fin-insight
+      KEYCLOAK_SECONDARY_ISSUER_URI: ${SERVICE_URL_KEYCLOAK:-http://localhost:8080}/realms/fin-insight
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
     ports:
       - "${PORTFOLIO_MANAGER_PORT:-8081}:8081"
@@ -229,6 +229,7 @@ services:
       DB_PASSWORD: ${MARKET_DATA_DB_PASSWORD:-password}
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      KEYCLOAK_SECONDARY_ISSUER_URI: ${SERVICE_URL_KEYCLOAK:-http://localhost:8080}/realms/fin-insight
       SPRING_REDIS_HOST: ${REDIS_HOST:-redis}
       SPRING_REDIS_PORT: ${REDIS_PORT_INTERNAL:-6379}
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -273,6 +274,7 @@ services:
       DB_PASSWORD: ${ADVISOR_DB_PASSWORD:-password}
       EUREKA_URL: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      KEYCLOAK_SECONDARY_ISSUER_URI: ${SERVICE_URL_KEYCLOAK:-http://localhost:8080}/realms/fin-insight
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       # External API keys consumed by ai-advisor-service.
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
@@ -314,6 +316,7 @@ services:
       SPRING_REDIS_PORT: ${REDIS_PORT_INTERNAL:-6379}
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/fin-insight}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-https://*.sslip.io}
     ports:
       - "${GATEWAY_PORT:-8084}:8084"
     depends_on:
