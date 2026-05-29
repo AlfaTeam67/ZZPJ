@@ -63,7 +63,7 @@ Triggers refresh for all active STOCK, FOREX, and CRYPTO symbols sequentially.
 | Method | Trigger | Types |
 |--------|---------|-------|
 | `refreshStocks` | `0 */5 9-23 * * MON-FRI` (UTC) | STOCK, FOREX |
-| `refreshCrypto` | `0 */1 * * * *` (configurable) | CRYPTO |
+| `refreshCrypto` | `0 */5 * * * *` (configurable) | CRYPTO |
 | `eodRefresh`    | `0 0 23 * * MON-FRI` (UTC)     | STOCK |
 
 Override via config server: `market-data.scheduler.cron`, `market-data.scheduler.cron-crypto`.

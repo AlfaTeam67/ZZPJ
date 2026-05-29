@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Promise.race([
       keycloak.init({
         pkceMethod: 'S256',
-        checkLoginIframe: true,
+        checkLoginIframe: false,
         silentCheckSsoRedirectUri: silentRedirectUri,
       }),
       timeoutPromise,

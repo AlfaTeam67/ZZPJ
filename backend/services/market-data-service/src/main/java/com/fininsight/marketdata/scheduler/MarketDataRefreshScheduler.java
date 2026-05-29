@@ -51,7 +51,7 @@ public class MarketDataRefreshScheduler {
         refreshByTypes(Set.of(SymbolType.STOCK, SymbolType.FOREX));
     }
 
-    @Scheduled(cron = "${market-data.scheduler.cron-crypto:0 */1 * * * *}", zone = "UTC")
+    @Scheduled(cron = "${market-data.scheduler.cron-crypto:0 */5 * * * *}", zone = "UTC")
     public void refreshCrypto() {
         log.info("Market data refresh triggered (crypto)");
         refreshByTypes(Set.of(SymbolType.CRYPTO));

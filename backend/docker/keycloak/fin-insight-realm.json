@@ -29,7 +29,8 @@
         "http://localhost:8080/*",
         "http://localhost:8081/*",
         "http://localhost:8082/*",
-        "http://localhost:8083/*"
+        "http://localhost:8083/*",
+        "https://lpaf4zp0bam0t25kadj9byvf.164.92.198.142.sslip.io/*"
       ],
       "webOrigins": [
         "http://localhost:3000",
@@ -39,7 +40,8 @@
         "http://localhost:8080",
         "http://localhost:8081",
         "http://localhost:8082",
-        "http://localhost:8083"
+        "http://localhost:8083",
+        "https://lpaf4zp0bam0t25kadj9byvf.164.92.198.142.sslip.io"
       ]
     },
     {

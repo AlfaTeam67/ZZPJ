@@ -37,8 +37,11 @@ public class PriceSseBroadcaster {
         List<SseEmitter> dead = new ArrayList<>();
         for (SseEmitter emitter : emitters) {
             try {
-                emitter.send(SseEmitter.event().data(prices, MediaType.APPLICATION_JSON));
+                synchronized (emitter) {
+                    emitter.send(SseEmitter.event().data(prices, MediaType.APPLICATION_JSON));
+                }
             } catch (Exception e) {
+                emitter.completeWithError(e);
                 dead.add(emitter);
             }
         }
@@ -52,8 +55,11 @@ public class PriceSseBroadcaster {
         List<SseEmitter> dead = new ArrayList<>();
         for (SseEmitter emitter : emitters) {
             try {
-                emitter.send(SseEmitter.event().name("ping").data(""));
+                synchronized (emitter) {
+                    emitter.send(SseEmitter.event().name("ping").data(""));
+                }
             } catch (Exception e) {
+                emitter.completeWithError(e);
                 dead.add(emitter);
             }
         }

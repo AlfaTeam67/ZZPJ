@@ -53,7 +53,7 @@ management:
 market-data:
   scheduler:
     enabled: true
-    cron-crypto: "0 */1 * * * *"
+    cron-crypto: "0 */5 * * * *"
 
 resilience4j:
   circuitbreaker:
