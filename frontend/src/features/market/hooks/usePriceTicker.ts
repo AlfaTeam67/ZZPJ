@@ -7,15 +7,16 @@ import { env } from '@/lib/env'
 
 export function usePriceTicker() {
   const sseSnapshots = useEventSource<PriceSnapshot>(`${env.apiUrl}/api/prices/stream`)
+  const isLive = sseSnapshots !== undefined
 
   const query = useQuery({
     queryKey: ['market', 'ticker'],
     queryFn: fetchPriceTicker,
-    refetchInterval: sseSnapshots === undefined ? 15_000 : false,
+    refetchInterval: isLive ? false : 15_000,
   })
 
-  if (sseSnapshots !== undefined) {
-    return { ...query, data: sseSnapshots.map(toPriceTicker) }
+  if (isLive) {
+    return { ...query, data: sseSnapshots.map(toPriceTicker), isLive }
   }
-  return query
+  return { ...query, isLive }
 }

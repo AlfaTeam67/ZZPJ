@@ -4,9 +4,13 @@
   "all-symbols": "All Symbols",
   "all-symbols-desc": "Current market prices and 24h change.",
   "no-data": "No market data available.",
-  "loading": "Loading market data…",
+  "loading": "Polling…",
+  "live": "Live",
+  "symbol": "Symbol",
   "current-price": "Current Price",
   "change-24h": "24h Change",
   "price-history": "Price History",
-  "price-details": "Price Details"
+  "price-details": "Price Details",
+  "chart-title": "Price Chart",
+  "no-symbol-selected": "Select a symbol to view its price chart"
 }

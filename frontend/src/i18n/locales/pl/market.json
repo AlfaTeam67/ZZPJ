@@ -4,9 +4,13 @@
   "all-symbols": "Wszystkie symbole",
   "all-symbols-desc": "Aktualne ceny rynkowe i zmiana 24h.",
   "no-data": "Brak danych rynkowych.",
-  "loading": "Ładowanie danych rynkowych…",
+  "loading": "Odpytywanie…",
+  "live": "Na żywo",
+  "symbol": "Symbol",
   "current-price": "Aktualna cena",
   "change-24h": "Zmiana 24h",
   "price-history": "Historia cen",
-  "price-details": "Szczegóły ceny"
+  "price-details": "Szczegóły ceny",
+  "chart-title": "Wykres ceny",
+  "no-symbol-selected": "Wybierz symbol aby zobaczyć wykres ceny"
 }

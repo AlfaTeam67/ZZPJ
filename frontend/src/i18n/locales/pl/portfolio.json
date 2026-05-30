@@ -11,6 +11,7 @@
   "assets-count_many": "{{count}} aktywów",
   "delete-confirm": "Czy na pewno chcesz usunąć ten portfel?",
   "create-title": "Nowy portfel",
+  "create-cancel": "Anuluj",
   "create-subtitle": "Dodaj nowy portfel do śledzenia aktywów.",
   "create-name-label": "Nazwa portfela",
   "create-name-placeholder": "np. Fundusz emerytalny",
