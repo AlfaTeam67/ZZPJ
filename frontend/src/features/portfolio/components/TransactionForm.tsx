@@ -12,10 +12,9 @@ import { formatMoney } from '@/utils/formatMoney'
 
 interface TransactionFormProps {
   portfolioId: string | null
-  onSuccess?: () => void
 }
 
-export function TransactionForm({ portfolioId, onSuccess }: TransactionFormProps) {
+export function TransactionForm({ portfolioId }: TransactionFormProps) {
   const { t } = useTranslation('portfolio')
   const queryClient = useQueryClient()
   const { data: assets } = useAssets(portfolioId)
@@ -37,7 +36,6 @@ export function TransactionForm({ portfolioId, onSuccess }: TransactionFormProps
       queryClient.invalidateQueries({ queryKey: ['portfolio-valuation', portfolioId] })
       queryClient.invalidateQueries({ queryKey: ['assets', portfolioId] })
       setFormData({ type: 'BUY', quantity: '', price: '', currency: 'USD', assetId: '' })
-      onSuccess?.()
     },
   })
 
@@ -49,7 +47,7 @@ export function TransactionForm({ portfolioId, onSuccess }: TransactionFormProps
       : '0.00'
 
   return (
-    <section>
+    <section className="rounded-2xl border border-border/40 bg-card/60 p-6">
       <h3 className="text-base font-semibold">{t('tx-title')}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{t('tx-subtitle')}</p>
 

@@ -1,9 +1,6 @@
-import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { Add01Icon, Cancel01Icon, ChartLineData02Icon } from '@hugeicons/core-free-icons'
 
 import { fetchPortfolio } from '@/features/portfolio/api'
 import { AssetList } from '@/features/portfolio/components/AssetList'
@@ -11,7 +8,6 @@ import { AddAssetForm } from '@/features/portfolio/components/AddAssetForm'
 import { TransactionHistory } from '@/features/portfolio/components/TransactionHistory'
 import { TransactionForm } from '@/features/portfolio/components/TransactionForm'
 import { SectionSkeleton } from '@/components/ui/SectionSkeleton'
-import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/utils/formatMoney'
 import type { Portfolio } from '@/types/portfolio/portfolio'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
@@ -20,8 +16,6 @@ export function PortfolioDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation('portfolio')
   const { locale } = useLanguage()
-  const [showAddAsset, setShowAddAsset] = useState(false)
-  const [showAddTx, setShowAddTx] = useState(false)
 
   const {
     data: portfolio,
@@ -60,6 +54,7 @@ export function PortfolioDetailsPage() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      {/* Breadcrumb + Title */}
       <section>
         <Link
           to="/portfolio"
@@ -73,6 +68,7 @@ export function PortfolioDetailsPage() {
         )}
       </section>
 
+      {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-border/40 bg-card/60 p-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -106,70 +102,16 @@ export function PortfolioDetailsPage() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">{t('assets-title')}</h2>
-            <Button
-              size="sm"
-              variant={showAddAsset ? 'outline' : 'default'}
-              onClick={() => {
-                setShowAddAsset((v) => !v)
-                setShowAddTx(false)
-              }}
-            >
-              <HugeiconsIcon
-                icon={showAddAsset ? Cancel01Icon : Add01Icon}
-                className="size-4"
-                aria-hidden
-              />
-              {showAddAsset ? t('create-cancel') : t('add-asset-title')}
-            </Button>
-          </div>
-
-          {showAddAsset && (
-            <div className="rounded-2xl border border-border/40 bg-card/30 p-6">
-              <AddAssetForm
-                portfolioId={portfolio.id}
-                onSuccess={() => setShowAddAsset(false)}
-              />
-            </div>
-          )}
-
+      {/* Main content */}
+      <div className="grid gap-8 lg:grid-cols-[1fr,350px]">
+        <div className="space-y-6">
           <AssetList portfolioId={portfolio.id} assets={portfolio.assets || []} />
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">{t('transactions-title')}</h2>
-            <Button
-              size="sm"
-              variant={showAddTx ? 'outline' : 'secondary'}
-              onClick={() => {
-                setShowAddTx((v) => !v)
-                setShowAddAsset(false)
-              }}
-            >
-              <HugeiconsIcon
-                icon={showAddTx ? Cancel01Icon : ChartLineData02Icon}
-                className="size-4"
-                aria-hidden
-              />
-              {showAddTx ? t('create-cancel') : t('tx-title')}
-            </Button>
-          </div>
-
-          {showAddTx && (
-            <div className="rounded-2xl border border-border/40 bg-card/30 p-6">
-              <TransactionForm
-                portfolioId={portfolio.id}
-                onSuccess={() => setShowAddTx(false)}
-              />
-            </div>
-          )}
-
           <TransactionHistory portfolioId={portfolio.id} />
         </div>
+        <aside className="space-y-6 lg:sticky lg:top-8 lg:self-start">
+          <AddAssetForm portfolioId={portfolio.id} />
+          <TransactionForm portfolioId={portfolio.id} />
+        </aside>
       </div>
     </div>
   )

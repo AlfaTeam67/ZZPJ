@@ -9,10 +9,9 @@ import { Label } from '@/components/ui/label'
 
 interface AddAssetFormProps {
   portfolioId: string
-  onSuccess?: () => void
 }
 
-export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
+export function AddAssetForm({ portfolioId }: AddAssetFormProps) {
   const { t } = useTranslation('portfolio')
   const [symbol, setSymbol] = useState('')
   const [quantity, setQuantity] = useState('')
@@ -37,7 +36,6 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
       setPrice('')
       queryClient.invalidateQueries({ queryKey: ['portfolio', portfolioId] })
       queryClient.invalidateQueries({ queryKey: ['portfolios'] })
-      onSuccess?.()
     },
   })
 
@@ -48,7 +46,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
   }
 
   return (
-    <section>
+    <section className="rounded-2xl border border-border/40 bg-card/60 p-6">
       <h3 className="text-base font-semibold">{t('add-asset-title')}</h3>
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
