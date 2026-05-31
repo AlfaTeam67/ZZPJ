@@ -60,10 +60,18 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
 
   const tickerList = useMemo(() => tickers ?? [], [tickers])
 
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [query])
+
   const { data: searchResults } = useQuery({
-    queryKey: ['searchSymbols', query],
-    queryFn: () => searchSymbols(query.trim()),
-    enabled: query.trim().length > 0,
+    queryKey: ['searchSymbols', debouncedQuery],
+    queryFn: () => searchSymbols(debouncedQuery.trim()),
+    enabled: debouncedQuery.trim().length > 0,
     staleTime: 60000,
   })
 
@@ -74,8 +82,8 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
     return tickerList.filter((tk) => tk.symbol.toLowerCase().includes(q)).slice(0, 5)
   }, [tickerList, query])
 
-  const displayResults =
-    searchResults && searchResults.length > 0
+  const displayResults = useMemo(() => {
+    return searchResults && searchResults.length > 0
       ? searchResults.map((r) => ({
           symbol: r.symbol,
           description: r.description,
@@ -92,6 +100,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
           price: t.price,
           currency: t.currency,
         }))
+  }, [searchResults, localFiltered, symbolTypeMap])
 
   const filteredDisplayResults = useMemo(() => {
     return displayResults.filter((r) => {
@@ -137,10 +146,11 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
       setOpen(false)
     } else {
       // Need to resolve external symbol
+      const resolvedType = type === 'Crypto' || type === 'CRYPTO' ? 'CRYPTO' : 'STOCK'
       setQuery(symbol)
-      setSelectedType(type === 'Crypto' || type === 'CRYPTO' ? 'CRYPTO' : 'STOCK')
+      setSelectedType(resolvedType)
       setOpen(false)
-      resolveMutation.mutate(symbol)
+      resolveMutation.mutate({ symbol, type: resolvedType })
     }
   }
 
@@ -148,12 +158,11 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
     setQuery(e.target.value.toUpperCase())
     setSelectedSymbol(null)
     setOpen(true)
+    resolveMutation.reset()
   }
 
   const resolveMutation = useMutation({
-    mutationFn: async (explicitSymbol?: string) => {
-      const type = selectedType
-      const symbol = explicitSymbol || query.trim()
+    mutationFn: async ({ symbol, type }: { symbol: string; type: string }) => {
       const resolved = await resolveSymbol(symbol, type)
       return resolved
     },
@@ -172,7 +181,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
 
   const handleResolve = () => {
     if (!query) return
-    resolveMutation.mutate(query.trim())
+    resolveMutation.mutate({ symbol: query.trim(), type: selectedType })
   }
 
   const mutation = useMutation({
