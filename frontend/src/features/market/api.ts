@@ -77,6 +77,8 @@ export interface SearchSymbolResponse {
 }
 
 export async function searchSymbols(query: string): Promise<SearchSymbolResponse[]> {
-  const { data } = await apiClient.get<SearchSymbolResponse[]>(`${env.apiUrl}/api/symbols/search?query=${encodeURIComponent(query)}`)
+  const { data } = await apiClient.get<SearchSymbolResponse[]>(
+    `${env.apiUrl}/api/symbols/search?query=${encodeURIComponent(query)}`
+  )
   return data
 }

@@ -74,35 +74,37 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
     return tickerList.filter((tk) => tk.symbol.toLowerCase().includes(q)).slice(0, 5)
   }, [tickerList, query])
 
-  const displayResults = searchResults && searchResults.length > 0
-    ? searchResults.map(r => ({
-        symbol: r.symbol,
-        description: r.description,
-        type: r.type,
-        isLocal: false,
-        price: undefined as number | string | undefined,
-        currency: undefined as string | undefined
-      }))
-    : localFiltered.map(t => ({
-        symbol: t.symbol,
-        description: '',
-        type: symbolTypeMap.get(t.symbol) ?? inferType(t.symbol),
-        isLocal: true,
-        price: t.price,
-        currency: t.currency
-      }))
+  const displayResults =
+    searchResults && searchResults.length > 0
+      ? searchResults.map((r) => ({
+          symbol: r.symbol,
+          description: r.description,
+          type: r.type,
+          isLocal: false,
+          price: undefined as number | string | undefined,
+          currency: undefined as string | undefined,
+        }))
+      : localFiltered.map((t) => ({
+          symbol: t.symbol,
+          description: '',
+          type: symbolTypeMap.get(t.symbol) ?? inferType(t.symbol),
+          isLocal: true,
+          price: t.price,
+          currency: t.currency,
+        }))
 
   const filteredDisplayResults = useMemo(() => {
-    return displayResults.filter(r => {
-      const typeStr = r.type || '';
-      const isCryptoType = typeStr.toUpperCase().includes('CRYPTO') || r.symbol.startsWith('BINANCE:');
-      
+    return displayResults.filter((r) => {
+      const typeStr = r.type || ''
+      const isCryptoType =
+        typeStr.toUpperCase().includes('CRYPTO') || r.symbol.startsWith('BINANCE:')
+
       if (selectedType === 'CRYPTO') {
-        return r.isLocal ? r.type === 'CRYPTO' : isCryptoType;
+        return r.isLocal ? r.type === 'CRYPTO' : isCryptoType
       } else if (selectedType === 'STOCK') {
-        return r.isLocal ? r.type === 'STOCK' : !isCryptoType;
+        return r.isLocal ? r.type === 'STOCK' : !isCryptoType
       }
-      return true;
+      return true
     })
   }, [displayResults, selectedType])
 
@@ -165,7 +167,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
     },
     onError: () => {
       // Failed to resolve
-    }
+    },
   })
 
   const handleResolve = () => {
@@ -241,9 +243,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
                   ref={inputRef}
                   id="asset-symbol"
                   placeholder={
-                    selectedType === 'CRYPTO'
-                      ? 'e.g. BTCUSDT'
-                      : t('add-asset-symbol-placeholder')
+                    selectedType === 'CRYPTO' ? 'e.g. BTCUSDT' : t('add-asset-symbol-placeholder')
                   }
                   value={query}
                   onChange={handleQueryChange}
@@ -256,58 +256,61 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
                   required
                 />
 
-            {open && filteredDisplayResults.length > 0 && (
-              <div
-                ref={dropdownRef}
-                className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
-              >
-                {filteredDisplayResults.map((tk) => {
-                  const isCrypto = tk.type === 'CRYPTO' || tk.type?.toUpperCase().includes('CRYPTO')
-                  return (
-                    <button
-                      key={tk.symbol}
-                      type="button"
-                      onPointerDown={(e) => {
-                        e.preventDefault()
-                        handleSelect(tk.symbol, tk.type)
-                      }}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus:outline-none"
-                    >
-                      <div
-                        className={cn(
-                          'flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold',
-                          isCrypto
-                            ? 'bg-amber-500/15 text-amber-400'
-                            : 'bg-blue-500/15 text-blue-400'
-                        )}
-                      >
-                        {tk.symbol.slice(0, 2)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm font-semibold block">{tk.symbol}</span>
-                        {tk.description && (
-                           <span className="text-xs text-muted-foreground block truncate">{tk.description}</span>
-                        )}
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          'shrink-0 text-[10px]',
-                          isCrypto ? 'text-amber-400' : 'text-blue-400'
-                        )}
-                      >
-                        {tk.type || (isCrypto ? 'CRYPTO' : 'STOCK')}
-                      </Badge>
-                      {tk.isLocal && tk.price !== undefined && (
-                        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                          {formatMoney(tk.price, tk.currency!)}
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+                {open && filteredDisplayResults.length > 0 && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
+                  >
+                    {filteredDisplayResults.map((tk) => {
+                      const isCrypto =
+                        tk.type === 'CRYPTO' || tk.type?.toUpperCase().includes('CRYPTO')
+                      return (
+                        <button
+                          key={tk.symbol}
+                          type="button"
+                          onPointerDown={(e) => {
+                            e.preventDefault()
+                            handleSelect(tk.symbol, tk.type)
+                          }}
+                          className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus:outline-none"
+                        >
+                          <div
+                            className={cn(
+                              'flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold',
+                              isCrypto
+                                ? 'bg-amber-500/15 text-amber-400'
+                                : 'bg-blue-500/15 text-blue-400'
+                            )}
+                          >
+                            {tk.symbol.slice(0, 2)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-sm font-semibold block">{tk.symbol}</span>
+                            {tk.description && (
+                              <span className="text-xs text-muted-foreground block truncate">
+                                {tk.description}
+                              </span>
+                            )}
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              'shrink-0 text-[10px]',
+                              isCrypto ? 'text-amber-400' : 'text-blue-400'
+                            )}
+                          >
+                            {tk.type || (isCrypto ? 'CRYPTO' : 'STOCK')}
+                          </Badge>
+                          {tk.isLocal && tk.price !== undefined && (
+                            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                              {formatMoney(tk.price, tk.currency!)}
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
               <Button
                 type="button"
@@ -319,25 +322,29 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
               </Button>
             </div>
 
-          {isValidSymbol && selectedTicker && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Badge variant="secondary" className="text-[10px]">
-                {symbolTypeMap.get(selectedSymbol!) ?? inferType(selectedSymbol!)}
-              </Badge>
-              <span>
-                {t('add-asset-market-price')}:{' '}
-                {formatMoney(selectedTicker.price, selectedTicker.currency)}
-              </span>
-            </div>
-          )}
+            {isValidSymbol && selectedTicker && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Badge variant="secondary" className="text-[10px]">
+                  {symbolTypeMap.get(selectedSymbol!) ?? inferType(selectedSymbol!)}
+                </Badge>
+                <span>
+                  {t('add-asset-market-price')}:{' '}
+                  {formatMoney(selectedTicker.price, selectedTicker.currency)}
+                </span>
+              </div>
+            )}
 
-          {!isValidSymbol && query.length > 0 && !resolveMutation.isPending && (
-            <p className="text-xs text-amber-500">{t('add-asset-symbol-invalid', 'Please select or search symbol')}</p>
-          )}
-          {resolveMutation.isError && (
-            <p className="text-xs text-red-500">{t('add-asset-resolve-error', 'Symbol not found in external market')}</p>
-          )}
-        </div>
+            {!isValidSymbol && query.length > 0 && !resolveMutation.isPending && (
+              <p className="text-xs text-amber-500">
+                {t('add-asset-symbol-invalid', 'Please select or search symbol')}
+              </p>
+            )}
+            {resolveMutation.isError && (
+              <p className="text-xs text-red-500">
+                {t('add-asset-resolve-error', 'Symbol not found in external market')}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

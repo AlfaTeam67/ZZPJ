@@ -134,7 +134,6 @@ function SymbolRow({ item, isSelected, isMine, onClick }: SymbolRowProps) {
   )
 }
 
-
 export function MarketPage() {
   const { t } = useTranslation('market')
   const { data: prices, isLoading, isLive } = usePriceTicker()
@@ -157,19 +156,22 @@ export function MarketPage() {
 
   const myPrices = useMemo(() => {
     const fromApi = filtered.filter((p) => mySymbols.has(p.symbol))
-    const fromApiSet = new Set(fromApi.map(p => p.symbol))
-    
+    const fromApiSet = new Set(fromApi.map((p) => p.symbol))
+
     // add missing
     const missing = Array.from(mySymbols)
-      .filter(s => !fromApiSet.has(s) && s.toLowerCase().includes(search.trim().toLowerCase()))
-      .map(s => ({
-        symbol: s,
-        price: 0,
-        currency: 'USD',
-        trend: 'NEUTRAL',
-        fetchedAt: new Date().toISOString(),
-      } as PriceTicker))
-      
+      .filter((s) => !fromApiSet.has(s) && s.toLowerCase().includes(search.trim().toLowerCase()))
+      .map(
+        (s) =>
+          ({
+            symbol: s,
+            price: 0,
+            currency: 'USD',
+            trend: 'NEUTRAL',
+            fetchedAt: new Date().toISOString(),
+          }) as PriceTicker
+      )
+
     return [...fromApi, ...missing]
   }, [filtered, mySymbols, search])
   const otherPrices = useMemo(
@@ -238,37 +240,37 @@ export function MarketPage() {
                 <CardDescription>{t('all-symbols-desc')}</CardDescription>
               </div>
               <div className="flex shrink-0 gap-1 rounded-lg bg-muted p-1">
-                  <button
-                    onClick={() => setView('stocks')}
-                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                      view === 'stocks'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-background/50'
-                    }`}
-                  >
-                    {t('market-stocks', 'Akcje')}
-                  </button>
-                  <button
-                    onClick={() => setView('crypto')}
-                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                      view === 'crypto'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-background/50'
-                    }`}
-                  >
-                    {t('market-crypto', 'Krypto')}
-                  </button>
-                  <button
-                    onClick={() => setView('mine')}
-                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                      view === 'mine'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-background/50'
-                    }`}
-                  >
-                    {t('view-mine', 'Moje')} ({mySymbols.size})
-                  </button>
-                </div>
+                <button
+                  onClick={() => setView('stocks')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    view === 'stocks'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
+                  }`}
+                >
+                  {t('market-stocks', 'Akcje')}
+                </button>
+                <button
+                  onClick={() => setView('crypto')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    view === 'crypto'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
+                  }`}
+                >
+                  {t('market-crypto', 'Krypto')}
+                </button>
+                <button
+                  onClick={() => setView('mine')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    view === 'mine'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
+                  }`}
+                >
+                  {t('view-mine', 'Moje')} ({mySymbols.size})
+                </button>
+              </div>
             </div>
             <div className="relative mt-1">
               <HugeiconsIcon
@@ -327,22 +329,20 @@ export function MarketPage() {
                       {t('no-results')}
                     </p>
                   )
+                ) : otherCryptos.length > 0 ? (
+                  otherCryptos.map((item) => (
+                    <SymbolRow
+                      key={item.symbol}
+                      item={item}
+                      isSelected={selectedSymbol === item.symbol}
+                      isMine={mySymbols.has(item.symbol)}
+                      onClick={() => handleSelect(item.symbol)}
+                    />
+                  ))
                 ) : (
-                  otherCryptos.length > 0 ? (
-                    otherCryptos.map((item) => (
-                      <SymbolRow
-                        key={item.symbol}
-                        item={item}
-                        isSelected={selectedSymbol === item.symbol}
-                        isMine={mySymbols.has(item.symbol)}
-                        onClick={() => handleSelect(item.symbol)}
-                      />
-                    ))
-                  ) : (
-                    <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                      {t('no-results')}
-                    </p>
-                  )
+                  <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                    {t('no-results')}
+                  </p>
                 )}
               </div>
             )}
