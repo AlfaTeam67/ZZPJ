@@ -32,6 +32,7 @@ public class CreateSymbolRequest {
     private String apiSource;
 
     @Schema(description = "Whether the symbol is actively tracked", example = "true")
+    @Builder.Default
     private boolean active = true;
 
     @Size(max = 10, message = "Base currency must not exceed 10 characters")

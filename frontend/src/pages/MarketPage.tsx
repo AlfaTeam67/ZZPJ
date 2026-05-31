@@ -16,8 +16,6 @@ import {
   ArrowRight01Icon,
   ActivityIcon,
   Search01Icon,
-  Briefcase01Icon,
-  ChartBarLineIcon,
 } from '@hugeicons/core-free-icons'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -136,31 +134,13 @@ function SymbolRow({ item, isSelected, isMine, onClick }: SymbolRowProps) {
   )
 }
 
-interface SectionHeaderProps {
-  icon: React.ComponentProps<typeof HugeiconsIcon>['icon']
-  label: string
-  count: number
-}
-
-function SectionHeader({ icon, label, count }: SectionHeaderProps) {
-  return (
-    <div className="flex items-center gap-2 bg-muted/20 px-4 py-2">
-      <HugeiconsIcon icon={icon} className="size-3.5 text-muted-foreground" aria-hidden />
-      <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
-      <span className="ml-auto text-xs tabular-nums text-muted-foreground/60">{count}</span>
-    </div>
-  )
-}
-
 export function MarketPage() {
   const { t } = useTranslation('market')
   const { data: prices, isLoading, isLive } = usePriceTicker()
   const { data: portfolios } = usePortfolios()
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [view, setView] = useState<'all' | 'mine'>('all')
+  const [view, setView] = useState<'stocks' | 'crypto' | 'mine'>('stocks')
   const { data: history } = usePriceHistory(selectedSymbol)
 
   const mySymbols = useMemo(() => {
@@ -174,13 +154,37 @@ export function MarketPage() {
     return q ? prices.filter((p) => p.symbol.toLowerCase().includes(q)) : prices
   }, [prices, search])
 
-  const myPrices = useMemo(
-    () => filtered.filter((p) => mySymbols.has(p.symbol)),
-    [filtered, mySymbols]
-  )
+  const myPrices = useMemo(() => {
+    const fromApi = filtered.filter((p) => mySymbols.has(p.symbol))
+    const fromApiSet = new Set(fromApi.map((p) => p.symbol))
+
+    // add missing
+    const missing = Array.from(mySymbols)
+      .filter((s) => !fromApiSet.has(s) && s.toLowerCase().includes(search.trim().toLowerCase()))
+      .map(
+        (s) =>
+          ({
+            symbol: s,
+            price: 0,
+            currency: 'USD',
+            trend: 'NEUTRAL',
+            fetchedAt: new Date().toISOString(),
+          }) as PriceTicker
+      )
+
+    return [...fromApi, ...missing]
+  }, [filtered, mySymbols, search])
   const otherPrices = useMemo(
     () => filtered.filter((p) => !mySymbols.has(p.symbol)),
     [filtered, mySymbols]
+  )
+  const otherStocks = useMemo(
+    () => otherPrices.filter((p) => !p.symbol.startsWith('BINANCE:')),
+    [otherPrices]
+  )
+  const otherCryptos = useMemo(
+    () => otherPrices.filter((p) => p.symbol.startsWith('BINANCE:')),
+    [otherPrices]
   )
 
   const selectedPrice = prices?.find((p) => p.symbol === selectedSymbol)
@@ -235,30 +239,38 @@ export function MarketPage() {
                 <CardTitle className="text-base">{t('all-symbols')}</CardTitle>
                 <CardDescription>{t('all-symbols-desc')}</CardDescription>
               </div>
-              {mySymbols.size > 0 && (
-                <div className="flex shrink-0 gap-1 rounded-lg bg-muted p-1">
-                  <button
-                    onClick={() => setView('all')}
-                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                      view === 'all'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-background/50'
-                    }`}
-                  >
-                    {t('view-all')}
-                  </button>
-                  <button
-                    onClick={() => setView('mine')}
-                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                      view === 'mine'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:bg-background/50'
-                    }`}
-                  >
-                    {t('view-mine')} ({mySymbols.size})
-                  </button>
-                </div>
-              )}
+              <div className="flex shrink-0 gap-1 rounded-lg bg-muted p-1">
+                <button
+                  onClick={() => setView('stocks')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    view === 'stocks'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
+                  }`}
+                >
+                  {t('market-stocks', 'Akcje')}
+                </button>
+                <button
+                  onClick={() => setView('crypto')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    view === 'crypto'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
+                  }`}
+                >
+                  {t('market-crypto', 'Krypto')}
+                </button>
+                <button
+                  onClick={() => setView('mine')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                    view === 'mine'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
+                  }`}
+                >
+                  {t('view-mine', 'Moje')} ({mySymbols.size})
+                </button>
+              </div>
             </div>
             <div className="relative mt-1">
               <HugeiconsIcon
@@ -298,53 +310,39 @@ export function MarketPage() {
                     ))
                   ) : (
                     <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                      {t('no-my-assets')}
+                      {t('no-my-assets', 'Brak aktywów w portfelu')}
                     </p>
                   )
+                ) : view === 'stocks' ? (
+                  otherStocks.length > 0 ? (
+                    otherStocks.map((item) => (
+                      <SymbolRow
+                        key={item.symbol}
+                        item={item}
+                        isSelected={selectedSymbol === item.symbol}
+                        isMine={mySymbols.has(item.symbol)}
+                        onClick={() => handleSelect(item.symbol)}
+                      />
+                    ))
+                  ) : (
+                    <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                      {t('no-results')}
+                    </p>
+                  )
+                ) : otherCryptos.length > 0 ? (
+                  otherCryptos.map((item) => (
+                    <SymbolRow
+                      key={item.symbol}
+                      item={item}
+                      isSelected={selectedSymbol === item.symbol}
+                      isMine={mySymbols.has(item.symbol)}
+                      onClick={() => handleSelect(item.symbol)}
+                    />
+                  ))
                 ) : (
-                  <>
-                    {myPrices.length > 0 && (
-                      <>
-                        <SectionHeader
-                          icon={Briefcase01Icon}
-                          label={t('my-assets')}
-                          count={myPrices.length}
-                        />
-                        {myPrices.map((item) => (
-                          <SymbolRow
-                            key={item.symbol}
-                            item={item}
-                            isSelected={selectedSymbol === item.symbol}
-                            isMine={true}
-                            onClick={() => handleSelect(item.symbol)}
-                          />
-                        ))}
-                      </>
-                    )}
-                    {otherPrices.length > 0 && (
-                      <>
-                        <SectionHeader
-                          icon={ChartBarLineIcon}
-                          label={t('market')}
-                          count={otherPrices.length}
-                        />
-                        {otherPrices.map((item) => (
-                          <SymbolRow
-                            key={item.symbol}
-                            item={item}
-                            isSelected={selectedSymbol === item.symbol}
-                            isMine={false}
-                            onClick={() => handleSelect(item.symbol)}
-                          />
-                        ))}
-                      </>
-                    )}
-                    {filtered.length === 0 && (
-                      <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        {t('no-results')}
-                      </p>
-                    )}
-                  </>
+                  <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                    {t('no-results')}
+                  </p>
                 )}
               </div>
             )}

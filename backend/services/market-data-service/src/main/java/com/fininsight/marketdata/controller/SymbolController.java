@@ -1,6 +1,8 @@
 package com.fininsight.marketdata.controller;
 
 import com.fininsight.marketdata.dto.symbol.CreateSymbolRequest;
+import com.fininsight.marketdata.dto.symbol.ResolveSymbolRequest;
+import com.fininsight.marketdata.dto.symbol.SearchSymbolResponse;
 import com.fininsight.marketdata.dto.symbol.SymbolResponse;
 import com.fininsight.marketdata.dto.symbol.UpdateSymbolRequest;
 import com.fininsight.marketdata.exception.GlobalExceptionHandler.ErrorResponse;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -52,6 +55,21 @@ public class SymbolController {
     })
     public ResponseEntity<List<SymbolResponse>> getAllSymbols() {
         return ResponseEntity.ok(symbolService.getAllSymbols());
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /api/symbols/search
+    // -------------------------------------------------------------------------
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Search symbols", description = "Searches Finnhub for symbols matching the query.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Search results returned",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchSymbolResponse.class))))
+    })
+    public ResponseEntity<List<SearchSymbolResponse>> searchSymbols(@RequestParam String query) {
+        return ResponseEntity.ok(symbolService.searchSymbols(query));
     }
 
     // -------------------------------------------------------------------------
@@ -98,6 +116,25 @@ public class SymbolController {
     })
     public ResponseEntity<SymbolResponse> createSymbol(@Valid @RequestBody CreateSymbolRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(symbolService.createSymbol(request));
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /api/symbols/resolve
+    // -------------------------------------------------------------------------
+
+    @PostMapping("/resolve")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Resolve symbol", description = "Checks DB for symbol, if missing fetches from Finnhub and adds to DB.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Symbol resolved",
+            content = @Content(schema = @Schema(implementation = SymbolResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Validation error",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "Symbol not found in external provider",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<SymbolResponse> resolveSymbol(@Valid @RequestBody ResolveSymbolRequest request) {
+        return ResponseEntity.ok(symbolService.resolveSymbol(request));
     }
 
     // -------------------------------------------------------------------------

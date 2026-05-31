@@ -61,3 +61,24 @@ export async function createSymbol(symbolDto: SymbolDto): Promise<SupportedSymbo
   const { data } = await apiClient.post<SupportedSymbol>(`${env.apiUrl}/api/symbols`, symbolDto)
   return data
 }
+
+export async function resolveSymbol(symbol: string, type: string): Promise<SupportedSymbol> {
+  const { data } = await apiClient.post<SupportedSymbol>(`${env.apiUrl}/api/symbols/resolve`, {
+    symbol,
+    type,
+  })
+  return data
+}
+
+export interface SearchSymbolResponse {
+  symbol: string
+  description: string
+  type: string
+}
+
+export async function searchSymbols(query: string): Promise<SearchSymbolResponse[]> {
+  const { data } = await apiClient.get<SearchSymbolResponse[]>(
+    `${env.apiUrl}/api/symbols/search?query=${encodeURIComponent(query)}`
+  )
+  return data
+}
