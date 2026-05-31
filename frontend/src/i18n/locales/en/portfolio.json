@@ -10,6 +10,7 @@
   "assets-count_other": "{{count}} assets",
   "delete-confirm": "Are you sure you want to delete this portfolio?",
   "create-title": "New Portfolio",
+  "create-cancel": "Cancel",
   "create-subtitle": "Add a new portfolio to track your assets.",
   "create-name-label": "Portfolio Name",
   "create-name-placeholder": "e.g. Retirement Fund",

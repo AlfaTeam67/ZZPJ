@@ -1,6 +1,7 @@
 {
   "realm": "fin-insight",
   "enabled": true,
+  "sslRequired": "none",
   "roles": {
     "realm": [
       {

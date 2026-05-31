@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { Badge } from '@/components/ui/badge'
+import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
 
 const RISK_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const
@@ -17,48 +17,101 @@ const RISK_KEYS = {
   AGGRESSIVE: 'risk-aggressive',
 } as const
 
+const RISK_DESC_KEYS = {
+  LOW: 'risk-low-desc',
+  MODERATE: 'risk-moderate-desc',
+  HIGH: 'risk-high-desc',
+  AGGRESSIVE: 'risk-aggressive-desc',
+} as const
+
 const HORIZON_KEYS = {
   SHORT_TERM: 'horizon-short',
   MID_TERM: 'horizon-mid',
   LONG_TERM: 'horizon-long',
 } as const
 
-export function AdvisorRecommendations() {
+const HORIZON_DESC_KEYS = {
+  SHORT_TERM: 'horizon-short-desc',
+  MID_TERM: 'horizon-mid-desc',
+  LONG_TERM: 'horizon-long-desc',
+} as const
+
+interface AdvisorRecommendationsProps {
+  portfolioId: string
+}
+
+export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsProps) {
   const { t } = useTranslation('advisor')
   const { locale } = useLanguage()
   const [risk, setRisk] = useState<(typeof RISK_LEVELS)[number]>('MODERATE')
   const [horizon, setHorizon] = useState<(typeof HORIZONS)[number]>('MID_TERM')
-  const { data, isLoading, refetch, isFetching } = useRecommendations(risk, horizon)
+  const [enabled, setEnabled] = useState(false)
+  const { data, isLoading, refetch, isFetching } = useRecommendations(
+    portfolioId,
+    risk,
+    horizon,
+    enabled
+  )
+
+  const handleGenerate = () => {
+    if (!enabled) {
+      setEnabled(true)
+    } else {
+      void refetch()
+    }
+  }
+
+  const handleFilterChange = <T,>(setter: (v: T) => void, value: T) => {
+    setter(value)
+    setEnabled(false)
+  }
+
+  const busy = isLoading || isFetching
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>{t('insights-title')}</CardTitle>
-            <CardDescription>{t('insights-subtitle')}</CardDescription>
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex gap-2 rounded-md bg-muted p-1">
+        <CardTitle>{t('insights-title')}</CardTitle>
+        <CardDescription>{t('insights-subtitle')}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t('risk-label')}
+            </p>
+            <p className="text-xs text-muted-foreground">{t(RISK_DESC_KEYS[risk])}</p>
+            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
               {RISK_LEVELS.map((r) => (
                 <button
                   key={r}
-                  onClick={() => setRisk(r)}
-                  className={`rounded-sm px-3 py-1 text-xs transition-colors ${
-                    risk === r ? 'bg-background font-medium shadow-sm' : 'hover:bg-background/50'
+                  onClick={() => handleFilterChange(setRisk, r)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    risk === r
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
                   }`}
                 >
                   {t(RISK_KEYS[r])}
                 </button>
               ))}
             </div>
-            <div className="flex gap-2 rounded-md bg-muted p-1">
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t('horizon-label')}
+            </p>
+            <p className="text-xs text-muted-foreground">{t(HORIZON_DESC_KEYS[horizon])}</p>
+            <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
               {HORIZONS.map((h) => (
                 <button
                   key={h}
-                  onClick={() => setHorizon(h)}
-                  className={`rounded-sm px-3 py-1 text-xs transition-colors ${
-                    horizon === h ? 'bg-background font-medium shadow-sm' : 'hover:bg-background/50'
+                  onClick={() => handleFilterChange(setHorizon, h)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    horizon === h
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/50'
                   }`}
                 >
                   {t(HORIZON_KEYS[h])}
@@ -67,19 +120,18 @@ export function AdvisorRecommendations() {
             </div>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!data && !isLoading && !isFetching ? (
-          <div className="rounded-lg border-2 border-dashed py-10 text-center text-muted-foreground">
-            {t('empty')}
-          </div>
-        ) : isLoading || isFetching ? (
+
+        <Button className="w-full" onClick={handleGenerate} disabled={busy}>
+          {busy ? t('refreshing') : enabled ? t('refresh') : t('generate')}
+        </Button>
+
+        {busy ? (
           <div className="animate-pulse py-10 text-center text-muted-foreground">
             {t('analyzing')}
           </div>
         ) : data ? (
-          <>
-            <div className="mb-2 flex items-center gap-2">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
               <Badge variant="secondary">
                 {t('risk-score', { score: data.riskScore?.toFixed(1) ?? 'N/A' })}
               </Badge>
@@ -101,16 +153,36 @@ export function AdvisorRecommendations() {
                 </li>
               ))}
             </ul>
-          </>
-        ) : (
-          <div className="rounded-lg border-2 border-dashed py-10 text-center">
-            <p className="text-muted-foreground">{t('no-recommendations')}</p>
+            {data.newsContext && data.newsContext.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t('news-context')}
+                </p>
+                <ul className="space-y-1.5">
+                  {data.newsContext.slice(0, 4).map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block rounded-md border bg-muted/30 px-3 py-2 text-xs transition-colors hover:bg-muted/60"
+                      >
+                        <span className="font-medium">{item.symbol}</span>
+                        <span className="mx-1.5 text-muted-foreground">·</span>
+                        {item.headline}
+                        <span className="ml-1.5 text-muted-foreground/60">({item.source})</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : enabled ? null : (
+          <div className="rounded-xl border-2 border-dashed border-border/40 py-12 text-center">
+            <p className="text-sm text-muted-foreground">{t('prompt')}</p>
           </div>
         )}
-
-        <Button className="w-full" onClick={() => refetch()} disabled={isLoading || isFetching}>
-          {isLoading || isFetching ? t('refreshing') : t('refresh')}
-        </Button>
       </CardContent>
     </Card>
   )

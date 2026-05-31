@@ -8,7 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-export function CreatePortfolioForm() {
+interface CreatePortfolioFormProps {
+  onSuccess?: () => void
+}
+
+export function CreatePortfolioForm({ onSuccess }: CreatePortfolioFormProps = {}) {
   const { t } = useTranslation('portfolio')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -20,6 +24,7 @@ export function CreatePortfolioForm() {
       setName('')
       setDescription('')
       queryClient.invalidateQueries({ queryKey: ['portfolios'] })
+      onSuccess?.()
     },
   })
 

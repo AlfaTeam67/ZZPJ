@@ -14,5 +14,18 @@
   "risk-aggressive": "Aggressive",
   "horizon-short": "Short term",
   "horizon-mid": "Mid term",
-  "horizon-long": "Long term"
+  "horizon-long": "Long term",
+  "subtitle": "Select a portfolio and get AI-powered financial analysis.",
+  "news-context": "News context",
+  "generate": "Generate AI Analysis",
+  "prompt": "Configure risk and horizon, then click Generate.",
+  "risk-label": "Risk tolerance",
+  "risk-low-desc": "Capital preservation priority. Bonds and stable assets.",
+  "risk-moderate-desc": "Balanced growth and safety. Diversified portfolio.",
+  "risk-high-desc": "Growth-oriented. Higher volatility accepted.",
+  "risk-aggressive-desc": "Maximum growth. High volatility, speculative positions.",
+  "horizon-label": "Investment horizon",
+  "horizon-short-desc": "Up to 1 year. Liquidity and quick returns.",
+  "horizon-mid-desc": "1–5 years. Balanced growth strategy.",
+  "horizon-long-desc": "5+ years. Compounding and long-term appreciation."
 }

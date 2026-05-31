@@ -4,9 +4,21 @@
   "all-symbols": "Wszystkie symbole",
   "all-symbols-desc": "Aktualne ceny rynkowe i zmiana 24h.",
   "no-data": "Brak danych rynkowych.",
-  "loading": "Ładowanie danych rynkowych…",
+  "loading": "Odpytywanie…",
+  "live": "Na żywo",
+  "symbol": "Symbol",
   "current-price": "Aktualna cena",
   "change-24h": "Zmiana 24h",
   "price-history": "Historia cen",
-  "price-details": "Szczegóły ceny"
+  "price-details": "Szczegóły ceny",
+  "chart-title": "Wykres ceny",
+  "no-symbol-selected": "Wybierz symbol aby zobaczyć wykres ceny",
+  "my-assets": "Twoje aktywa",
+  "market": "Rynek",
+  "mine": "Twoje",
+  "search-placeholder": "Szukaj symbolu…",
+  "no-results": "Brak symboli pasujących do wyszukiwania.",
+  "view-all": "Wszystkie",
+  "view-mine": "Moje",
+  "no-my-assets": "Brak aktywów w Twoich portfelach."
 }

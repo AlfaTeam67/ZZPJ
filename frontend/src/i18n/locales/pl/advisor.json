@@ -14,5 +14,18 @@
   "risk-aggressive": "Agresywne",
   "horizon-short": "Krótki termin",
   "horizon-mid": "Średni termin",
-  "horizon-long": "Długi termin"
+  "horizon-long": "Długi termin",
+  "subtitle": "Wybierz portfel i otrzymaj analizę finansową wspieraną przez AI.",
+  "news-context": "Kontekst newsów",
+  "generate": "Generuj analizę AI",
+  "prompt": "Skonfiguruj ryzyko i horyzont, a następnie kliknij Generuj.",
+  "risk-label": "Tolerancja ryzyka",
+  "risk-low-desc": "Priorytet ochrony kapitału. Obligacje i stabilne aktywa.",
+  "risk-moderate-desc": "Zrównoważony wzrost i bezpieczeństwo. Zdywersyfikowany portfel.",
+  "risk-high-desc": "Zorientowany na wzrost. Wyższa zmienność akceptowana.",
+  "risk-aggressive-desc": "Maksymalny wzrost. Wysoka zmienność, pozycje spekulacyjne.",
+  "horizon-label": "Horyzont inwestycyjny",
+  "horizon-short-desc": "Do 1 roku. Płynność i szybkie zwroty.",
+  "horizon-mid-desc": "1–5 lat. Zrównoważona strategia wzrostu.",
+  "horizon-long-desc": "Powyżej 5 lat. Procent składany i długoterminowy wzrost."
 }
