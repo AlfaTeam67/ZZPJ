@@ -337,7 +337,7 @@ describe('React Query Hooks - Market Data', () => {
 describe('React Query Hooks - Recommendations', () => {
   describe('useRecommendations Hook', () => {
     it('should fetch recommendations successfully', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -349,7 +349,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should return loading state initially', () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -357,7 +357,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should have bulletPoints array', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -370,7 +370,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should contain recommendation properties', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -386,7 +386,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should have no error on successful fetch', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -399,7 +399,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should support risk tolerance parameter', async () => {
-      const { result } = renderHook(() => useRecommendations('HIGH'), {
+      const { result } = renderHook(() => useRecommendations('1', 'HIGH', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -411,13 +411,12 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should update recommendations when risk tolerance changes', async () => {
-      // POPRAWIONE: Otypowanie 'riskTolerance' jako unii akceptowanej przez Twój komponent, zamiast ogólnego stringa
       const { result, rerender } = renderHook(
         ({
           riskTolerance,
         }: {
-          riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE' | undefined
-        }) => useRecommendations(riskTolerance),
+          riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE'
+        }) => useRecommendations('1', riskTolerance, 'MID_TERM', true),
         {
           initialProps: { riskTolerance: 'LOW' as const },
           wrapper: createWrapper(),
@@ -428,7 +427,7 @@ describe('React Query Hooks - Recommendations', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
-      rerender({ riskTolerance: 'LOW' })
+      rerender({ riskTolerance: 'HIGH' })
 
       await waitFor(() => {
         expect(result.current.data).toBeDefined()
@@ -436,7 +435,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should support refetch for recommendations', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -454,7 +453,7 @@ describe('React Query Hooks - Recommendations', () => {
 
   describe('useRecommendations Hook - Error Handling', () => {
     it('should have isError flag', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -466,7 +465,7 @@ describe('React Query Hooks - Recommendations', () => {
     })
 
     it('should have status property', async () => {
-      const { result } = renderHook(() => useRecommendations(), {
+      const { result } = renderHook(() => useRecommendations('1', 'MODERATE', 'MID_TERM', true), {
         wrapper: createWrapper(),
       })
 
@@ -483,9 +482,12 @@ describe('React Query Hooks - Integration', () => {
       wrapper: createWrapper(),
     })
 
-    const { result: recommendationsResult } = renderHook(() => useRecommendations(), {
-      wrapper: createWrapper(),
-    })
+    const { result: recommendationsResult } = renderHook(
+      () => useRecommendations('1', 'MODERATE', 'MID_TERM', true),
+      {
+        wrapper: createWrapper(),
+      }
+    )
 
     await waitFor(() => {
       expect(portfoliosResult.current.isLoading).toBe(false)
