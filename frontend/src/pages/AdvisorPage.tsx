@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Briefcase01Icon } from '@hugeicons/core-free-icons'
@@ -11,12 +11,7 @@ export function AdvisorPage() {
   const { t } = useTranslation('advisor')
   const { data: portfolios, isLoading } = usePortfolios()
   const [selectedId, setSelectedId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (portfolios && portfolios.length > 0 && selectedId === null) {
-      setSelectedId(portfolios[0].id)
-    }
-  }, [portfolios, selectedId])
+  const activeId = selectedId ?? portfolios?.[0]?.id ?? null
 
   return (
     <div className="space-y-6">
@@ -44,7 +39,7 @@ export function AdvisorPage() {
                 onClick={() => setSelectedId(p.id)}
                 className={cn(
                   'flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all duration-150',
-                  selectedId === p.id
+                  activeId === p.id
                     ? 'border-primary/50 bg-primary/10 text-primary shadow-sm'
                     : 'border-border/40 bg-card text-muted-foreground hover:border-border hover:text-foreground'
                 )}
@@ -55,7 +50,7 @@ export function AdvisorPage() {
             ))}
           </div>
 
-          {selectedId && <AdvisorRecommendations portfolioId={selectedId} />}
+          {activeId && <AdvisorRecommendations portfolioId={activeId} />}
         </>
       )}
     </div>
