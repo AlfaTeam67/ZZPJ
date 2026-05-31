@@ -47,6 +47,8 @@
   "add-asset-price": "Śr. cena",
   "add-asset-currency": "Waluta",
   "add-asset-currency-placeholder": "USD, EUR, PLN…",
+  "add-asset-symbol-invalid": "Wybierz symbol z listy, aby kontynuować.",
+  "add-asset-market-price": "Aktualna cena rynkowa",
   "add-asset-button": "Dodaj do portfela",
   "add-asset-pending": "Dodawanie…",
   "tx-title": "Nowa transakcja",

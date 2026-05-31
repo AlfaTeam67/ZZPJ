@@ -1,38 +1,117 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import { addAsset } from '../api'
+import { useSymbols } from '@/features/market/hooks/useSymbols'
+import { usePriceTicker } from '@/features/market/hooks/usePriceTicker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import { formatMoney } from '@/utils/formatMoney'
 
 interface AddAssetFormProps {
   portfolioId: string
   onSuccess?: () => void
 }
 
+type AssetType = 'STOCK' | 'CRYPTO' | 'BOND'
+
+function inferType(symbolName: string, symbolsType?: string): AssetType {
+  if (symbolsType === 'CRYPTO') return 'CRYPTO'
+  if (symbolsType === 'STOCK') return 'STOCK'
+  const upper = symbolName.toUpperCase()
+  if (
+    upper.includes('BTC') ||
+    upper.includes('ETH') ||
+    upper.includes('USDT') ||
+    upper.includes('SOL') ||
+    upper.includes('ADA') ||
+    upper.includes('BNB')
+  )
+    return 'CRYPTO'
+  return 'STOCK'
+}
+
 export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
   const { t } = useTranslation('portfolio')
-  const [symbol, setSymbol] = useState('')
+  const { data: tickers } = usePriceTicker()
+  const { data: symbols } = useSymbols()
+
+  const [query, setQuery] = useState('')
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
+  const [selectedType, setSelectedType] = useState<AssetType>('STOCK')
+  const [selectedCurrency, setSelectedCurrency] = useState('USD')
   const [quantity, setQuantity] = useState('')
   const [price, setPrice] = useState('')
-  const [currency, setCurrency] = useState('USD')
-  const [type, setType] = useState<'STOCK' | 'CRYPTO'>('STOCK')
+  const [open, setOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const queryClient = useQueryClient()
+
+  const symbolTypeMap = useMemo(() => {
+    if (!symbols) return new Map<string, string>()
+    return new Map(symbols.map((s) => [s.symbol, s.type]))
+  }, [symbols])
+
+  const tickerList = useMemo(() => tickers ?? [], [tickers])
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return tickerList.slice(0, 10)
+    return tickerList.filter((tk) => tk.symbol.toLowerCase().includes(q)).slice(0, 10)
+  }, [tickerList, query])
+
+  const isValidSymbol = selectedSymbol !== null
+  const selectedTicker = tickers?.find((tk) => tk.symbol === selectedSymbol)
+
+  useEffect(() => {
+    function onPointerDown(e: PointerEvent) {
+      if (
+        dropdownRef.current?.contains(e.target as Node) ||
+        inputRef.current?.contains(e.target as Node)
+      )
+        return
+      setOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [])
+
+  const handleSelect = (symbol: string) => {
+    const tk = tickers?.find((t) => t.symbol === symbol)
+    if (!tk) return
+    const type = inferType(symbol, symbolTypeMap.get(symbol))
+    setSelectedSymbol(symbol)
+    setQuery(symbol)
+    setSelectedType(type)
+    setSelectedCurrency(tk.currency)
+    const raw = typeof tk.price === 'number' ? tk.price : parseFloat(String(tk.price))
+    if (Number.isFinite(raw)) setPrice(String(raw))
+    setOpen(false)
+  }
+
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value)
+    setSelectedSymbol(null)
+    setOpen(true)
+  }
 
   const mutation = useMutation({
     mutationFn: () =>
       addAsset(portfolioId, {
-        symbol: symbol.toUpperCase(),
+        symbol: selectedSymbol!,
         quantity,
         avgBuyPrice: price,
-        currency,
-        type,
+        currency: selectedCurrency,
+        type: selectedType,
       }),
     onSuccess: () => {
-      setSymbol('')
+      setQuery('')
+      setSelectedSymbol(null)
       setQuantity('')
       setPrice('')
       queryClient.invalidateQueries({ queryKey: ['portfolio', portfolioId] })
@@ -43,7 +122,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!symbol || !quantity || !price) return
+    if (!isValidSymbol || !quantity || !price) return
     mutation.mutate()
   }
 
@@ -52,30 +131,91 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
       <h3 className="text-base font-semibold">{t('add-asset-title')}</h3>
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="asset-symbol">{t('add-asset-symbol')}</Label>
+        <div className="space-y-2">
+          <Label htmlFor="asset-symbol">{t('add-asset-symbol')}</Label>
+          <div className="relative">
             <Input
+              ref={inputRef}
               id="asset-symbol"
               placeholder={t('add-asset-symbol-placeholder')}
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
+              value={query}
+              onChange={handleQueryChange}
+              onFocus={() => setOpen(true)}
+              autoComplete="off"
+              className={cn(
+                isValidSymbol && 'border-emerald-500/50',
+                !isValidSymbol && query.length > 0 && 'border-amber-500/50'
+              )}
               required
             />
+
+            {open && filtered.length > 0 && (
+              <div
+                ref={dropdownRef}
+                className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
+              >
+                {filtered.map((tk) => {
+                  const symType = symbolTypeMap.get(tk.symbol) ?? inferType(tk.symbol)
+                  const isCrypto = symType === 'CRYPTO'
+                  return (
+                    <button
+                      key={tk.symbol}
+                      type="button"
+                      onPointerDown={(e) => {
+                        e.preventDefault()
+                        handleSelect(tk.symbol)
+                      }}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus:outline-none"
+                    >
+                      <div
+                        className={cn(
+                          'flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold',
+                          isCrypto
+                            ? 'bg-amber-500/15 text-amber-400'
+                            : 'bg-blue-500/15 text-blue-400'
+                        )}
+                      >
+                        {tk.symbol.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-semibold">{tk.symbol}</span>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          'shrink-0 text-[10px]',
+                          isCrypto ? 'text-amber-400' : 'text-blue-400'
+                        )}
+                      >
+                        {symType}
+                      </Badge>
+                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                        {formatMoney(tk.price, tk.currency)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="asset-type">{t('add-asset-type')}</Label>
-            <select
-              id="asset-type"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              value={type}
-              onChange={(e) => setType(e.target.value as 'STOCK' | 'CRYPTO')}
-            >
-              <option value="STOCK">{t('add-asset-type-stock')}</option>
-              <option value="CRYPTO">{t('add-asset-type-crypto')}</option>
-            </select>
-          </div>
+
+          {isValidSymbol && selectedTicker && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Badge variant="secondary" className="text-[10px]">
+                {symbolTypeMap.get(selectedSymbol!) ?? inferType(selectedSymbol!)}
+              </Badge>
+              <span>
+                {t('add-asset-market-price')}:{' '}
+                {formatMoney(selectedTicker.price, selectedTicker.currency)}
+              </span>
+            </div>
+          )}
+
+          {!isValidSymbol && query.length > 0 && (
+            <p className="text-xs text-amber-500">{t('add-asset-symbol-invalid')}</p>
+          )}
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="asset-quantity">{t('add-asset-quantity')}</Label>
@@ -83,6 +223,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
               id="asset-quantity"
               type="number"
               step="0.000001"
+              min="0"
               placeholder="0.00"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
@@ -95,6 +236,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
               id="asset-price"
               type="number"
               step="0.01"
+              min="0"
               placeholder="0.00"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -102,17 +244,23 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
             />
           </div>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="asset-currency">{t('add-asset-currency')}</Label>
           <Input
             id="asset-currency"
-            placeholder={t('add-asset-currency-placeholder')}
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+            placeholder="USD"
+            value={selectedCurrency}
+            onChange={(e) => setSelectedCurrency(e.target.value.toUpperCase())}
             required
           />
         </div>
-        <Button type="submit" className="w-full" disabled={mutation.isPending}>
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={mutation.isPending || !isValidSymbol || !quantity || !price}
+        >
           {mutation.isPending ? t('add-asset-pending') : t('add-asset-button')}
         </Button>
       </form>

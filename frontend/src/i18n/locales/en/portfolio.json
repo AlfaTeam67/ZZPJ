@@ -46,6 +46,8 @@
   "add-asset-price": "Avg Price",
   "add-asset-currency": "Currency",
   "add-asset-currency-placeholder": "USD, EUR, PLN…",
+  "add-asset-symbol-invalid": "Select a symbol from the list to continue.",
+  "add-asset-market-price": "Current market price",
   "add-asset-button": "Add to Portfolio",
   "add-asset-pending": "Adding…",
   "tx-title": "New Transaction",
