@@ -412,11 +412,8 @@ describe('React Query Hooks - Recommendations', () => {
 
     it('should update recommendations when risk tolerance changes', async () => {
       const { result, rerender } = renderHook(
-        ({
-          riskTolerance,
-        }: {
-          riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE'
-        }) => useRecommendations('1', riskTolerance, 'MID_TERM', true),
+        ({ riskTolerance }: { riskTolerance: 'LOW' | 'MODERATE' | 'HIGH' | 'AGGRESSIVE' }) =>
+          useRecommendations('1', riskTolerance, 'MID_TERM', true),
         {
           initialProps: { riskTolerance: 'LOW' as const },
           wrapper: createWrapper(),
