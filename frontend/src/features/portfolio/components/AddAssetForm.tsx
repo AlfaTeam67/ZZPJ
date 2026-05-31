@@ -151,7 +151,7 @@ export function AddAssetForm({ portfolioId, onSuccess }: AddAssetFormProps) {
   const resolveMutation = useMutation({
     mutationFn: async (explicitSymbol?: string) => {
       const type = selectedType
-      let symbol = explicitSymbol || query.trim()
+      const symbol = explicitSymbol || query.trim()
       const resolved = await resolveSymbol(symbol, type)
       return resolved
     },

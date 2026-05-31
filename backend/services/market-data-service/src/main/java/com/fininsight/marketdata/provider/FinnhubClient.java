@@ -81,4 +81,33 @@ public class FinnhubClient implements MarketDataProvider {
     public String providerName() {
         return PROVIDER_NAME;
     }
+
+    @Override
+    @Retry(name = "finnhub-fetch")
+    public FinnhubSearchResponse searchSymbols(String query) {
+        log.debug("Fetching Finnhub search for query: {}", query);
+
+        FinnhubSearchResponse response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/search")
+                        .queryParam("q", query)
+                        .queryParam("token", apiKey)
+                        .build())
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.TOO_MANY_REQUESTS,
+                        (req, res) -> {
+                            log.warn("Finnhub rate-limit hit for search query: {}", query);
+                            throw new FinnhubRateLimitException(query);
+                        })
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        (req, res) -> {
+                            log.warn("Finnhub 5xx error for search query: {}, status: {}",
+                                    query, res.getStatusCode());
+                            throw new org.springframework.web.client.HttpServerErrorException(
+                                    res.getStatusCode());
+                        })
+                .body(FinnhubSearchResponse.class);
+
+        return response;
+    }
 }

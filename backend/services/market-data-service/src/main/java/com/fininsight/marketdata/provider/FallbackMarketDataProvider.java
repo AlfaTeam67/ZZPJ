@@ -27,6 +27,17 @@ public class FallbackMarketDataProvider implements MarketDataProvider {
     }
 
     @Override
+    @CircuitBreaker(name = "finnhub-circuit", fallbackMethod = "fallbackSearch")
+    public FinnhubSearchResponse searchSymbols(String query) {
+        return finnhubClient.searchSymbols(query);
+    }
+
+    FinnhubSearchResponse fallbackSearch(String query, Throwable t) {
+        log.warn("finnhub search unavailable for query: {}. Reason: {}", query, t.getMessage());
+        throw new MarketDataUnavailableException("Market data search unavailable", t);
+    }
+
+    @Override
     public String providerName() {
         return finnhubClient.providerName();
     }

@@ -19,6 +19,11 @@ public interface MarketDataProvider {
     FinnhubQuoteResponse fetchQuote(String symbol);
 
     /**
+     * Searches for symbols by company name or ticker.
+     */
+    FinnhubSearchResponse searchSymbols(String query);
+
+    /**
      * Human-readable provider name used as the {@code source} field in {@code PriceSnapshot}.
      */
     String providerName();
