@@ -1,12 +1,10 @@
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { Badge } from '@/components/ui/badge'
 
 export function AdvisorRecommendations() {
-  const [risk, setRisk] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM')
-  const { data, isLoading, refetch, isFetching } = useRecommendations(risk)
+  const { data, isLoading, refetch, isFetching } = useRecommendations()
 
   return (
     <Card>
@@ -16,20 +14,9 @@ export function AdvisorRecommendations() {
             <CardTitle>AI Portfolio Insights</CardTitle>
             <CardDescription>Personalized recommendations based on your holdings.</CardDescription>
           </div>
-          <div className="flex gap-2 bg-muted p-1 rounded-md">
-            {(['LOW', 'MEDIUM', 'HIGH'] as const).map((r) => (
-              <button
-                key={r}
-                disabled={!data && !isLoading}
-                onClick={() => setRisk(r)}
-                className={`px-3 py-1 text-xs rounded-sm transition-colors ${
-                  risk === r ? 'bg-background shadow-sm font-medium' : 'hover:bg-background/50'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+          {data?.riskScore && (
+            <Badge variant="secondary">Risk Score: {data.riskScore}</Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -44,26 +31,32 @@ export function AdvisorRecommendations() {
         ) : data ? (
           <>
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary">
-                Confidence: {(parseFloat(data.confidence) * 100).toFixed(0)}%
-              </Badge>
+              <Badge variant="outline">{data.llmProvider.name}</Badge>
               <span className="text-xs text-muted-foreground">
-                Generated at: {new Date(data.timestamp).toLocaleString()}
+                Generated at: {new Date(data.createdAt).toLocaleString()}
               </span>
             </div>
-            <ul className="grid gap-3">
-              {data.recommendations.map((text, idx) => (
-                <li
-                  key={idx}
-                  className="flex gap-3 items-start p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                    {idx + 1}
-                  </div>
-                  <p className="text-sm leading-relaxed">{text}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="p-3 rounded-lg border bg-card">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{data.llmResponse}</p>
+            </div>
+            {data.news && data.news.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  News Context
+                </p>
+                <ul className="grid gap-2">
+                  {data.news.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex gap-2 items-start p-2 rounded-md border bg-muted/40 text-sm"
+                    >
+                      <span className="font-medium truncate">{item.headline}</span>
+                      <span className="text-muted-foreground shrink-0">— {item.source}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </>
         ) : (
           <div className="py-10 text-center border-2 border-dashed rounded-lg">

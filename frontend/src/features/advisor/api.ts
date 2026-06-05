@@ -1,23 +1,13 @@
 import { apiClient } from '@/lib/axios'
 import { env } from '@/lib/env'
+import type { Recommendation, RecommendationRequest } from '@/types/advisor'
 
-export interface RecommendationRequest {
-  userId: string
-  portfolioId?: string
-  riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH'
-  includeNews?: boolean
-}
-
-export interface RecommendationResponse {
-  recommendations: string[]
-  confidence: string
-  timestamp: string
-}
+export type { RecommendationRequest } from '@/types/advisor'
 
 export async function fetchRecommendations(
   payload: RecommendationRequest
-): Promise<RecommendationResponse> {
-  const { data } = await apiClient.post<RecommendationResponse>(
+): Promise<Recommendation> {
+  const { data } = await apiClient.post<Recommendation>(
     `${env.advisorApiUrl}/api/recommendations`,
     payload
   )
