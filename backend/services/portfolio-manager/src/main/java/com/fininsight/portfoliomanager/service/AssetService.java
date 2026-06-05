@@ -14,6 +14,8 @@ import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,16 @@ public class AssetService {
     private final AssetRepository assetRepository;
     private final TransactionRepository transactionRepository;
     private final AssetMapper assetMapper;
+
+    @Transactional(readOnly = true)
+    public Page<AssetResponse> getAssetsPaged(UUID portfolioId, UUID userId, Pageable pageable) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
+        return assetRepository.findByPortfolioId(portfolioId, pageable).map(assetMapper::toResponse);
+    }
 
     @Transactional
     public AssetResponse addAsset(UUID portfolioId, AddAssetRequest request, UUID userId) {
