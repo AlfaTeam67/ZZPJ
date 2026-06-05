@@ -9,11 +9,15 @@ import com.fininsight.portfoliomanager.dto.valuation.PortfolioValuationResponse;
 import com.fininsight.portfoliomanager.domain.enums.AssetType;
 import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
 import com.fininsight.portfoliomanager.service.PortfolioService;
+import com.fininsight.portfoliomanager.service.PortfolioSharingService;
+import com.fininsight.portfoliomanager.service.PortfolioValuationHistoryService;
 import com.fininsight.portfoliomanager.service.ValuationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -59,18 +63,25 @@ class PortfolioControllerTest {
     private ValuationService valuationService;
 
     @MockBean
+    private PortfolioValuationHistoryService historyService;
+
+    @MockBean
+    private PortfolioSharingService sharingService;
+
+    @MockBean
     private JwtDecoder jwtDecoder;
 
     @Test
     void getAllPortfolios_returnsListWithStatus200() throws Exception {
         PortfolioResponse response = portfolioResponse(PORTFOLIO_ID, "Growth");
-        when(portfolioService.getPortfoliosForUser(USER_ID)).thenReturn(List.of(response));
+        when(portfolioService.getPortfoliosForUserPaged(eq(USER_ID), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(response)));
 
         mockMvc.perform(get("/api/portfolios")
                 .with(userJwt()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(PORTFOLIO_ID.toString()))
-            .andExpect(jsonPath("$[0].name").value("Growth"));
+            .andExpect(jsonPath("$.content[0].id").value(PORTFOLIO_ID.toString()))
+            .andExpect(jsonPath("$.content[0].name").value("Growth"));
     }
 
     @Test
