@@ -59,7 +59,7 @@ class RepositoryIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.datasource.driver-class-name", postgres::getDriverClassName);
         registry.add("spring.flyway.enabled", () -> true);
-        registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+        registry.add("spring.flyway.locations", () -> "filesystem:src/main/resources/db/migration");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
 
