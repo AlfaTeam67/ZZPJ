@@ -65,4 +65,10 @@ public class Portfolio {
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Asset> assets = new ArrayList<>();
+
+    @Column(name = "share_token", unique = true, length = 128)
+    private String shareToken;
+
+    @Column(name = "share_token_created_at")
+    private Instant shareTokenCreatedAt;
 }
