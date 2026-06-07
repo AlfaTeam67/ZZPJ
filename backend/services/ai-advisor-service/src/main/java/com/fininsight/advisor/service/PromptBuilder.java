@@ -33,8 +33,8 @@ public class PromptBuilder {
         InvestmentHorizon horizon,
         String language
     ) {
-        String langInstruction = "pl".equalsIgnoreCase(language)
-            ? "\nIMPORTANT: Respond entirely in Polish (polski).\n"
+        String langInstruction = (language != null && !language.isBlank())
+            ? "\nIMPORTANT: Respond entirely in the language with code \"" + language + "\". All text including bullet points must be in that language.\n"
             : "";
 
         StringBuilder user = new StringBuilder(2048);
@@ -75,8 +75,10 @@ public class PromptBuilder {
 
             Produce:
               1) A 1-2 sentence summary about whether the portfolio is positioned for upside or downside given the news.
-              2) A bullet list of 3-6 concrete recommendations. EACH bullet MUST start with [BUY], [HOLD], or [SELL] tag.
-                 Example format: "- [BUY] Increase AAPL position — strong earnings growth."
+              2) A bullet list of 3-6 concrete recommendations. Rules for each bullet:
+                 - MUST start with [BUY], [HOLD], or [SELL] tag.
+                 - MUST mention the ticker symbol (e.g. AAPL, BTC-USD) it refers to.
+                 - Example: "- [BUY] AAPL — strong earnings growth supports adding to position."
               3) The final line: RISK_SCORE=<float between 0 and 10>
             """);
 

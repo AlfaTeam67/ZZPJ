@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
-import { detectSignal, SIGNAL_STYLES } from '@/utils/bulletSignal'
+import { detectSignal, extractTicker, SIGNAL_STYLES } from '@/utils/bulletSignal'
 import { cn } from '@/lib/utils'
 
 const RISK_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const
@@ -146,6 +146,7 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
               {data.bulletPoints?.map((text, idx) => {
                 const signal = detectSignal(text)
                 const styles = signal ? SIGNAL_STYLES[signal] : null
+                const ticker = signal ? extractTicker(text) : null
                 const displayText = text.replace(/^\s*\[(BUY|HOLD|SELL)\]\s*/i, '')
                 return (
                   <li
@@ -157,13 +158,20 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                   >
                     <div className="flex items-start gap-2.5">
                       {styles ? (
-                        <span className={cn('mt-0.5 shrink-0 rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider border', styles.badge,
-                          signal === 'BUY'  && 'border-green-500/50 bg-green-500/15',
-                          signal === 'SELL' && 'border-red-500/50 bg-red-500/15',
-                          signal === 'HOLD' && 'border-yellow-500/50 bg-yellow-500/15',
-                        )}>
-                          {styles.label}
-                        </span>
+                        <div className="mt-0.5 flex shrink-0 items-center gap-1.5">
+                          <span className={cn('rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider border', styles.badge,
+                            signal === 'BUY'  && 'border-green-500/50 bg-green-500/15',
+                            signal === 'SELL' && 'border-red-500/50 bg-red-500/15',
+                            signal === 'HOLD' && 'border-yellow-500/50 bg-yellow-500/15',
+                          )}>
+                            {styles.label}
+                          </span>
+                          {ticker && (
+                            <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-blue-300 bg-blue-900/40">
+                              {ticker}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
                           {idx + 1}

@@ -3,6 +3,8 @@ export type Signal = 'BUY' | 'HOLD' | 'SELL' | null
 const TAG_RE = /^\s*\[(BUY|HOLD|SELL)\]/i
 const BUY_RE = /\b(buy|kup|kupuj|warto kupi[ćc]|purchase|accumulate|strong buy)\b/i
 const SELL_RE = /\b(sell|sprzedaj|sprzedawa[ćc]|rozwa[żz] sprzeda[żz]|reduce|exit|strong sell)\b/i
+// Ticker: 1-5 uppercase letters optionally followed by -USD/-USDT etc.
+const TICKER_RE = /\b([A-Z]{1,5}(?:-USD[T]?)?)\b/g
 
 export function detectSignal(text: string): Signal {
   const tag = TAG_RE.exec(text)
@@ -11,6 +13,15 @@ export function detectSignal(text: string): Signal {
   if (BUY_RE.test(text)) return 'BUY'
   if (/\b(hold|trzymaj|utrzymuj|maintain)\b/i.test(text)) return 'HOLD'
   return null
+}
+
+const NOISE = new Set(['BUY','HOLD','SELL','THE','AND','FOR','WITH','FROM','THAT','THIS','YOUR','INTO','OVER'])
+
+export function extractTicker(text: string): string | null {
+  const cleaned = text.replace(TAG_RE, '')
+  const matches = cleaned.match(TICKER_RE) ?? []
+  const candidate = matches.find(m => !NOISE.has(m))
+  return candidate ?? null
 }
 
 export const SIGNAL_STYLES: Record<NonNullable<Signal>, { card: string; label: string; text: string; badge: string }> = {
