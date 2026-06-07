@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
-import { NewsSignalCard } from './NewsSignalCard'
+import { detectSignal, SIGNAL_STYLES } from '@/utils/bulletSignal'
+import { cn } from '@/lib/utils'
 
 const RISK_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const
 const HORIZONS = ['SHORT_TERM', 'MID_TERM', 'LONG_TERM'] as const
@@ -142,27 +143,51 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
             </div>
             {data.summary && <p className="text-sm italic text-muted-foreground">{data.summary}</p>}
             <ul className="grid gap-3">
-              {data.bulletPoints?.map((text, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
-                >
-                  <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                    {idx + 1}
-                  </div>
-                  <p className="text-sm leading-relaxed">{text}</p>
-                </li>
-              ))}
+              {data.bulletPoints?.map((text, idx) => {
+                const signal = detectSignal(text)
+                const styles = signal ? SIGNAL_STYLES[signal] : null
+                return (
+                  <li
+                    key={idx}
+                    className={cn(
+                      'rounded-xl border p-3',
+                      styles ? styles.card : 'bg-card border-border/40'
+                    )}
+                  >
+                    <div className="mb-1.5 flex items-center gap-2">
+                      {styles ? (
+                        <span className={cn('text-xs font-bold tracking-wide', styles.badge)}>
+                          {styles.label}
+                        </span>
+                      ) : (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                          {idx + 1}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm leading-relaxed">{text}</p>
+                  </li>
+                )
+              })}
             </ul>
             {data.newsContext && data.newsContext.length > 0 && (
               <div className="space-y-2 pt-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t('news-context')}
+                  {t('sources')}
                 </p>
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   {data.newsContext.slice(0, 4).map((item) => (
                     <li key={item.id}>
-                      <NewsSignalCard item={item} />
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-baseline gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span className="shrink-0 font-semibold text-foreground/70">{item.symbol}</span>
+                        <span className="truncate">{item.headline}</span>
+                        <span className="shrink-0 text-muted-foreground/50">— {item.source}</span>
+                      </a>
                     </li>
                   ))}
                 </ul>
