@@ -17,6 +17,7 @@
   "horizon-long": "Long term",
   "subtitle": "Select a portfolio and get AI-powered financial analysis.",
   "news-context": "News context",
+  "sources": "Sources",
   "generate": "Generate AI Analysis",
   "prompt": "Configure risk and horizon, then click Generate.",
   "risk-label": "Risk tolerance",

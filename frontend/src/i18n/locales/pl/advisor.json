@@ -17,6 +17,7 @@
   "horizon-long": "Długi termin",
   "subtitle": "Wybierz portfel i otrzymaj analizę finansową wspieraną przez AI.",
   "news-context": "Kontekst newsów",
+  "sources": "Źródła",
   "generate": "Generuj analizę AI",
   "prompt": "Skonfiguruj ryzyko i horyzont, a następnie kliknij Generuj.",
   "risk-label": "Tolerancja ryzyka",

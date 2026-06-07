@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
+import { detectSignal, extractTicker, SIGNAL_STYLES } from '@/utils/bulletSignal'
+import { cn } from '@/lib/utils'
+import { NewsSignalCard } from './NewsSignalCard'
 
 const RISK_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const
 const HORIZONS = ['SHORT_TERM', 'MID_TERM', 'LONG_TERM'] as const
@@ -141,37 +144,59 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
             </div>
             {data.summary && <p className="text-sm italic text-muted-foreground">{data.summary}</p>}
             <ul className="grid gap-3">
-              {data.bulletPoints?.map((text, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
-                >
-                  <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                    {idx + 1}
-                  </div>
-                  <p className="text-sm leading-relaxed">{text}</p>
-                </li>
-              ))}
+              {data.bulletPoints?.map((text, idx) => {
+                const signal = detectSignal(text)
+                const styles = signal ? SIGNAL_STYLES[signal] : null
+                const ticker = signal ? extractTicker(text) : null
+                const displayText = text.replace(/^\s*\[(BUY|HOLD|SELL)\]\s*/i, '')
+                return (
+                  <li
+                    key={idx}
+                    className={cn(
+                      'rounded-xl border p-3',
+                      styles ? styles.card : 'bg-card border-border/40'
+                    )}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      {styles ? (
+                        <div className="mt-0.5 flex shrink-0 items-center gap-1.5">
+                          <span
+                            className={cn(
+                              'rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider border',
+                              styles.badge,
+                              signal === 'BUY' && 'border-green-500/50 bg-green-500/15',
+                              signal === 'SELL' && 'border-red-500/50 bg-red-500/15',
+                              signal === 'HOLD' && 'border-yellow-500/50 bg-yellow-500/15'
+                            )}
+                          >
+                            {styles.label}
+                          </span>
+                          {ticker && (
+                            <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-blue-300 bg-blue-900/40">
+                              {ticker}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                          {idx + 1}
+                        </span>
+                      )}
+                      <p className="text-sm leading-relaxed">{displayText}</p>
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
             {data.newsContext && data.newsContext.length > 0 && (
               <div className="space-y-2 pt-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t('news-context')}
+                  {t('sources')}
                 </p>
-                <ul className="space-y-1.5">
+                <ul className="grid gap-2">
                   {data.newsContext.slice(0, 4).map((item) => (
                     <li key={item.id}>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block rounded-md border bg-muted/30 px-3 py-2 text-xs transition-colors hover:bg-muted/60"
-                      >
-                        <span className="font-medium">{item.symbol}</span>
-                        <span className="mx-1.5 text-muted-foreground">·</span>
-                        {item.headline}
-                        <span className="ml-1.5 text-muted-foreground/60">({item.source})</span>
-                      </a>
+                      <NewsSignalCard item={item} />
                     </li>
                   ))}
                 </ul>

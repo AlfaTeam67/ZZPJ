@@ -20,6 +20,7 @@ public class PromptBuilder {
           * weigh portfolio composition against the user's risk tolerance and investment horizon,
           * cite which news headlines materially support each conclusion,
           * give 3-6 short, actionable bullet recommendations,
+          * EVERY bullet recommendation MUST start with exactly one of these tags: [BUY], [HOLD], or [SELL] — no exceptions,
           * end with a single line "RISK_SCORE=<float 0..10>" reflecting overall portfolio risk vs the user's tolerance,
           * never recommend leverage, options, or derivatives unless the user is AGGRESSIVE.
         Use plain English. Do not invent prices or news that are not in the context.
@@ -32,8 +33,8 @@ public class PromptBuilder {
         InvestmentHorizon horizon,
         String language
     ) {
-        String langInstruction = "pl".equalsIgnoreCase(language)
-            ? "\nIMPORTANT: Respond entirely in Polish (polski).\n"
+        String langInstruction = (language != null && !language.isBlank() && language.matches("^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,4})?$"))
+            ? "\nIMPORTANT: Respond entirely in the language with code \"" + language + "\". All text including bullet points must be in that language.\n"
             : "";
 
         StringBuilder user = new StringBuilder(2048);
@@ -74,7 +75,10 @@ public class PromptBuilder {
 
             Produce:
               1) A 1-2 sentence summary about whether the portfolio is positioned for upside or downside given the news.
-              2) A bullet list of 3-6 concrete recommendations (rebalancing, hedging, or "hold" calls).
+              2) A bullet list of 3-6 concrete recommendations. Rules for each bullet:
+                 - MUST start with [BUY], [HOLD], or [SELL] tag.
+                 - MUST mention the ticker symbol (e.g. AAPL, BTC-USD) it refers to.
+                 - Example: "- [BUY] AAPL — strong earnings growth supports adding to position."
               3) The final line: RISK_SCORE=<float between 0 and 10>
             """);
 
