@@ -159,11 +159,15 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                     <div className="flex items-start gap-2.5">
                       {styles ? (
                         <div className="mt-0.5 flex shrink-0 items-center gap-1.5">
-                          <span className={cn('rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider border', styles.badge,
-                            signal === 'BUY'  && 'border-green-500/50 bg-green-500/15',
-                            signal === 'SELL' && 'border-red-500/50 bg-red-500/15',
-                            signal === 'HOLD' && 'border-yellow-500/50 bg-yellow-500/15',
-                          )}>
+                          <span
+                            className={cn(
+                              'rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider border',
+                              styles.badge,
+                              signal === 'BUY' && 'border-green-500/50 bg-green-500/15',
+                              signal === 'SELL' && 'border-red-500/50 bg-red-500/15',
+                              signal === 'HOLD' && 'border-yellow-500/50 bg-yellow-500/15'
+                            )}
+                          >
                             {styles.label}
                           </span>
                           {ticker && (
@@ -197,7 +201,9 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                         rel="noopener noreferrer"
                         className="flex items-baseline gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <span className="shrink-0 font-semibold text-foreground/70">{item.symbol}</span>
+                        <span className="shrink-0 font-semibold text-foreground/70">
+                          {item.symbol}
+                        </span>
                         <span className="truncate">{item.headline}</span>
                         <span className="shrink-0 text-muted-foreground/50">— {item.source}</span>
                       </a>

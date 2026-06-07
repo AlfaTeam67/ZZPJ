@@ -15,17 +15,49 @@ export function detectSignal(text: string): Signal {
   return null
 }
 
-const NOISE = new Set(['BUY','HOLD','SELL','THE','AND','FOR','WITH','FROM','THAT','THIS','YOUR','INTO','OVER'])
+const NOISE = new Set([
+  'BUY',
+  'HOLD',
+  'SELL',
+  'THE',
+  'AND',
+  'FOR',
+  'WITH',
+  'FROM',
+  'THAT',
+  'THIS',
+  'YOUR',
+  'INTO',
+  'OVER',
+])
 
 export function extractTicker(text: string): string | null {
   const cleaned = text.replace(TAG_RE, '')
   const matches = cleaned.match(TICKER_RE) ?? []
-  const candidate = matches.find(m => !NOISE.has(m))
+  const candidate = matches.find((m) => !NOISE.has(m))
   return candidate ?? null
 }
 
-export const SIGNAL_STYLES: Record<NonNullable<Signal>, { card: string; label: string; text: string; badge: string }> = {
-  BUY:  { card: 'bg-green-500/10 border-green-500/35',  label: '↑ BUY',  text: 'text-green-400',  badge: 'text-green-400' },
-  HOLD: { card: 'bg-yellow-500/10 border-yellow-500/35', label: '→ HOLD', text: 'text-yellow-400', badge: 'text-yellow-400' },
-  SELL: { card: 'bg-red-500/10 border-red-500/35',      label: '↓ SELL', text: 'text-red-400',    badge: 'text-red-400' },
+export const SIGNAL_STYLES: Record<
+  NonNullable<Signal>,
+  { card: string; label: string; text: string; badge: string }
+> = {
+  BUY: {
+    card: 'bg-green-500/10 border-green-500/35',
+    label: '↑ BUY',
+    text: 'text-green-400',
+    badge: 'text-green-400',
+  },
+  HOLD: {
+    card: 'bg-yellow-500/10 border-yellow-500/35',
+    label: '→ HOLD',
+    text: 'text-yellow-400',
+    badge: 'text-yellow-400',
+  },
+  SELL: {
+    card: 'bg-red-500/10 border-red-500/35',
+    label: '↓ SELL',
+    text: 'text-red-400',
+    badge: 'text-red-400',
+  },
 }

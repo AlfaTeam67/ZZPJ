@@ -38,7 +38,12 @@ export function NewsSignalCard({ item }: NewsSignalCardProps) {
   const signal = sentimentToSignal(item.sentiment ?? '')
 
   const content = (
-    <div className={cn('rounded-xl border p-3 transition-colors hover:brightness-110', signal.cardClass)}>
+    <div
+      className={cn(
+        'rounded-xl border p-3 transition-colors hover:brightness-110',
+        signal.cardClass
+      )}
+    >
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span className={cn('text-xs font-bold tracking-wide', signal.labelClass)}>
           {signal.label}
