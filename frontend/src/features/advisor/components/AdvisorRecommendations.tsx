@@ -146,6 +146,7 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
               {data.bulletPoints?.map((text, idx) => {
                 const signal = detectSignal(text)
                 const styles = signal ? SIGNAL_STYLES[signal] : null
+                const displayText = text.replace(/^\s*\[(BUY|HOLD|SELL)\]\s*/i, '')
                 return (
                   <li
                     key={idx}
@@ -168,7 +169,7 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                           {idx + 1}
                         </span>
                       )}
-                      <p className="text-sm leading-relaxed">{text}</p>
+                      <p className="text-sm leading-relaxed">{displayText}</p>
                     </div>
                   </li>
                 )

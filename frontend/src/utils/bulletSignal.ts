@@ -1,12 +1,14 @@
 export type Signal = 'BUY' | 'HOLD' | 'SELL' | null
 
+const TAG_RE = /^\s*\[(BUY|HOLD|SELL)\]/i
 const BUY_RE = /\b(buy|kup|kupuj|warto kupi[ćc]|purchase|accumulate|strong buy)\b/i
 const SELL_RE = /\b(sell|sprzedaj|sprzedawa[ćc]|rozwa[żz] sprzeda[żz]|reduce|exit|strong sell)\b/i
 
 export function detectSignal(text: string): Signal {
+  const tag = TAG_RE.exec(text)
+  if (tag) return tag[1].toUpperCase() as Signal
   if (SELL_RE.test(text)) return 'SELL'
   if (BUY_RE.test(text)) return 'BUY'
-  // "hold" and Polish variants — only if no stronger signal
   if (/\b(hold|trzymaj|utrzymuj|maintain)\b/i.test(text)) return 'HOLD'
   return null
 }
