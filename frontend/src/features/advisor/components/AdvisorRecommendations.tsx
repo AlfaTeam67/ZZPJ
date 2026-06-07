@@ -154,18 +154,22 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                       styles ? styles.card : 'bg-card border-border/40'
                     )}
                   >
-                    <div className="mb-1.5 flex items-center gap-2">
+                    <div className="flex items-start gap-2.5">
                       {styles ? (
-                        <span className={cn('text-xs font-bold tracking-wide', styles.badge)}>
+                        <span className={cn('mt-0.5 shrink-0 rounded-md px-2 py-0.5 text-[11px] font-extrabold tracking-wider border', styles.badge,
+                          signal === 'BUY'  && 'border-green-500/50 bg-green-500/15',
+                          signal === 'SELL' && 'border-red-500/50 bg-red-500/15',
+                          signal === 'HOLD' && 'border-yellow-500/50 bg-yellow-500/15',
+                        )}>
                           {styles.label}
                         </span>
                       ) : (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                        <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
                           {idx + 1}
                         </span>
                       )}
+                      <p className="text-sm leading-relaxed">{text}</p>
                     </div>
-                    <p className="text-sm leading-relaxed">{text}</p>
                   </li>
                 )
               })}
