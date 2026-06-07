@@ -33,7 +33,7 @@ public class PromptBuilder {
         InvestmentHorizon horizon,
         String language
     ) {
-        String langInstruction = (language != null && !language.isBlank())
+        String langInstruction = (language != null && !language.isBlank() && language.matches("^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,4})?$"))
             ? "\nIMPORTANT: Respond entirely in the language with code \"" + language + "\". All text including bullet points must be in that language.\n"
             : "";
 

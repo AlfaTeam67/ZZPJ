@@ -29,6 +29,18 @@ const NOISE = new Set([
   'YOUR',
   'INTO',
   'OVER',
+  'AI',
+  'CEO',
+  'SEC',
+  'FED',
+  'FDA',
+  'IPO',
+  'ETF',
+  'GDP',
+  'CPI',
+  'US',
+  'EU',
+  'UK',
 ])
 
 export function extractTicker(text: string): string | null {

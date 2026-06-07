@@ -8,6 +8,7 @@ import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
 import { detectSignal, extractTicker, SIGNAL_STYLES } from '@/utils/bulletSignal'
 import { cn } from '@/lib/utils'
+import { NewsSignalCard } from './NewsSignalCard'
 
 const RISK_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const
 const HORIZONS = ['SHORT_TERM', 'MID_TERM', 'LONG_TERM'] as const
@@ -192,21 +193,10 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {t('sources')}
                 </p>
-                <ul className="space-y-1">
+                <ul className="grid gap-2">
                   {data.newsContext.slice(0, 4).map((item) => (
                     <li key={item.id}>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-baseline gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <span className="shrink-0 font-semibold text-foreground/70">
-                          {item.symbol}
-                        </span>
-                        <span className="truncate">{item.headline}</span>
-                        <span className="shrink-0 text-muted-foreground/50">— {item.source}</span>
-                      </a>
+                      <NewsSignalCard item={item} />
                     </li>
                   ))}
                 </ul>
