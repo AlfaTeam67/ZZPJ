@@ -34,6 +34,11 @@ describe('NewsSignalCard', () => {
     expect(screen.getByText('→ HOLD')).toBeInTheDocument()
   })
 
+  it('falls back to HOLD when sentiment is undefined', () => {
+    render(<NewsSignalCard item={{ ...base, sentiment: undefined as unknown as string }} />)
+    expect(screen.getByText('→ HOLD')).toBeInTheDocument()
+  })
+
   it('renders symbol badge and headline', () => {
     render(<NewsSignalCard item={base} />)
     expect(screen.getByText('AAPL')).toBeInTheDocument()
@@ -45,6 +50,7 @@ describe('NewsSignalCard', () => {
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', 'https://reuters.com/apple-q2')
     expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
   it('renders without href when url is empty', () => {
