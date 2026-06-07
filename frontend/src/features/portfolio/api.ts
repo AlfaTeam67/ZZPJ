@@ -44,8 +44,8 @@ export interface PortfolioValuation {
 }
 
 export async function fetchPortfolios(): Promise<Portfolio[]> {
-  const { data } = await apiClient.get<Portfolio[]>(`${env.apiUrl}/api/portfolios`)
-  return data
+  const { data } = await apiClient.get<{ content: Portfolio[] } | Portfolio[]>(`${env.apiUrl}/api/portfolios`)
+  return Array.isArray(data) ? data : (data as { content: Portfolio[] }).content
 }
 
 /**
@@ -99,10 +99,10 @@ export async function removeAsset(portfolioId: string, assetId: string): Promise
 }
 
 export async function fetchTransactions(portfolioId: string): Promise<Transaction[]> {
-  const { data } = await apiClient.get<Transaction[]>(
+  const { data } = await apiClient.get<{ content: Transaction[] } | Transaction[]>(
     `${env.apiUrl}/api/portfolios/${portfolioId}/transactions`
   )
-  return data
+  return Array.isArray(data) ? data : (data as { content: Transaction[] }).content
 }
 
 export async function createTransaction(
