@@ -44,7 +44,9 @@ export interface PortfolioValuation {
 }
 
 export async function fetchPortfolios(): Promise<Portfolio[]> {
-  const { data } = await apiClient.get<{ content: Portfolio[] } | Portfolio[]>(`${env.apiUrl}/api/portfolios`)
+  const { data } = await apiClient.get<{ content: Portfolio[] } | Portfolio[]>(
+    `${env.apiUrl}/api/portfolios`
+  )
   return Array.isArray(data) ? data : (data as { content: Portfolio[] }).content
 }
 
