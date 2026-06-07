@@ -6,14 +6,16 @@ import com.fininsight.portfoliomanager.domain.Transaction;
 import com.fininsight.portfoliomanager.domain.enums.TransactionType;
 import com.fininsight.portfoliomanager.dto.transaction.TransactionRequest;
 import com.fininsight.portfoliomanager.dto.transaction.TransactionResponse;
+import com.fininsight.portfoliomanager.exception.AssetNotFoundException;
+import com.fininsight.portfoliomanager.exception.PortfolioAccessDeniedException;
+import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
 import com.fininsight.portfoliomanager.mapper.TransactionMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
-import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
-import com.fininsight.portfoliomanager.exception.PortfolioAccessDeniedException;
-import com.fininsight.portfoliomanager.exception.AssetNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,27 @@ public class TransactionService {
             .stream()
             .map(transactionMapper::toResponse)
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionResponse> getTransactionsByPortfolioPaged(
+        UUID portfolioId, UUID userId, Pageable pageable,
+        Instant from, Instant to, TransactionType type
+    ) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+            .orElseThrow(() -> new PortfolioNotFoundException("Portfolio not found"));
+
+        if (!portfolio.getUser().getId().equals(userId)) {
+            throw new PortfolioAccessDeniedException("Access denied to this portfolio");
+        }
+
+        boolean hasFilters = from != null || to != null || type != null;
+        if (hasFilters) {
+            return transactionRepository.findByPortfolioIdWithFilters(portfolioId, from, to, type, pageable)
+                .map(transactionMapper::toResponse);
+        }
+        return transactionRepository.findByPortfolioId(portfolioId, pageable)
+            .map(transactionMapper::toResponse);
     }
 
     @Transactional

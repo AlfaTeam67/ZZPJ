@@ -5,14 +5,16 @@ import com.fininsight.portfoliomanager.domain.User;
 import com.fininsight.portfoliomanager.dto.portfolio.CreatePortfolioRequest;
 import com.fininsight.portfoliomanager.dto.portfolio.PortfolioResponse;
 import com.fininsight.portfoliomanager.dto.portfolio.UpdatePortfolioRequest;
-import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
 import com.fininsight.portfoliomanager.exception.PortfolioAccessDeniedException;
+import com.fininsight.portfoliomanager.exception.PortfolioNotFoundException;
 import com.fininsight.portfoliomanager.mapper.PortfolioMapper;
 import com.fininsight.portfoliomanager.repository.AssetRepository;
 import com.fininsight.portfoliomanager.repository.PortfolioDataRepository;
 import com.fininsight.portfoliomanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +38,6 @@ public class PortfolioService {
     @Transactional(readOnly = true)
     public List<PortfolioResponse> getPortfoliosForUser(UUID userId) {
         List<Portfolio> portfolios = portfolioRepository.findByUserId(userId);
-        if (portfolios.isEmpty()) {
-            return List.of();
-        }
-
         Map<UUID, List<AssetRepository.PortfolioCurrencyTotalValueProjection>> totalsByPortfolioId = assetRepository.findTotalValuesByPortfolioIds(
             portfolios.stream().map(Portfolio::getId).toList()
         ).stream().collect(Collectors.groupingBy(
@@ -53,6 +51,22 @@ public class PortfolioService {
                 return portfolioMapper.toResponse(portfolio, totals);
             })
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PortfolioResponse> getPortfoliosForUserPaged(UUID userId, Pageable pageable) {
+        Page<Portfolio> page = portfolioRepository.findByUserId(userId, pageable);
+        List<UUID> ids = page.getContent().stream().map(Portfolio::getId).toList();
+        Map<UUID, List<AssetRepository.PortfolioCurrencyTotalValueProjection>> totalsByPortfolioId =
+            ids.isEmpty() ? Map.of() : assetRepository.findTotalValuesByPortfolioIds(ids).stream()
+                .collect(Collectors.groupingBy(
+                    AssetRepository.PortfolioCurrencyTotalValueProjection::getPortfolioId,
+                    Collectors.toList()
+                ));
+        return page.map(portfolio -> {
+            Map<String, BigDecimal> totals = resolveTotals(totalsByPortfolioId.get(portfolio.getId()));
+            return portfolioMapper.toResponse(portfolio, totals);
+        });
     }
 
     @Transactional(readOnly = true)
