@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { useRecommendations } from '@/features/advisor/hooks/useRecommendations'
 import { useLanguage } from '@/i18n/hooks/useLanguage'
+import { NewsSignalCard } from './NewsSignalCard'
 
 const RISK_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'AGGRESSIVE'] as const
 const HORIZONS = ['SHORT_TERM', 'MID_TERM', 'LONG_TERM'] as const
@@ -158,20 +159,10 @@ export function AdvisorRecommendations({ portfolioId }: AdvisorRecommendationsPr
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {t('news-context')}
                 </p>
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {data.newsContext.slice(0, 4).map((item) => (
                     <li key={item.id}>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block rounded-md border bg-muted/30 px-3 py-2 text-xs transition-colors hover:bg-muted/60"
-                      >
-                        <span className="font-medium">{item.symbol}</span>
-                        <span className="mx-1.5 text-muted-foreground">·</span>
-                        {item.headline}
-                        <span className="ml-1.5 text-muted-foreground/60">({item.source})</span>
-                      </a>
+                      <NewsSignalCard item={item} />
                     </li>
                   ))}
                 </ul>
