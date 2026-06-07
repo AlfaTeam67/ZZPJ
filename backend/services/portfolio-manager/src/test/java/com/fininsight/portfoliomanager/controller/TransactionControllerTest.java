@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,30 +58,30 @@ class TransactionControllerTest {
     @Test
     void getTransactionHistory_returnsListWithStatus200() throws Exception {
         TransactionResponse response = transactionResponse(TX_ID, TransactionType.BUY);
-        when(transactionService.getTransactionsByPortfolio(PORTFOLIO_ID, USER_ID))
-            .thenReturn(List.of(response));
+        when(transactionService.getTransactionsByPortfolioPaged(eq(PORTFOLIO_ID), eq(USER_ID), any(), isNull(), isNull(), isNull()))
+            .thenReturn(new PageImpl<>(List.of(response)));
 
         mockMvc.perform(get("/api/portfolios/{portfolioId}/transactions", PORTFOLIO_ID)
                 .with(userJwt()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(TX_ID.toString()))
-            .andExpect(jsonPath("$[0].type").value("BUY"));
+            .andExpect(jsonPath("$.content[0].id").value(TX_ID.toString()))
+            .andExpect(jsonPath("$.content[0].type").value("BUY"));
     }
 
     @Test
     void getTransactionHistory_returnsEmptyListWhenNoTransactions() throws Exception {
-        when(transactionService.getTransactionsByPortfolio(PORTFOLIO_ID, USER_ID))
-            .thenReturn(List.of());
+        when(transactionService.getTransactionsByPortfolioPaged(eq(PORTFOLIO_ID), eq(USER_ID), any(), isNull(), isNull(), isNull()))
+            .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/portfolios/{portfolioId}/transactions", PORTFOLIO_ID)
                 .with(userJwt()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isEmpty());
+            .andExpect(jsonPath("$.content").isEmpty());
     }
 
     @Test
     void getTransactionHistory_returns404WhenPortfolioNotFound() throws Exception {
-        when(transactionService.getTransactionsByPortfolio(PORTFOLIO_ID, USER_ID))
+        when(transactionService.getTransactionsByPortfolioPaged(eq(PORTFOLIO_ID), eq(USER_ID), any(), isNull(), isNull(), isNull()))
             .thenThrow(new PortfolioNotFoundException("Portfolio not found"));
 
         mockMvc.perform(get("/api/portfolios/{portfolioId}/transactions", PORTFOLIO_ID)
@@ -90,7 +92,7 @@ class TransactionControllerTest {
 
     @Test
     void getTransactionHistory_returns403WhenAccessDenied() throws Exception {
-        when(transactionService.getTransactionsByPortfolio(PORTFOLIO_ID, USER_ID))
+        when(transactionService.getTransactionsByPortfolioPaged(eq(PORTFOLIO_ID), eq(USER_ID), any(), isNull(), isNull(), isNull()))
             .thenThrow(new PortfolioAccessDeniedException("Access denied to this portfolio"));
 
         mockMvc.perform(get("/api/portfolios/{portfolioId}/transactions", PORTFOLIO_ID)
