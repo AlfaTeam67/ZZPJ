@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { formatCurrency, formatPercent } from '@/utils/formatNumber'
 
 export function WatchlistCard() {
-  const { data, isLoading } = useWatchlist()
+  const { data, isLoading, isError } = useWatchlist()
   const { t } = useTranslation('dashboard')
 
   return (
@@ -30,43 +30,57 @@ export function WatchlistCard() {
       </header>
 
       <ul className="mt-5 divide-y divide-border/30">
-        {isLoading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <li key={i} className="flex items-center justify-between py-3">
-                <div className="space-y-2">
-                  <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-                  <div className="h-2 w-24 animate-pulse rounded bg-muted/70" />
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <li key={i} className="flex items-center justify-between py-3">
+              <div className="space-y-2">
+                <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                <div className="h-2 w-24 animate-pulse rounded bg-muted/70" />
+              </div>
+              <div className="space-y-2 text-right">
+                <div className="ml-auto h-3 w-24 animate-pulse rounded bg-muted" />
+                <div className="ml-auto h-2 w-16 animate-pulse rounded bg-muted/70" />
+              </div>
+            </li>
+          ))
+        ) : isError ? (
+          <li className="py-6 text-center text-sm text-muted-foreground">
+            Nie udało się pobrać danych.
+          </li>
+        ) : !data || data.length === 0 ? (
+          <li className="py-6 text-center text-sm text-muted-foreground">
+            Brak aktywów w portfelu.{' '}
+            <Link to="/portfolio" className="text-foreground underline underline-offset-2">
+              Dodaj pierwsze aktywo
+            </Link>
+            .
+          </li>
+        ) : (
+          data.map((row) => {
+            const isUp = !row.changePercent.startsWith('-')
+            return (
+              <li key={row.symbol} className="flex items-center justify-between py-3">
+                <div>
+                  <p className="text-sm font-semibold tracking-tight">{row.symbol}</p>
+                  <p className="text-xs text-muted-foreground">{row.name}</p>
                 </div>
-                <div className="space-y-2 text-right">
-                  <div className="ml-auto h-3 w-24 animate-pulse rounded bg-muted" />
-                  <div className="ml-auto h-2 w-16 animate-pulse rounded bg-muted/70" />
+                <div className="text-right">
+                  <p className="text-sm font-semibold tabular-nums">
+                    {formatCurrency(row.value, row.currency)}
+                  </p>
+                  <p
+                    className={cn(
+                      'text-xs tabular-nums',
+                      isUp ? 'text-success' : 'text-destructive'
+                    )}
+                  >
+                    {formatPercent(row.changePercent)}
+                  </p>
                 </div>
               </li>
-            ))
-          : data?.map((row) => {
-              const isUp = !row.changePercent.startsWith('-')
-              return (
-                <li key={row.symbol} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-semibold tracking-tight">{row.symbol}</p>
-                    <p className="text-xs text-muted-foreground">{row.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold tabular-nums">
-                      {formatCurrency(row.value, row.currency)}
-                    </p>
-                    <p
-                      className={cn(
-                        'text-xs tabular-nums',
-                        isUp ? 'text-success' : 'text-destructive'
-                      )}
-                    >
-                      {formatPercent(row.changePercent)}
-                    </p>
-                  </div>
-                </li>
-              )
-            })}
+            )
+          })
+        )}
       </ul>
     </section>
   )
