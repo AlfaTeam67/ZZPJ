@@ -47,7 +47,9 @@ export async function fetchPortfolios(): Promise<Portfolio[]> {
   const { data } = await apiClient.get<{ content: Portfolio[] } | Portfolio[]>(
     `${env.apiUrl}/api/portfolios`
   )
-  return Array.isArray(data) ? data : (data as { content: Portfolio[] }).content
+  if (!data) return []
+  if (Array.isArray(data)) return data
+  return data.content ?? []
 }
 
 /**
@@ -104,7 +106,9 @@ export async function fetchTransactions(portfolioId: string): Promise<Transactio
   const { data } = await apiClient.get<{ content: Transaction[] } | Transaction[]>(
     `${env.apiUrl}/api/portfolios/${portfolioId}/transactions`
   )
-  return Array.isArray(data) ? data : (data as { content: Transaction[] }).content
+  if (!data) return []
+  if (Array.isArray(data)) return data
+  return data.content ?? []
 }
 
 export async function createTransaction(

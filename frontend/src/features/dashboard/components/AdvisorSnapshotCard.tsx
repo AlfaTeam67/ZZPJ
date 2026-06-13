@@ -52,7 +52,7 @@ function RiskGauge({ score }: RiskGaugeProps) {
 }
 
 export function AdvisorSnapshotCard() {
-  const { data, isLoading } = useAdvisorSnapshot()
+  const { data, isLoading, isError } = useAdvisorSnapshot()
   const { t } = useTranslation('dashboard')
 
   return (
@@ -73,12 +73,16 @@ export function AdvisorSnapshotCard() {
         </Link>
       </header>
 
-      {isLoading || !data ? (
+      {isLoading || (!data && !isError) ? (
         <div className="mt-6 flex flex-1 flex-col gap-3">
           <div className="h-4 w-40 animate-pulse rounded bg-muted" />
           <div className="h-3 w-full animate-pulse rounded bg-muted/70" />
           <div className="h-3 w-5/6 animate-pulse rounded bg-muted/70" />
           <div className="h-3 w-4/6 animate-pulse rounded bg-muted/70" />
+        </div>
+      ) : isError ? (
+        <div className="mt-6 flex flex-1 items-center justify-center text-sm text-muted-foreground">
+          Nie udało się pobrać analizy AI.
         </div>
       ) : (
         <div className="mt-5 flex flex-1 flex-col rounded-xl bg-muted/30 p-5">
@@ -88,18 +92,18 @@ export function AdvisorSnapshotCard() {
                 'rounded-md bg-brand-primary-300/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-brand-neutral-900'
               )}
             >
-              {data.modelTag}
+              {data!.modelTag}
             </span>
-            <span className="text-xs text-muted-foreground">{data.generatedAt}</span>
+            <span className="text-xs text-muted-foreground">{data!.generatedAt}</span>
           </div>
 
-          <p className="mt-4 text-sm leading-relaxed text-foreground/90">{data.body}</p>
+          <p className="mt-4 text-sm leading-relaxed text-foreground/90">{data!.body}</p>
 
           <div className="mt-auto flex items-center justify-between gap-4 pt-6">
             <div className="flex items-center gap-3">
-              <RiskGauge score={data.riskScore} />
+              <RiskGauge score={data!.riskScore} />
               <div>
-                <p className="text-sm font-semibold">{data.riskLabel}</p>
+                <p className="text-sm font-semibold">{data!.riskLabel}</p>
                 <p className="text-xs text-muted-foreground">{t('advisor-risk-label')}</p>
               </div>
             </div>

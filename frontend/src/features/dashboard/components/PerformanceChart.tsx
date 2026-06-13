@@ -65,7 +65,7 @@ export function PerformanceChart() {
   const { t } = useTranslation('dashboard')
 
   const geometry = useMemo(() => buildGeometry(data ?? []), [data])
-  const hasData = !isLoading && (data?.length ?? 0) > 1
+  const hasData = !isLoading && (data?.length ?? 0) >= 1
 
   return (
     <section

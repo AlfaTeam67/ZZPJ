@@ -3,10 +3,12 @@ import {
   AiBrain02Icon,
   Briefcase01Icon,
   ChartLineData02Icon,
+  CreditCardIcon,
   Crown02Icon,
   DashboardSquare02Icon,
   Logout03Icon,
   Settings01Icon,
+  UserCircleIcon,
 } from '@hugeicons/core-free-icons'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -15,9 +17,11 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { cn } from '@/lib/utils'
 
+type NavLabelKey = 'dashboard' | 'portfolio' | 'market' | 'transactions' | 'advisor'
+
 interface NavItem {
   to: string
-  labelKey: string
+  labelKey: NavLabelKey
   icon: IconSvgElement
 }
 
@@ -25,6 +29,7 @@ const navigation: NavItem[] = [
   { to: '/', labelKey: 'dashboard', icon: DashboardSquare02Icon },
   { to: '/portfolio', labelKey: 'portfolio', icon: Briefcase01Icon },
   { to: '/market', labelKey: 'market', icon: ChartLineData02Icon },
+  { to: '/transactions', labelKey: 'transactions', icon: CreditCardIcon },
   { to: '/advisor', labelKey: 'advisor', icon: AiBrain02Icon },
 ]
 
@@ -45,7 +50,7 @@ export function AppSidebar() {
         <span className="text-lg font-semibold tracking-tight">Fin-Insight</span>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-1" aria-label="Główna nawigacja">
         {navigation.map((item) => (
           <NavLink
             key={item.to}
@@ -67,7 +72,7 @@ export function AppSidebar() {
                   className={cn('size-4', isActive ? 'text-foreground' : 'text-muted-foreground')}
                   aria-hidden
                 />
-                {t(item.labelKey as 'dashboard' | 'portfolio' | 'market' | 'advisor')}
+                {t(item.labelKey)}
               </>
             )}
           </NavLink>
@@ -90,8 +95,23 @@ export function AppSidebar() {
           {t('settings')}
         </NavLink>
 
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-muted text-foreground'
+                : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+            )
+          }
+        >
+          <HugeiconsIcon icon={UserCircleIcon} className="size-4" aria-hidden />
+          {t('profile')}
+        </NavLink>
+
         <div className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-3">
-          <span className="flex size-8 items-center justify-center rounded-md bg-brand-primary-300/90 text-brand-neutral-900">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-brand-primary-300/90 text-brand-neutral-900">
             <HugeiconsIcon icon={Crown02Icon} className="size-4" aria-hidden />
           </span>
           <div className="min-w-0 leading-tight">

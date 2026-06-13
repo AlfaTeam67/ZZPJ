@@ -15,5 +15,7 @@
   "search": "Szukaj",
   "search-placeholder": "Szukaj akcji…",
   "notifications": "Powiadomienia",
-  "account": "Konto"
+  "account": "Konto",
+  "theme-light": "Przełącz na tryb jasny",
+  "theme-dark": "Przełącz na tryb ciemny"
 }

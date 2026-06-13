@@ -15,5 +15,7 @@
   "search": "Search",
   "search-placeholder": "Search stocks…",
   "notifications": "Notifications",
-  "account": "Account"
+  "account": "Account",
+  "theme-light": "Switch to light mode",
+  "theme-dark": "Switch to dark mode"
 }
