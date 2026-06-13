@@ -1,7 +1,3 @@
-/**
- * Minimalny system toastów bez zewnętrznych zależności.
- * Używa React context + portal do renderowania powiadomień.
- */
 import {
   createContext,
   useCallback,
@@ -67,14 +63,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={t.id}
               className={cn(
                 'pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg text-sm max-w-sm',
-                t.variant === 'success' &&
-                  'border-success/30 bg-success/10 text-success',
-                t.variant === 'error' &&
-                  'border-destructive/30 bg-destructive/10 text-destructive',
-                t.variant === 'warning' &&
-                  'border-yellow-500/30 bg-yellow-500/10 text-yellow-600',
-                t.variant === 'default' &&
-                  'border-border/50 bg-card text-foreground'
+                t.variant === 'success' && 'border-success/30 bg-success/10 text-success',
+                t.variant === 'error' && 'border-destructive/30 bg-destructive/10 text-destructive',
+                t.variant === 'warning' && 'border-yellow-500/30 bg-yellow-500/10 text-yellow-600',
+                t.variant === 'default' && 'border-border/50 bg-card text-foreground'
               )}
             >
               <span className="flex-1 leading-relaxed">{t.message}</span>

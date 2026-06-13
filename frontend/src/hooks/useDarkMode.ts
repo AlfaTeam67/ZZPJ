@@ -6,7 +6,6 @@ function getInitialDark(): boolean {
   if (typeof window === 'undefined') return true
   const stored = localStorage.getItem(STORAGE_KEY)
   if (stored !== null) return stored === 'dark'
-  // domyślnie dark (zgodnie z design systemu)
   return true
 }
 
