@@ -106,10 +106,12 @@ export async function removeAsset(portfolioId: string, assetId: string): Promise
 }
 
 export async function fetchTransactions(portfolioId: string): Promise<Transaction[]> {
-  const { data } = await apiClient.get<Transaction[]>(
+  // Backend (po ALF-87) zwraca Page<TransactionResponse>, obsługujemy oba formaty.
+  const { data } = await apiClient.get<Transaction[] | { content: Transaction[] }>(
     `${env.portfolioApiUrl}/api/portfolios/${portfolioId}/transactions`
   )
-  return data
+  if (Array.isArray(data)) return data
+  return data.content ?? []
 }
 
 export async function createTransaction(
