@@ -1,20 +1,41 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { fetchRecommendations } from '@/features/advisor/api'
+import { generateRecommendation, fetchMyRecommendations } from '@/features/advisor/api'
 import { fetchFirstPortfolio } from '@/features/portfolio/api'
+import type { RecommendationRequest } from '@/features/advisor/api'
 
-export function useRecommendations(riskTolerance: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM') {
+/**
+ * Hook do listowania ostatnich rekomendacji zalogowanego użytkownika.
+ */
+export function useMyRecommendations(page = 0) {
   return useQuery({
-    queryKey: ['advisor', 'recommendations', riskTolerance],
-    queryFn: async () => {
-      const portfolio = await fetchFirstPortfolio()
-      if (!portfolio) return null
+    queryKey: ['advisor', 'recommendations', 'me', page],
+    queryFn: () => fetchMyRecommendations(page, 10),
+  })
+}
 
-      return fetchRecommendations({
-        userId: portfolio.userId,
+/**
+ * Hook do generowania nowej rekomendacji.
+ */
+export function useGenerateRecommendation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (params: {
+      riskTolerance: RecommendationRequest['riskTolerance']
+      investmentHorizon: RecommendationRequest['investmentHorizon']
+    }) => {
+      const portfolio = await fetchFirstPortfolio()
+      if (!portfolio) throw new Error('Brak portfela — utwórz portfel przed wygenerowaniem rekomendacji.')
+
+      return generateRecommendation({
         portfolioId: portfolio.id,
-        riskTolerance,
+        riskTolerance: params.riskTolerance,
+        investmentHorizon: params.investmentHorizon,
       })
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['advisor', 'recommendations', 'me'] })
     },
   })
 }
