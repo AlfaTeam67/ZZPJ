@@ -31,10 +31,11 @@ interface ValuationResponse {
 }
 
 export async function fetchPortfolioMetric(): Promise<PortfolioMetricSnapshot> {
-  // 1. Pobierz listę portfeli
-  const { data: portfolios } = await apiClient.get<Portfolio[]>(
+  // Backend (po ALF-87) zwraca Page<Portfolio> — obsługujemy oba formaty
+  const { data: raw } = await apiClient.get<Portfolio[] | { content: Portfolio[] }>(
     `${env.portfolioApiUrl}/api/portfolios`
   )
+  const portfolios = Array.isArray(raw) ? raw : (raw as { content: Portfolio[] }).content ?? []
 
   if (!portfolios || portfolios.length === 0) {
     return {
@@ -46,25 +47,28 @@ export async function fetchPortfolioMetric(): Promise<PortfolioMetricSnapshot> {
     }
   }
 
-  // 2. Wycena pierwszego portfela
+  // Wycena pierwszego portfela
   const firstId = portfolios[0].id
   try {
     const { data: valuation } = await apiClient.get<ValuationResponse>(
       `${env.portfolioApiUrl}/api/portfolios/${firstId}/valuation`
     )
 
+    // totalValue może być number lub string z backendu
+    const total = String(valuation.totalValue ?? '0')
+
     return {
-      totalValue: valuation.totalValue ?? '0',
+      totalValue: total,
       changeAbsolute: '0',
       changePercent: '0',
       changeLabel: 'Wartość rynkowa',
       currency: 'USD',
     }
   } catch {
-    // Jeśli wycena niedostępna — zwróć wartość cost-basis z portfela
+    // Wycena niedostępna — cost-basis z totals portfela
     const totals = portfolios[0].totals ?? {}
     const firstCurrency = Object.keys(totals)[0] ?? 'USD'
-    const firstTotal = totals[firstCurrency] ?? '0'
+    const firstTotal = String(totals[firstCurrency] ?? '0')
 
     return {
       totalValue: firstTotal,
@@ -96,9 +100,10 @@ const RANGE_MONTHS: Record<ChartRange, number> = {
 }
 
 export async function fetchPerformanceSeries(range: ChartRange): Promise<PerformancePoint[]> {
-  const { data: portfolios } = await apiClient.get<Portfolio[]>(
+  const { data: raw } = await apiClient.get<Portfolio[] | { content: Portfolio[] }>(
     `${env.portfolioApiUrl}/api/portfolios`
   )
+  const portfolios = Array.isArray(raw) ? raw : (raw as { content: Portfolio[] }).content ?? []
 
   if (!portfolios || portfolios.length === 0) return []
 
@@ -121,14 +126,28 @@ export async function fetchPerformanceSeries(range: ChartRange): Promise<Perform
       { params: { from: fmt(from), to: fmt(to) } }
     )
 
-    if (!history || history.length === 0) return []
+    if (!history || history.length === 0) {
+      // Brak historii — zwróć jeden punkt z aktualną wyceną żeby wykres nie był pusty
+      try {
+        const { data: valuation } = await apiClient.get<ValuationResponse>(
+          `${env.portfolioApiUrl}/api/portfolios/${id}/valuation`
+        )
+        const today = fmt(new Date())
+        return [{
+          label: new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }),
+          value: parseFloat(String(valuation.totalValue ?? '0')),
+        }]
+      } catch {
+        return []
+      }
+    }
 
     return history.map((h) => ({
       label: new Date(h.valuationDate).toLocaleDateString('pl-PL', {
         day: 'numeric',
         month: 'short',
       }),
-      value: parseFloat(h.totalValue),
+      value: parseFloat(String(h.totalValue)),
     }))
   } catch {
     return []
@@ -140,18 +159,36 @@ export async function fetchPerformanceSeries(range: ChartRange): Promise<Perform
 // ---------------------------------------------------------------------------
 
 export async function fetchWatchlist(): Promise<WatchlistRow[]> {
-  const { data: portfolios } = await apiClient.get<Portfolio[]>(
+  const { data: raw } = await apiClient.get<Portfolio[] | { content: Portfolio[] }>(
     `${env.portfolioApiUrl}/api/portfolios`
   )
+  const portfolios = Array.isArray(raw) ? raw : (raw as { content: Portfolio[] }).content ?? []
 
   if (!portfolios || portfolios.length === 0) return []
 
   const firstPortfolio = portfolios[0]
   const assets = firstPortfolio.assets ?? []
 
-  if (assets.length === 0) return []
+  if (assets.length === 0) {
+    // assets mogą nie być w odpowiedzi listy — pobierz portfel z detalami
+    try {
+      const { data: detail } = await apiClient.get<Portfolio>(
+        `${env.portfolioApiUrl}/api/portfolios/${firstPortfolio.id}`
+      )
+      const detailAssets = detail.assets ?? []
+      if (detailAssets.length === 0) return []
+      return buildWatchlistRows(detailAssets)
+    } catch {
+      return []
+    }
+  }
 
-  // Pobierz snapshoty z market service
+  return buildWatchlistRows(assets)
+}
+
+async function buildWatchlistRows(
+  assets: NonNullable<Portfolio['assets']>
+): Promise<WatchlistRow[]> {
   let snapshots: PriceSnapshot[] = []
   try {
     const { data } = await apiClient.get<PriceSnapshot[]>(
@@ -166,9 +203,9 @@ export async function fetchWatchlist(): Promise<WatchlistRow[]> {
 
   return assets.slice(0, 8).map((asset) => {
     const snap = snapshotMap.get(asset.symbol)
-    const currentPrice = snap?.price ?? asset.avgBuyPrice
+    const currentPrice = snap?.price != null ? String(snap.price) : asset.avgBuyPrice
     const value = (parseFloat(currentPrice) * parseFloat(asset.quantity)).toFixed(2)
-    const changePct = snap?.changePct24h ?? '0'
+    const changePct = snap?.changePct24h != null ? String(snap.changePct24h) : '0'
 
     return {
       symbol: asset.symbol,

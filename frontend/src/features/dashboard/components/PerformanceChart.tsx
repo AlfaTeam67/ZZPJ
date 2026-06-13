@@ -62,7 +62,7 @@ export function PerformanceChart() {
   const { data, isLoading } = usePerformanceSeries(range)
 
   const geometry = useMemo(() => buildGeometry(data ?? []), [data])
-  const hasData = !isLoading && (data?.length ?? 0) > 1
+  const hasData = !isLoading && (data?.length ?? 0) >= 1
 
   return (
     <section
