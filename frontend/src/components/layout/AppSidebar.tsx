@@ -7,6 +7,8 @@ import {
   DashboardSquare02Icon,
   Logout03Icon,
   Settings01Icon,
+  Transaction01Icon,
+  UserCircleIcon,
 } from '@hugeicons/core-free-icons'
 import { NavLink } from 'react-router-dom'
 
@@ -24,6 +26,7 @@ const navigation: NavItem[] = [
   { to: '/', label: 'Kokpit', icon: DashboardSquare02Icon },
   { to: '/portfolio', label: 'Portfel', icon: Briefcase01Icon },
   { to: '/market', label: 'Rynek', icon: ChartLineData02Icon },
+  { to: '/transactions', label: 'Transakcje', icon: Transaction01Icon },
   { to: '/advisor', label: 'Doradca AI', icon: AiBrain02Icon },
 ]
 
@@ -33,8 +36,8 @@ export function AppSidebar() {
     ? [user.firstName, user.lastName].filter(Boolean).join(' ') ||
       user.username ||
       user.email ||
-      'Uzytkownik'
-    : 'Goscinnie'
+      'Użytkownik'
+    : 'Gość'
 
   return (
     <aside className="flex h-full flex-col gap-6 border-r border-border/40 bg-card/40 px-4 py-6">
@@ -42,7 +45,7 @@ export function AppSidebar() {
         <span className="text-lg font-semibold tracking-tight">Fin-Insight</span>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-1" aria-label="Główna nawigacja">
         {navigation.map((item) => (
           <NavLink
             key={item.to}
@@ -87,8 +90,23 @@ export function AppSidebar() {
           Ustawienia
         </NavLink>
 
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-muted text-foreground'
+                : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+            )
+          }
+        >
+          <HugeiconsIcon icon={UserCircleIcon} className="size-4" aria-hidden />
+          Profil
+        </NavLink>
+
         <div className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-3">
-          <span className="flex size-8 items-center justify-center rounded-md bg-brand-primary-300/90 text-brand-neutral-900">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-brand-primary-300/90 text-brand-neutral-900">
             <HugeiconsIcon icon={Crown02Icon} className="size-4" aria-hidden />
           </span>
           <div className="min-w-0 leading-tight">
