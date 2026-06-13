@@ -10,6 +10,7 @@ import { AuthProvider } from '@/features/auth/AuthProvider'
 import { setupAxiosInterceptors } from '@/lib/axios'
 import { queryClient } from '@/lib/queryClient'
 import { store } from '@/store/store'
+import { ToastProvider } from '@/components/ui/toast'
 
 const rootElement = document.getElementById('root')
 
@@ -31,8 +32,10 @@ createRoot(rootElement).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
-            <App />
-          </AuthProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </Provider>
