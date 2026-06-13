@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useToast } from '@/components/ui/toast'
 
 export function CreatePortfolioForm() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const mutation = useMutation({
     mutationFn: () => createPortfolio({ name, description }),
@@ -18,6 +20,10 @@ export function CreatePortfolioForm() {
       setName('')
       setDescription('')
       queryClient.invalidateQueries({ queryKey: ['portfolios'] })
+      toast('Portfel utworzony pomyślnie!', 'success')
+    },
+    onError: () => {
+      toast('Nie udało się utworzyć portfela.', 'error')
     },
   })
 
@@ -59,10 +65,7 @@ export function CreatePortfolioForm() {
           </Button>
           {mutation.isError && (
             <p className="text-sm text-destructive mt-2">
-              Error:{' '}
-              {mutation.error instanceof Error
-                ? mutation.error.message
-                : 'Failed to create portfolio'}
+              Nie udało się utworzyć portfela.
             </p>
           )}
         </form>
