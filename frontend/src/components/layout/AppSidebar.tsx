@@ -3,11 +3,11 @@ import {
   AiBrain02Icon,
   Briefcase01Icon,
   ChartLineData02Icon,
+  CreditCardIcon,
   Crown02Icon,
   DashboardSquare02Icon,
   Logout03Icon,
   Settings01Icon,
-  Transaction01Icon,
   UserCircleIcon,
 } from '@hugeicons/core-free-icons'
 import { NavLink } from 'react-router-dom'
@@ -26,7 +26,7 @@ const navigation: NavItem[] = [
   { to: '/', label: 'Kokpit', icon: DashboardSquare02Icon },
   { to: '/portfolio', label: 'Portfel', icon: Briefcase01Icon },
   { to: '/market', label: 'Rynek', icon: ChartLineData02Icon },
-  { to: '/transactions', label: 'Transakcje', icon: Transaction01Icon },
+  { to: '/transactions', label: 'Transakcje', icon: CreditCardIcon },
   { to: '/advisor', label: 'Doradca AI', icon: AiBrain02Icon },
 ]
 
