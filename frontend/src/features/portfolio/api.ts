@@ -44,8 +44,12 @@ export interface PortfolioValuation {
 }
 
 export async function fetchPortfolios(): Promise<Portfolio[]> {
-  const { data } = await apiClient.get<Portfolio[]>(`${env.portfolioApiUrl}/api/portfolios`)
-  return data
+  // Backend (po ALF-87) zwraca Page<PortfolioResponse>, obsługujemy oba formaty.
+  const { data } = await apiClient.get<Portfolio[] | { content: Portfolio[] }>(
+    `${env.portfolioApiUrl}/api/portfolios`
+  )
+  if (Array.isArray(data)) return data
+  return data.content ?? []
 }
 
 /**
